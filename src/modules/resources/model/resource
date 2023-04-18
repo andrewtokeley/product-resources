@@ -1,0 +1,64 @@
+//import { firebase } from "../firebaseInit.js";
+//const { DateTime } = require("luxon");
+//export { Resource, resourceConverter };
+
+export { Resource };
+
+class Resource {
+  constructor(config) {
+    this.id = config.id;
+    this.displayName = config.displayName;
+    this.url = config.url;
+    this.description = config.description;
+    this.publishedDate = config.publishedDate;
+    this.imageUrl = config.imageUrl;
+    this.authors = config.authors;
+    this.category = config.category;
+    this.tags = config.tags;
+    this.parentResourceId = config.parentResourceId;
+    this.relatedResources = config.relatedResources;
+    this.source = config.source;
+  }
+
+  static null() {
+    return new Resource({ name: "" })
+  }
+}
+
+// /**
+//  * FirestoreDataConverter implementation for User instances
+//  */
+// var adventureConverter = {
+//   toFirestore: function (adventure) {
+//     const result = {};
+//     if (adventure.uid != null) { result.uid = adventure.uid }
+//     if (adventure.startDate != null) { result.startDate = firebase.firestore.Timestamp.fromDate(adventure.startDate.toJSDate()); }
+//     if (adventure.endDate != null) { result.endDate = firebase.firestore.Timestamp.fromDate(adventure.endDate.toJSDate()); }
+//     if (adventure.name != null) { result.name = adventure.name }
+//     if (adventure.username != null) { result.username = adventure.username }
+//     if (adventure.description != null) { result.description = adventure.description }
+//     if (adventure.public != null) { result.public = adventure.public}
+//     if (adventure.allowSubscribe != null) { result.allowSubscribe = adventure.allowSubscribe}
+//     if (adventure.subscriptionKey != null) { result.subscriptionKey = adventure.subscriptionKey}
+//     return result;
+//   },
+
+//   fromFirestore: function (snapshot, options) {
+//     const data = snapshot.data(options);
+
+//     const config = {
+//       id: snapshot.id,
+//       uid: data.uid,
+//       startDate: data.startDate ? DateTime.fromJSDate(data.startDate.toDate()) : null,
+//       endDate: data.endDate ? DateTime.fromJSDate(data.endDate.toDate()) : null,
+//       name: data.name,
+//       username: data.username,
+//       public: data.public ?? false,
+//       description: data.description,
+//       allowSubscribe: data.allowSubscribe ?? false,
+//       subscriptionKey: data.subscriptionKey,
+//     }
+
+//     return new Adventure(config);
+//   }
+// };

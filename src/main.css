@@ -1,0 +1,42 @@
+/* Global variables */
+:root {
+  --prr-bluehover: #2363b6;
+  --prr-blue: rgb(0, 74, 173);
+  --prr-lightblue:#32a5d3;
+  --prr-extralightgrey: rgb(248, 246, 246);
+  --prr-lightgrey: rgb(231, 231, 231);
+  --prr-mediumgrey: rgb(122, 122, 122);
+  --prr-darkgrey: rgb(22, 22, 22);
+  --prr-orange: #ff914d;
+  --prr-red: #ad0606;
+
+  --prr-blue: rgb(33,85,102);
+  --prr-orange: rgb(230,158,76);
+  --prr-green: rgb(119,242,207);
+
+  --prr-font-weight: 400;
+  --prr-font-family: 'Work Sans', sans-serif;
+  --prr-font-size-small: 0.8em;
+  --prr-font-size-normal: 0.875rem;
+  --prr-font-size-medium: 1.2em;
+  --prr-font-size-large: 1.5em;
+}
+
+body {
+  background-color: rgb(228, 228, 228);
+  font-family: var(--prr-font-family);
+  font-weight: var(--prr-font-weight);
+  box-sizing: border-box;
+  overscroll-behavior-y: contain;
+}
+
+
+a.onWhite {
+  padding: 0px 20px 0px 00px;
+  color: var(--prr-blue);
+  transition: 0.4s;
+  cursor: pointer;
+}
+a.onWhite:hover {
+  color: var(--prr-orange);
+}
