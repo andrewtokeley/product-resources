@@ -2,8 +2,8 @@
   <div class="resource-card">
     <img class="image" :src="imageUrl"/>
     <div>
-      <h1>{{ title }}</h1>
-      <h2>{{ authorsDisplay }}</h2>
+      <h1>{{ displayName }}</h1>
+      <h2>{{ description }}</h2>
       play
     </div>
   </div>
@@ -15,7 +15,8 @@ export default {
   name: 'PodcastCard',
   
   props: {
-    title: String,
+    displayName: String,
+    description: String,
     authors: [],
     imageUrl: String
   },
@@ -34,7 +35,6 @@ export default {
 .resource-card {
   display: flex;
   flex-direction: row;
-  
   background: lightgrey;
 }
 .image {

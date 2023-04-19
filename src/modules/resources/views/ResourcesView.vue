@@ -4,26 +4,29 @@
     <div class='content'>
       <base-input v-model="searchTerm" class='searchInput'></base-input>
       <base-button @click="handleSearch">Search</base-button>
-    </div>
-  
-    <div v-for="category in uniqueCategories" :key="category">
-      <h1>{{ category }}s</h1>
-      <div class="resource-list">
-        <div class="resource-item" @click="showDetail(resource.id)" v-for="resource in resourcesByCategory(category)" :key="resource.id">
-          
-          <book-card v-if="resource.category == 'Book'"
-            :imageUrl="resource.imageUrl"
-            :title="resource.displayName"
-            :authors="resource.authors"
-          >
-          </book-card>
-          <podcast-card v-if="resource.category == 'Podcast'"
-            :imageUrl="resource.imageUrl"
-            :title="resource.displayName"
-            :authors="resource.authors"
-          >
-          </podcast-card>
-        </div>
+    
+      <div class="search-results">
+        <template v-for="category in uniqueCategories" :key="category">
+          <h1>{{ category }}s</h1>
+          <div class="resource-list">
+            <div class="resource-item" @click="showDetail(resource.id)" v-for="resource in resourcesByCategory(category)" :key="resource.id">
+              
+              <book-card v-if="resource.category == 'Book'"
+                :imageUrl="resource.imageUrl"
+                :title="resource.displayName"
+                :authors="resource.authors"
+              >
+              </book-card>
+              <podcast-card v-if="resource.category == 'Podcast'"
+                :imageUrl="resource.imageUrl"
+                :displayName="resource.displayName"
+                :description="resource.description"
+                :authors="resource.authors"
+              >
+              </podcast-card>
+            </div>
+          </div>
+        </template>
       </div>
     </div>
 
@@ -108,22 +111,26 @@ export default {
   align-items: center;
   width: 80%;
 }
+
+.search-results {
+  width: 100%;
+  overflow-x:hidden;
+  margin-bottom: 100px;
+}
+
 .searchInput {
   width: 50%;
   max-width: 400px;
-}
-img {
-  width: 100px;
 }
 
 .resource-list {
   display: flex;
   flex-direction: row;
-  width: 500px;
+  overflow-x: scroll;
 }
 
 .resource-item {
-  padding: 20px;
+  padding: 5px;
   cursor: pointer;
 }
 

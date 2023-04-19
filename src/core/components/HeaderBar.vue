@@ -6,7 +6,7 @@
       <a class="onWhite">Articles</a>
       <a class="onWhite">Video</a>
     </div>
-    <h1>Product Resources</h1>
+    
     <div class="header__right">
       <base-button class='header__login' @click="handleLogin">LogIn</base-button>
     </div>
