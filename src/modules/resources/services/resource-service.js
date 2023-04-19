@@ -18,6 +18,11 @@ const searchResources = function(searchTerm) {
   });
 }
 
+/**
+ * 
+ * @param {String} id the id of the resource
+ * @returns a new Resource instance 
+ */
 const getResource = function(id) {
   return new Promise(function (resolve) {
     let result = new Resource({
