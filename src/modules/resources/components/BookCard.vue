@@ -1,25 +1,26 @@
 <template>
   <div class="resource-card">
-    <img class="image" :src="imageUrl"/>
-    <div class="title">{{ title }}</div>
+    <img class="image" :src="resource.imageUrl"/>
+    <div :title="resource.displayName" class="title">{{ resource.displayName }}</div>
     <a class="subTitle">{{ authorsDisplay }}</a>
   </div>
 </template>
 
 <script>
-
+import { Resource } from '@/modules/resources/model/resource'
 export default {
   name: 'ResourceCard',
   
   props: {
-    title: String,
-    authors: [],
-    imageUrl: String
+    resource: {
+      type: Resource,
+      default: null
+    }
   },
 
   computed: {
     authorsDisplay() {
-      return this.authors.join(", ")
+      return this.resource.authors.join(", ")
     }
   }
 }
@@ -36,6 +37,7 @@ export default {
   align-items: left;
   flex-direction: column;
   background: white;
+  width:140px;
 }
 
 .image {

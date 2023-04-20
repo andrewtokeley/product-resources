@@ -2,7 +2,7 @@
   <modal-dialog :title="resource.displayName" @close="$emit('close')">
     
     <div>
-      <img :src="resource.imageUrl" />
+      <img :class="{ book: isBook}" :src="resource.imageUrl" />
       <p>{{resource.description}}</p>
     </div>
 
@@ -39,6 +39,15 @@ export default {
     })
   },
 
+  computed: { 
+    isBook() {
+      if (this.resource.category) {
+        return this.resource.category.toLowerCase() == 'book'
+      }
+      return false;
+    },
+  }
+
 }
 
 </script>
@@ -46,7 +55,14 @@ export default {
 <style scoped>
 
 img {
+  height:112px;
+  width: 112px;
+  border-radius: 12px;
+}
+
+img.book {
   height:215px;
   width: 140px;
 }
+
 </style>

@@ -9,7 +9,7 @@
 import BaseButton from '/src/core/components/BaseButton'
 
 export default {
-  name: 'loginView',
+  name: 'LoginView',
   components: {
     BaseButton
   },

@@ -1,10 +1,8 @@
 <template>
   <div class="header">
     <div class="header__left">
-      <a class="onWhite">Books</a>
-      <a class="onWhite">Podcasts</a>
-      <a class="onWhite">Articles</a>
-      <a class="onWhite">Video</a>
+      <router-link class="onWhite" to="/book">Books</router-link>
+      <router-link class="onWhite" to="/podcast">Podcasts</router-link>
     </div>
     
     <div class="header__right">
@@ -35,14 +33,16 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-left: 50px;
-  padding-right: 50px;
+  margin-right:50px;
+  margin-left:50px;
+  /* padding-left: 50px; */
+  /* padding-right: 0px; */
   /* top: 0px;
   left: 0px;
   right: 0px; */
   background: transparent;
   height: 70px;
-  width:80%;
+  /* width:100%; */
 }
 
 .header__left, .header__right {
@@ -55,6 +55,5 @@ export default {
 
 .header__login {
   float:right;
-  margin-left: 20px;
 }
 </style>

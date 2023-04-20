@@ -1,12 +1,17 @@
 <template>
+  <header-bar></header-bar>
   <router-view :key="$route.fullPath" />
 </template>
 
 <script>
 import { defineComponent } from "vue";
+import HeaderBar from "./core/components/HeaderBar.vue";
 
 export default defineComponent({
   name: "App",
+  components: {
+    HeaderBar,
+  },
 });
 </script>
 

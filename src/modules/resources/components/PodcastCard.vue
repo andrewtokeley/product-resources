@@ -1,25 +1,27 @@
 <template>
   <div class="resource-card">
-    <img class="image" :src="imageUrl"/>
-    <div class="title">{{ podcastName }}</div>
+    <img class="image" :src="resource.imageUrl"/>
+    <div class="title">{{ resource.displayName }}</div>
     <a class="subTitle">{{ authorsDisplay }}</a>
   </div>
 </template>
 
 <script>
 
+import { Resource } from '@/modules/resources/model/resource'
 export default {
   name: 'ResourceCard',
   
   props: {
-    podcastName: String,
-    authors: [],
-    imageUrl: String
+    resource: {
+      type: Resource,
+      default: null
+    }
   },
 
   computed: {
     authorsDisplay() {
-      return this.authors.join(", ")
+      return this.resource.authors.join(", ")
     }
   }
 }

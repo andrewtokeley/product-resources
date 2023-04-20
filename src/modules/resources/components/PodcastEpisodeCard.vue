@@ -1,10 +1,10 @@
 <template>
   <div class="resource-card">
-    <img class="image" :src="imageUrl"/>
+    <img class="image" :src="resource.imageUrl"/>
     <div>
-      <div class="title">{{ episodeName }}</div>
-      <div class="subTitle">{{ podcastName }}</div>
-      <div class="body">{{ description }}</div>
+      <div class="title">{{ resource.displayName }}</div>
+      <div v-if="resource.parentResourceName" class="subTitle">{{ resource.parentResourceName }}</div>
+      <div class="body">{{ resource.description }}</div>
       <div>
         <div class="subTitle">{{ dateLengthDescription }}</div>
       </div>
@@ -15,23 +15,20 @@
 
 <script>
 const { DateTime } = require("luxon");
-
+import { Resource } from '@/modules/resources/model/resource'
 export default {
   name: 'PodcastEpisodeCard',
   
   props: {
-    podcastName: String,
-    episodeName: String,
-    authors: [],
-    imageUrl: String,
-    description: String,
-    publishedDate: Date,
-    lengthSeconds: Number
+     resource: {
+      type: Resource,
+      default: null
+     }
   },
 
   computed: {
     authorsDisplay() {
-      return this.authors.join(", ")
+      return this.resource.authors.join(", ")
     },
     dateLengthDescription() {
       const date = DateTime.fromJSDate(this.publishedDate).toLocaleString(DateTime.DATE_MED);

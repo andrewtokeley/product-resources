@@ -1,6 +1,8 @@
-import ResourcesView from './modules/resources/views/ResourcesView'
-import LoginView from './modules/login/views/LoginView'
+import Search from './modules/resources/views/ResourcesSearch'
+import Login from './modules/login/views/LoginView'
 export default [
-  {name: "home", path: '/', component:ResourcesView},
-  {name: "login-view", path: '/login', component:LoginView}
+  {path: '/', component:Search},
+  {path: '/:category', component:Search},
+  {path: '/:category/:searchTerm', component:Search},
+  {path: '/login', component:Login}
 ]

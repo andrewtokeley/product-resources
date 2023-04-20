@@ -1,6 +1,5 @@
 <template>
   <div class='resources'>
-    <header-bar></header-bar>
     <div class='content'>
       <base-input v-model="searchTerm" class='searchInput'></base-input>
       <base-button @click="handleSearch">Search</base-button>
@@ -12,26 +11,15 @@
             <div class="resource-item" @click="showDetail(resource.id)" v-for="resource in resourcesByCategory(category)" :key="resource.id">
               
               <book-card v-if="resource.category == 'Book'"
-                :imageUrl="resource.imageUrl"
-                :title="resource.displayName"
-                :authors="resource.authors"
+                :resource="resource"
               >
               </book-card>
               <podcast-card v-if="resource.category == 'Podcast'"
-                :imageUrl="resource.imageUrl"
-                :podcastName="resource.displayName"
-                :description="resource.description"
-                :authors="resource.authors"
+                :resource="resource"
               >
             </podcast-card>
               <podcast-episode-card v-if="resource.category == 'Podcast Episode'"
-              podcastName="Podcast Show"
-              :episodeName="resource.displayName"
-              :authors="resource.authors"
-              :imageUrl="resource.imageUrl"
-              :description="resource.description"
-              :publishedDate="resource.publishedDate"
-              :lengthSeconds="130"
+              :resource="resource"
               >
               </podcast-episode-card>
               
@@ -49,7 +37,6 @@
 <script>
 import BaseInput from '@/core/components/BaseInput.vue'
 import BaseButton from '@/core/components/BaseButton.vue'
-import HeaderBar from '@/core/components/HeaderBar.vue'
 import ResourceDetail from './ResourceDetail.vue'
 import PodcastCard from '../components/PodcastCard.vue'
 import BookCard from '../components/BookCard.vue'
@@ -58,11 +45,10 @@ import PodcastEpisodeCard from '../components/PodcastEpisodeCard.vue'
 import { searchResources } from '../services/resource-service.js'
 
 export default {
-  name: 'ResourcesView',
+  name: 'ResourcesSearch',
   components: {
     BaseInput,
     BaseButton,
-    HeaderBar,
     ResourceDetail,
     BookCard,
     PodcastCard,
@@ -71,10 +57,19 @@ export default {
 
   data() {
     return {
-      searchTerm: "",
+      searchCategory: null,
+      searchTerm: null,
       searchResults: [],
       showResourceDetail: false,
       selectedResourceId: ""
+    }
+  },
+
+  mounted() {
+    this.searchCategory = this.$route.params.category
+    this.searchTerm = this.$route.params.searchTerm ?? ""
+    if (this.searchCategory || this.category) {
+      this.handleSearch()
     }
   },
 
@@ -88,13 +83,17 @@ export default {
       this.$router.push('/login')
     },
     handleSearch() {
-      searchResources(this.searchTerm).then ( (results) => {
+      if (this.searchCategory) {
+        this.$router.replace( { path: `/${this.searchCategory}/${this.searchTerm}` })
+      }
+      searchResources(this.searchCategory, this.searchTerm).then ( (results) => {
         this.searchResults = results
       })
     },
     resourcesByCategory(category) {
       return this.searchResults.filter ( resource => resource.category === category )
     },
+
     closeDetail() {
       //alert('close')
       this.showResourceDetail=false
@@ -129,6 +128,7 @@ export default {
   flex-direction: column;
   align-items: center;
   width: 80%;
+  max-width: 800px;
 }
 
 .search-results {

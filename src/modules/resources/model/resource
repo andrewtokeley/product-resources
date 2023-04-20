@@ -16,8 +16,10 @@ class Resource {
     this.category = config.category;
     this.tags = config.tags;
     this.parentResourceId = config.parentResourceId;
+    this.parentResourceName = config.parentResourceName;
     this.relatedResources = config.relatedResources;
     this.source = config.source;
+
   }
 
   static null() {
