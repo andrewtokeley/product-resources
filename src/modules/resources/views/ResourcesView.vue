@@ -8,7 +8,7 @@
       <div class="search-results">
         <template v-for="category in uniqueCategories" :key="category">
           <h1>{{ category }}s</h1>
-          <div class="resource-list">
+          <div :class="layoutClassForCategory(category)">
             <div class="resource-item" @click="showDetail(resource.id)" v-for="resource in resourcesByCategory(category)" :key="resource.id">
               
               <book-card v-if="resource.category == 'Book'"
@@ -19,11 +19,22 @@
               </book-card>
               <podcast-card v-if="resource.category == 'Podcast'"
                 :imageUrl="resource.imageUrl"
-                :displayName="resource.displayName"
+                :podcastName="resource.displayName"
                 :description="resource.description"
                 :authors="resource.authors"
               >
-              </podcast-card>
+            </podcast-card>
+              <podcast-episode-card v-if="resource.category == 'Podcast Episode'"
+              podcastName="Podcast Show"
+              :episodeName="resource.displayName"
+              :authors="resource.authors"
+              :imageUrl="resource.imageUrl"
+              :description="resource.description"
+              :publishedDate="resource.publishedDate"
+              :lengthSeconds="130"
+              >
+              </podcast-episode-card>
+              
             </div>
           </div>
         </template>
@@ -42,6 +53,7 @@ import HeaderBar from '@/core/components/HeaderBar.vue'
 import ResourceDetail from './ResourceDetail.vue'
 import PodcastCard from '../components/PodcastCard.vue'
 import BookCard from '../components/BookCard.vue'
+import PodcastEpisodeCard from '../components/PodcastEpisodeCard.vue'
 
 import { searchResources } from '../services/resource-service.js'
 
@@ -53,7 +65,8 @@ export default {
     HeaderBar,
     ResourceDetail,
     BookCard,
-    PodcastCard
+    PodcastCard,
+    PodcastEpisodeCard
   },
 
   data() {
@@ -85,6 +98,12 @@ export default {
     closeDetail() {
       //alert('close')
       this.showResourceDetail=false
+    },
+    layoutClassForCategory(category) {
+      if (category == 'Podcast Episode') {
+        return 'vertical-list'
+      }
+      return 'horizontal-list'
     }
   },
 
@@ -123,15 +142,37 @@ export default {
   max-width: 400px;
 }
 
-.resource-list {
+.horizontal-list {
   display: flex;
   flex-direction: row;
   overflow-x: scroll;
 }
 
+.vertical-list {
+  display: flex;
+  flex-direction: column;
+  overflow-x: scroll;
+}
+
 .resource-item {
-  padding: 5px;
+  padding: 10px;
   cursor: pointer;
 }
 
+h1 {
+  font-family: "Google Sans",Roboto,Arial,sans-serif;
+    font-size: 1.125rem;
+    font-weight: 400;
+    letter-spacing: 0;
+    line-height: 1.5rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    display: -webkit-box;
+    max-height: 48px;
+    color: #202124;
+    margin-top: 40px;
+    margin-bottom: 12px;
+}
 </style>

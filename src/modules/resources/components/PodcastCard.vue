@@ -1,22 +1,18 @@
 <template>
   <div class="resource-card">
     <img class="image" :src="imageUrl"/>
-    <div>
-      <h1>{{ displayName }}</h1>
-      <h2>{{ description }}</h2>
-      play
-    </div>
+    <div class="title">{{ podcastName }}</div>
+    <a class="subTitle">{{ authorsDisplay }}</a>
   </div>
 </template>
 
 <script>
 
 export default {
-  name: 'PodcastCard',
+  name: 'ResourceCard',
   
   props: {
-    displayName: String,
-    description: String,
+    podcastName: String,
     authors: [],
     imageUrl: String
   },
@@ -31,24 +27,22 @@ export default {
 </script>
 
 <style scoped>
-
+@import 'styles.css';
 .resource-card {
+  padding-top:10px;
+  padding-bottom:10px;
   display: flex;
-  flex-direction: row;
-  background: lightgrey;
-}
-.image {
-  height:140px;
-  width: 140px;
-  object-fit: cover;
-}
-h1 {
-  font-size: var(--prr-font-size-large);
-  font-weight: var(--font-weight);
+  align-items: left;
+  flex-direction: column;
+  background: white;
 }
 
-h2 {
-  font-size: var(--prr-font-size-normal);
-  font-weight: var(--font-weight);
+.image {
+  height:112px;
+  width: 112px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid lightgray
 }
+
 </style>

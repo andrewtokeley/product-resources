@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "core-js": "^3.8.3",
+    "luxon": "^3.3.0",
     "rss-parser": "^3.13.0",
     "vue": "^3.2.13",
     "vue-router": "^4.1.6"
