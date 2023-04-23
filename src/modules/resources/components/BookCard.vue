@@ -2,7 +2,7 @@
   <div class="resource-card">
     <img class="image" :src="resource.imageUrl"/>
     <div :title="resource.displayName" class="title">{{ resource.displayName }}</div>
-    <a class="subTitle">{{ authorsDisplay }}</a>
+    <div class="subTitle">{{ authorsDisplay }}</div>
   </div>
 </template>
 
@@ -36,7 +36,7 @@ export default {
   display: flex;
   align-items: left;
   flex-direction: column;
-  background: white;
+  background: transparent;
   width:140px;
 }
 

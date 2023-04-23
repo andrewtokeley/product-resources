@@ -19,7 +19,6 @@ class Resource {
     this.parentResourceName = config.parentResourceName;
     this.relatedResources = config.relatedResources;
     this.source = config.source;
-
   }
 
   static null() {

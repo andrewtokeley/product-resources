@@ -1,12 +1,11 @@
 /* Global variables */
 :root {
   --prr-bluehover: #2363b6;
-  --prr-blue: rgb(0, 74, 173);
   --prr-lightblue:#32a5d3;
-  --prr-extralightgrey: rgb(248, 246, 246);
+  --prr-extralightgrey: rgb(241, 243, 244);
   --prr-lightgrey: rgb(231, 231, 231);
   --prr-mediumgrey: rgb(122, 122, 122);
-  --prr-darkgrey: rgb(22, 22, 22);
+  --prr-darkgrey: #222222;
   --prr-orange: #ff914d;
   --prr-red: #ad0606;
 
@@ -31,13 +30,8 @@ body {
   overscroll-behavior-y: contain;
 }
 
-
-a.onWhite {
-  padding: 0px 20px 0px 00px;
-  color: var(--prr-blue);
-  transition: 0.4s;
+a {
   cursor: pointer;
+  color: var(--prr-darkgrey);
 }
-a.onWhite:hover {
-  color: var(--prr-orange);
-}
+

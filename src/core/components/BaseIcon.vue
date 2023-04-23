@@ -15,16 +15,16 @@
     </span>
   </div>
   
-  <!-- <transition name="fade">
+  <transition name="fade">
     <context-menu v-if="showContextMenu"
       ref="menu"
-      :items="derivedOptions.menu.menuItems"
+      :items="menu.menuItems"
       :activateElement="iconDivElement" 
-      :rightAligned="derivedOptions.menu.rightAligned ?? true"
+      :rightAligned="menu.rightAligned ?? true"
       @click="handleMenuClick"
       @close="showContextMenu = false">
     </context-menu>
-  </transition> -->
+  </transition>
 
   </div>
 
@@ -32,18 +32,17 @@
 
 <script>
 import { defineComponent } from "vue";
-// import ContextMenu from "../controls/ContextMenu";
+import ContextMenu from "@/core/components/ContextMenu.vue"
 //import { constants } from "../../constants";
 
 export default defineComponent({
   name: "BaseIcon",
   
-  // components: {
-  //   ContextMenu,
-  // },
+  components: {
+    ContextMenu,
+  },
 
-  //emits: ["click", "menuClick"],
-  emits: ["click"],
+  emits: ["click", "menuClick"],
 
 /**
  * options: 
@@ -61,26 +60,28 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
-    // onWhite: {
-    //   type: Boolean,
-    //   required: false,
-    //   default: true 
-    // },
+    menu: {
+      type: Object,
+      default: () => {
+
+      }
+    },
     options: {
       type: Object,
       default: () => {
         return {
-          size: "32px",
-          colour: "darkGray",
+          size: "26px",
+          colour: "var(--prr-lightgray)",
           background: {
             size: "40px",
-            borderRadius: "2px",
-            colour: "white"
+            borderRadius: "20px",
+            colour: "transparent"
           },
           hover: {
-            colour: "black",
-            backgroundColour: "white"
+            colour: "var(--prr-lightgray)",
+            backgroundColour: "rgba(60,64,67,.08)"
           },
+          isMaterialIcon: true,
           isClickable: true,
         }
       },
@@ -90,9 +91,9 @@ export default defineComponent({
 
   data() {
     return {
-      //showContextMenu: false,
+      showContextMenu: false,
       isMouseOver: Boolean,
-      //isContextMenuOpen: false,
+      isContextMenuOpen: false,
       iconDivElement: this.$refs.iconDiv,
     };
   },
@@ -135,21 +136,21 @@ export default defineComponent({
       
     // },
 
-    // visibleMenuItems() {
-    //   return this.derivedOptions.menu.menuItems.filter( (m) => {
-    //     if (m.show != undefined) {
-    //       return m.show;
-    //     } 
-    //     return true;
-    //   });
-    // },
-    // contextMenuOpen() {
-    //   const menu =  this.$refs.menu;
-    //   if (menu) {
-    //     return menu.isOpen();
-    //   }
-    //   return false;
-    // },
+    visibleMenuItems() {
+      return this.menu.menuItems.filter( (m) => {
+        if (m.show != undefined) {
+          return m.show;
+        } 
+        return true;
+      });
+    },
+    contextMenuOpen() {
+      const menu =  this.$refs.menu;
+      if (menu) {
+        return menu.isOpen();
+      }
+      return false;
+    },
 
     isMaterialIconProp() {
       return this.$slots.default().length > 0
@@ -158,17 +159,17 @@ export default defineComponent({
 
   methods: {
 
-    // handleMenuClick(menuItem) {
-    //   this.showContextMenu = false;
-    //   this.$emit('menuClick', menuItem);
-    //   // if (menuItem.action) {
-    //   //   this.$refs.menu.close();
-    //   //   menuItem.action();
-    //   // }
-    // },
+    handleMenuClick(menuItem) {
+      this.showContextMenu = false;
+      this.$emit('menuClick', menuItem);
+      if (menuItem.action) {
+        this.$refs.menu.close();
+        menuItem.action();
+      }
+    },
 
     isMaterialIcon() {
-      return this.derivedOptions.icon.materialIcon;
+      return this.options.icon.materialIcon;
     },
 
     addListeners() {
@@ -198,20 +199,19 @@ export default defineComponent({
     },
 
     handleClick() {
-      // if (this.derivedOptions.menu) {
-      //   this.showContextMenu = !this.showContextMenu;
-      // } else {
+      if (this.menu) {
+        this.showContextMenu = !this.showContextMenu;
+      } else {
         if (this.options.isClickable ?? true) {
           this.$emit("click");
         }
-      //}
+      }
     },
 
   },
 });
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 
 div {
@@ -272,7 +272,7 @@ path {
     bottom: 0;
     margin: auto;
     border: 4px solid transparent;
-    border-top-color: var(--ish-blue);
+    border-top-color: var(--prr-blue);
     border-radius: 50%;
     animation: button-loading-spinner 1s ease infinite;
 }

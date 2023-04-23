@@ -42,7 +42,7 @@ export default {
   computed: { 
     isBook() {
       if (this.resource.category) {
-        return this.resource.category.toLowerCase() == 'book'
+        return this.resource.category.toLowerCase() == 'books'
       }
       return false;
     },

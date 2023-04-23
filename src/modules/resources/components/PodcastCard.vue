@@ -36,7 +36,7 @@ export default {
   display: flex;
   align-items: left;
   flex-direction: column;
-  background: white;
+  background: transparent;
 }
 
 .image {

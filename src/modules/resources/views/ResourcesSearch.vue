@@ -1,24 +1,27 @@
 <template>
   <div class='resources'>
+    <header-bar></header-bar>
     <div class='content'>
-      <base-input v-model="searchTerm" class='searchInput'></base-input>
-      <base-button @click="handleSearch">Search</base-button>
-    
-      <div class="search-results">
+      <!-- <search-input @search="handleSearch()" v-model="searchTerm"></search-input> -->
+      
+      <div v-if="searchResults.length > 0" class="search-results">
         <template v-for="category in uniqueCategories" :key="category">
-          <h1>{{ category }}s</h1>
+          <!-- <row-header :title="category" :moreLink="`/${category}`"></row-header> -->
+          <h1 v-if="searchTerm">
+            <router-link :to="`/${category.toLowerCase()}`">{{ category }}</router-link>
+          </h1>
           <div :class="layoutClassForCategory(category)">
             <div class="resource-item" @click="showDetail(resource.id)" v-for="resource in resourcesByCategory(category)" :key="resource.id">
               
-              <book-card v-if="resource.category == 'Book'"
+              <book-card v-if="resource.category == 'Books'"
                 :resource="resource"
               >
               </book-card>
-              <podcast-card v-if="resource.category == 'Podcast'"
+              <podcast-card v-if="resource.category == 'Podcasts'"
                 :resource="resource"
               >
-            </podcast-card>
-              <podcast-episode-card v-if="resource.category == 'Podcast Episode'"
+              </podcast-card>
+              <podcast-episode-card v-if="resource.category == 'Podcast Episodes'"
               :resource="resource"
               >
               </podcast-episode-card>
@@ -26,6 +29,9 @@
             </div>
           </div>
         </template>
+      </div>
+      <div v-else class="noresults">
+        We couldn't find anything matching, <i>{{ searchTerm }}</i>
       </div>
     </div>
 
@@ -35,24 +41,25 @@
 </template>
 
 <script>
-import BaseInput from '@/core/components/BaseInput.vue'
-import BaseButton from '@/core/components/BaseButton.vue'
 import ResourceDetail from './ResourceDetail.vue'
 import PodcastCard from '../components/PodcastCard.vue'
 import BookCard from '../components/BookCard.vue'
 import PodcastEpisodeCard from '../components/PodcastEpisodeCard.vue'
+import HeaderBar from "@/core/components/HeaderBar.vue";
 
 import { searchResources } from '../services/resource-service.js'
+// import RowHeader from '../components/RowHeader.vue'
+// import SearchInput from '@/core/components/SearchInput.vue'
 
 export default {
+  
   name: 'ResourcesSearch',
   components: {
-    BaseInput,
-    BaseButton,
     ResourceDetail,
     BookCard,
     PodcastCard,
-    PodcastEpisodeCard
+    PodcastEpisodeCard,
+    HeaderBar,
   },
 
   data() {
@@ -67,8 +74,11 @@ export default {
 
   mounted() {
     this.searchCategory = this.$route.params.category
+    if (this.searchCategory == 'search') {
+      this.searchCategory = null
+    }
     this.searchTerm = this.$route.params.searchTerm ?? ""
-    if (this.searchCategory || this.category) {
+    if (this.searchCategory || this.searchTerm) {
       this.handleSearch()
     }
   },
@@ -82,14 +92,16 @@ export default {
     handleLogin() {
       this.$router.push('/login')
     },
+
     handleSearch() {
-      if (this.searchCategory) {
-        this.$router.replace( { path: `/${this.searchCategory}/${this.searchTerm}` })
+      if (this.searchCategory == 'search' && this.searchTerm == '') {
+        this.$router.push('/');
       }
       searchResources(this.searchCategory, this.searchTerm).then ( (results) => {
         this.searchResults = results
       })
     },
+
     resourcesByCategory(category) {
       return this.searchResults.filter ( resource => resource.category === category )
     },
@@ -99,7 +111,7 @@ export default {
       this.showResourceDetail=false
     },
     layoutClassForCategory(category) {
-      if (category == 'Podcast Episode') {
+      if (category == 'Podcast Episodes') {
         return 'vertical-list'
       }
       return 'horizontal-list'
@@ -123,12 +135,22 @@ export default {
   align-items: center;
 }
 .content {
-  margin-top: 100px;
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 80%;
   max-width: 800px;
+}
+
+.searchWrapper {
+  display:flex;
+  flex-direction: row;
+  align-items: center;
+  width: 80%;
+  height: 100px;
+  border-radius: 18px;
+  background: white;
+  padding: 20px;
 }
 
 .search-results {
@@ -138,13 +160,13 @@ export default {
 }
 
 .searchInput {
-  width: 50%;
-  max-width: 400px;
+  width: 90%;
 }
 
 .horizontal-list {
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
   overflow-x: scroll;
 }
 
@@ -174,5 +196,9 @@ h1 {
     color: #202124;
     margin-top: 40px;
     margin-bottom: 12px;
+}
+
+.noresults {
+  margin-top:100px;
 }
 </style>

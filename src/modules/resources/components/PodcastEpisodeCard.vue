@@ -31,8 +31,8 @@ export default {
       return this.resource.authors.join(", ")
     },
     dateLengthDescription() {
-      const date = DateTime.fromJSDate(this.publishedDate).toLocaleString(DateTime.DATE_MED);
-      const length = this.lengthSeconds + "s";
+      const date = DateTime.fromJSDate(this.resource.publishedDate).toLocaleString(DateTime.DATE_MED);
+      const length = this.resource.lengthSeconds + "s";
       return date + ' ' + length;
     }
   }

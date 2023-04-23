@@ -1,5 +1,5 @@
 <template>
-  <a
+  <button
     :disabled="disabled"
     class="base-button"
     :class="{
@@ -9,8 +9,8 @@
       'base-button--transparent': isTransparent,
       }"
   >
-  <span class="base-button__text"><slot></slot></span>
-  </a>
+    <span class="base-button__text"><slot></slot></span>
+    </button>
 </template>
 
 <script>
@@ -52,13 +52,13 @@ export default {
   border-radius: 3px;
   text-align: center;
   text-decoration: none;
-  font-size: var(--ish-font-size-normal);
-  font-weight: var(--ish-font-weight);
-  border: 1px solid var(--prr-blue);
+  font-size: var(--prr-font-size-normal);
+  font-weight: var(--prr-font-weight);
+  border: none;
   margin-left: 10px;
-  background: var(--prr-blue);
-  color: white;
-  /* height: 40px; */
+  background: var(--prr-green);
+  color: var(--prr-blue);
+  height: 40px;
   transition: background 400ms;
 }
 .base-button:focus {
@@ -71,8 +71,8 @@ export default {
 .base-button:disabled {
   cursor: default;
   background: white;
-  color: var(--ish-mediumgrey);
-  border: 1px solid var(--ish-lightgrey);
+  color: var(--prr-mediumgrey);
+  border: 1px solid var(--prr-lightgrey);
 }
 
 /* TRANSPARENT */
@@ -89,17 +89,17 @@ export default {
 .base-button--secondary {
   background: white;
   color: var(--prr-blue);
-  border: 1px var(--ish-lightgrey) solid;
+  border: 1px var(--prr-lightgrey) solid;
 }
 .base-button--secondary:hover {
-  background: var(--ish-lightgrey);
+  background: var(--prr-lightgrey);
 }
 
 /* DANGER */
 .base-button--danger {
-  background: var(--ish-red);
+  background: var(--prr-red);
   color: white;
-  border: 1px var(--ish-red) solid;
+  border: 1px var(--prr-red) solid;
 }
 
 /* SPINNER */

@@ -178,11 +178,11 @@ export default defineComponent({
   -moz-appearance: none;
   appearance: none;
 
-  color: var(--ish-darkgrey);
-  background: var(--ish-extralightgrey);
+  color: var(--prr-darkgrey);
+  background: var(--prr-extralightgrey);
   border: 1px white solid;
-  border-bottom-color: var(--ish-mediumgrey);
-  font-size: var(--ish-font-size-normal);
+  border-bottom-color: var(--prr-mediumgrey);
+  font-size: var(--prr-font-size-normal);
   border-radius:5px 5px 0px 0px;
   height: 40px;
   width: 100%;
@@ -197,19 +197,19 @@ export default defineComponent({
 }
 
 .base-input__input--has-hover-effect.base-input__input--is-blue:hover {
-  background:  var(--ish-bluehover);
+  background:  var(--prr-bluehover);
   border-bottom-width: 1px;
   border-radius:5px 5px 0px 0px;
 }
 
 .base-input__input--has-hover-effect.base-input__input--is-white:hover {
-  background:  var(--ish-lightgrey);
+  background:  var(--prr-lightgrey);
   border-bottom-width: 1px;
   border-radius:5px 5px 0px 0px;
 }
 
 .base-input__input--has-underline-effect:focus {
-  background:  var(--ish-lightgrey);
+  background:  var(--prr-lightgrey);
   border-bottom-color: var(--prr-blue);
 }
 
@@ -218,7 +218,7 @@ export default defineComponent({
 }
 
 .base-input__input--is-large {
-  font-size: var(--ish-font-size-large);
+  font-size: var(--prr-font-size-large);
 }
 
 .base-input__input--is-blue {
@@ -226,12 +226,12 @@ export default defineComponent({
 }
 
 .base-input__input--has-error {
-  border-bottom-color: var(--ish-red);
+  border-bottom-color: var(--prr-red);
   border-width: 1px;
 }
 
 .base-input__input--has-error:focus {
-  border-bottom-color: var(--ish-red);
+  border-bottom-color: var(--prr-red);
   border-width: 1px;
 }
 
@@ -239,20 +239,20 @@ export default defineComponent({
   position: relative;
   padding-top:5px;
   height: 20px;
-  color: var(--ish-red);
-  font-size: var(--ish-font-size-small);
+  color: var(--prr-red);
+  font-size: var(--prr-font-size-small);
 }
 
 .base-input__errorMessage--inline {
   position: absolute;
   float: right;
   font-size: 24px;
-  color: var(--ish-red);
+  color: var(--prr-red);
 }
 
 .base-input__descriptionText {
   padding-top:5px;
-  color: var(--ish-darkgrey);
-  font-size: var(--ish-font-size-small);
+  color: var(--prr-darkgrey);
+  font-size: var(--prr-font-size-small);
 }
 </style>

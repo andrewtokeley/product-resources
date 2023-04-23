@@ -149,13 +149,13 @@ methods: {
 .modal__heading {
   height: 30px;
   font-weight: bold;
-  font-size: var(--ish-font-size-large);
+  font-size: var(--prr-font-size-large);
   display: flex;
   align-items: center;
 }
 
 .modal__content {
-  color: var(--ish-mediumgrey);
+  color: var(--prr-mediumgrey);
   font-size: 1em;
   padding-top: 1em;
   padding-bottom: 0em;
@@ -166,7 +166,7 @@ methods: {
 
 .modal__subTitle {
   height: 40px;
-  color: var(--ish-mediumgrey);
+  color: var(--prr-mediumgrey);
   display: flex;
   justify-content: center;
   align-items: center;
