@@ -30,6 +30,10 @@ body {
   overscroll-behavior-y: contain;
 }
 
+body.modal-open {
+  overflow: hidden;
+}
+
 a {
   cursor: pointer;
   color: var(--prr-darkgrey);
