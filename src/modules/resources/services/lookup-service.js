@@ -13,13 +13,13 @@ const db = getFirestore(app);
 const refreshTags = async function() {
   await deleteLookup(TAG_ID);
   const lookup = new Lookup({id:TAG_ID, items:[
-    {key:'strategy', value:'Strategy'},
-    {key:'marty-cagan', value:'Marty Cagan'},
-    {key:'teresa-torres', value:'Teresa Torres'},
-    {key:'rich-mirinov', value:'Rich Mirinov'},
-    {key: 'leadership', value:'Leadership'},
-    {key: 'teaming', value:'Teaming'},
-    {key: 'stakeholder', value:'Stakeholder Management'},
+    {key:'strategy', value:'Strategy', groups: ['General']},
+    {key:'marty-cagan', value:'Marty Cagan', groups: ['Popular Authors']},
+    {key:'teresa-torres', value:'Teresa Torres', groups: ['Popular Authors']},
+    {key:'rich-mirinov', value:'Rich Mirinov', groups: ['Popular Authors']},
+    {key: 'leadership', value:'Leadership', groups: ['General']},
+    {key: 'teaming', value:'Teaming', groups: ['General']},
+    {key: 'stakeholder', value:'Stakeholder Management', groups: ['General']},
   ]});
   await addLookup(lookup)
   return lookup;
