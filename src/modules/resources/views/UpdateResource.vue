@@ -1,26 +1,61 @@
 <template>
-  <div class="page" :class="{ isWorking: isWorking }">
-    
-    <div class="content">
-      <div class="wrapper">
-        <h1 v-if="title">{{ title }}</h1>
-        <h1 v-else>Add New Resource</h1>
-        <p>
-          All changes will be immediately visible to users.
-        </p>
+      <div class="content" :class="{ working: isWorking }">        
+        
         <div class="grid">
-          
+
           <div class="entry">
             <base-input
               v-model="resource.displayName"
               :options="{ 
-                maximumLength: 30,
+                maximumLength: 300,
                 placeholder: 'Add title'}"
             ></base-input>
+          </div>
+
+          <base-icon class="icon">person</base-icon>
+          <div class="entry">
+            <base-input
+              v-model="authorsList"
+              :options="{ 
+                placeholder: 'Add Author'}"
+            ></base-input>
             <div class="helpText">
-              This could be the book name, article heading, episode title or show name.
+              If more than one author, separate with commas.
             </div>
           </div>
+          
+          <base-icon class="icon">image</base-icon>
+          <div class="entry">
+            <base-input
+              v-model="resource.imageUrl"
+              :options="{ 
+                placeholder: 'Add Image URL'}"
+            ></base-input>
+          </div>
+
+          <base-icon class="icon">link</base-icon>
+          <div class="entry">
+            <base-input
+              v-model="resource.resourceUrl"
+              :options="{ 
+                placeholder: 'Add Resource URL'}"
+            ></base-input>
+          </div>
+          
+          <base-icon class="icon">calendar_month</base-icon>
+          <div class="entry">
+            <date-picker v-model="resource.publishedDate"></date-picker>
+          </div>
+          
+          <div class="entry">
+            <base-select
+              v-model="resource.resourceType"
+              :selectOptions="resourceTypes.items"
+              :options="{ 
+                placeholder: 'Select Type'}"
+            ></base-select>
+          </div>
+          
           <base-icon class="icon">notes</base-icon>
           <div class="entry">
             <base-multiline-text
@@ -33,29 +68,13 @@
             ></base-multiline-text>
           </div>
 
-          <!-- <div class="entry">
-            <base-check-box
-              label="Allow people to subscribe to updates"
-              :leftAlign="true"
-              v-model="adventure.allowSubscribe">
-            </base-check-box>
-          </div> -->
-          <!-- <div class="entry">
-            <base-input
-              :options="{ 
-                placeholder: 'Proposed start marker',
-                descriptionText: 'Where you intend to start your adventure (Optional) ' }"
-            ></base-input>
+          <div v-if="resource.tags" class="entry">
+            <div class="openingText">
+              Select which tags apply to this resource.
+            </div>
+            <tag-selector v-model="resource.tags"></tag-selector>
           </div>
-
-          <div class="entry">
-            <base-input
-              :options="{ placeholder: 'Proposed end marker',
-              descriptionText: 'Where you intend to end your adventure (Optional) ' }"
-            ></base-input>
-            
-          </div> -->
-          
+        
         </div>
         <div class="buttonStrip">
           <div class="buttonStrip--left">
@@ -68,22 +87,19 @@
           <div class="buttonStrip--right">
             <base-button
               :isSecondary="true"
-              @click="$router.push(`/`)"
+              @click="$router.back()"
               >Cancel</base-button
             >
             <base-button @click="handleSave">Save</base-button
             >
           </div>
         </div>
-      </div>
+        <modal-dialog v-if="showDeleteAlert" title="Delete" :actions="deleteActions" @close="showDeleteAlert = false;">
+        <p>Are you sure?</p>
+        <p>This will delete all checkins, images...</p>  
+      </modal-dialog>
     </div>
-
-    <modal-dialog v-if="showDeleteAlert" title="Delete" :actions="deleteActions" @close="showDeleteAlert = false;">
-      <p>Are you sure?</p>
-      <p>This will delete all checkins, images...</p>  
-    </modal-dialog>
-
-  </div>
+  
 </template>
 
 <script>
@@ -91,17 +107,15 @@ import BaseInput from "@/core/components/BaseInput.vue"
 import BaseButton from "@/core/components/BaseButton.vue"
 import BaseIcon from "@/core/components/BaseIcon.vue"
 import BaseMultilineText from "@/core/components/BaseMultilineText.vue";
+import BaseSelect from "@/core/components/BaseSelect";
+import DatePicker from "@/core/components/DatePicker";
+
 import ModalDialog from "@/core/components/ModalDialog";
+import { getResource, updateResource, addResource } from "@/modules/resources/services/resource-service"
+import { getResourceTypes } from "@/modules/resources/services/lookup-service"
 
-// import {
-//   addAdventure,
-//   getAdventure,
-//   updateAdventure,
-// } from "../../api/firestoreAdventures";
-import { getResource, updateResource } from "@/modules/resources/services/resource-service"
 import { Resource } from "@/modules/resources/model/resource"
-
-//const { DateTime } = require("luxon");
+import TagSelector from '@/modules/resources/components/TagSelector.vue';
 
 export default {
   name: "UpdateResource",
@@ -110,19 +124,34 @@ export default {
     BaseButton,
     BaseIcon,
     BaseMultilineText,
+    BaseSelect,
     ModalDialog,
+    DatePicker,
+    TagSelector,
+  },
+
+  emits: ['saved'],
+
+  props: {
+    resourceId: {
+      type: String,
+      default: null
+    }
   },
 
   data() {
     const vm = this;
     return {
-      showDeleteAlert: false,
-      isWorking: true,
+      temp: [{key: 'kkk', value: 'vvv'}],
       resource: {
         type: Resource,
-        default: new Resource({}),
+        default: () => {}
       },
-      title: "",
+      resourceTypeItem: null,
+      resourceTypes: [],
+      authorsList: "",
+      showDeleteAlert: false,
+      isWorking: true,
       deleteActions: [
         { id: 0, 
           title: "Cancel", 
@@ -144,34 +173,30 @@ export default {
   },
 
   computed: {
-    // iconOptions() {
-    //   return constants.ICON_OPTIONS.ON_WHITE;
-    // },
-  },
-
-  mounted() {
-    const id = this.$route.params.id;
-    if (id) {
-      this.getRsource(id);
-    } else {
-      this.title = "New Resource";
+    authorsArray() {
+      return this.authorsList.split(",")
+    },
+    title() {
+      if (this.resource.id) {
+        return this.resource.displayName
+      } else {
+        return "Add Resource"
+      }
     }
   },
 
-  methods: {
-    getRsource(id) {
-      const vm = this;
-      getResource(id).then((resource) => {
-        
-        if (resource) {
-          vm.resource = resource;
-          vm.title = "Update";
-        } else {
-          vm.title = "Error!";
-        }
-      });
-    },
+  async mounted() {
+    this.isWorking = true;
+    this.resourceTypes = await getResourceTypes();
+    this.resource = await getResource(this.resourceId);
+    if (this.resource.authors) {
+      this.authorsList = this.resource.authors.join(',');
+    }
+    this.isWorking = false;
+  },
 
+  methods: {
+    
     handleDeleteOpen() {
       this.showDeleteAlert = true;
     },
@@ -180,75 +205,63 @@ export default {
       console.log('do delete'); 
     },
 
-    handleSave() {
+    async handleSave() {
       this.isWorking = true;
-      const vm = this;
+      this.resource.authors = this.authorsArray;
 
       if (this.resource.id) {
         //this is an existing resource, update...
-        updateResource(this.resource).then( () => {
-          vm.$router.push(`/`);
-        }).catch( (error) => {
-          console.log(error);
-        });
+        await updateResource(this.resource)        
       } else {
-        //this is a new resource
-        updateResource(this.resource).then(() => {
-          this.isWorking = false;
-          vm.$router.push(`/`);
-        }).catch( (error) => {
-          console.log(error);
-        }
-        );
+        //this is a new resource        
+        await addResource(this.resource)
       }
+      this.$emits('saved');
+      this.isWorking = false;
     },
   },
+  
 };
 
 </script>
 
 <style scoped>
-.page .working {
-  cursor: progress;
+.content {
+  background-color: white;
+}
+.content.working {
+  display:none;
 }
 
 .content {
   position: relative;
-  top: 100px;
+  top: 20px;
   display: flex;
   justify-content: center;
   align-items: center;
   padding-bottom: 100px;
 }
 
-.wrapper {
-  border-radius: 10px;
-  max-width: 600px;
-  background: white;
-  width: 80%;
-  padding: 20px;
-}
-
-.wrapper h1 {
+.content h1 {
   font-size: 1.5em;
 }
 
-.wrapper p {
+.content p {
   color: var(--prr-mediumgrey);
   margin-bottom: 20px;
 }
 
-.wrapper .buttonStrip {
+.buttonStrip {
   display: flex;
   justify-content:space-between;
 }
 
-.wrapper .buttonStrip-left {
+.buttonStrip-left {
   display: flex;
   justify-content:flex-start;
 }
 
-.wrapper .buttonStrip-right {
+.buttonStrip-right {
   display: flex;
   justify-content:flex-end;
 }
@@ -260,7 +273,7 @@ export default {
 }
 
 .grid .icon {
-  padding-top: 10px;
+  /* padding-top: 10px; */
   grid-column: 1 / 2;
   align-self: flex-start;
 }
@@ -274,6 +287,14 @@ export default {
   font-size: 0.8em;
   color: var(--prr-mediumgrey);
   padding-left: 10px;
+  padding-bottom: 20px;
+  margin-top:-20px;
+}
+
+.grid .entry .openingText {
+  font-size: var(--prr-font-noomal);
+  color: var(--prr-darkgrey);
+  /* padding-left: 10px; */
   padding-bottom: 20px;
 }
 </style>

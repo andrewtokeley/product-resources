@@ -1,7 +1,7 @@
 <template>
   <div class="resource-card">
-    <img class="image" :src="resource.imageUrl"/>
-    <div :title="resource.displayName" class="title">{{ resource.displayName }}</div>
+    <img class="image" :src="resource.imageUrl"  />
+    <div v-if="showTitle" :title="resource.displayName" class="title">{{ resource.displayName }}</div>
     <div class="subTitle">{{ authorsDisplay }}</div>
   </div>
 </template>
@@ -15,14 +15,28 @@ export default {
     resource: {
       type: Resource,
       default: null
+    },
+    showTitle: {
+      type: Boolean,
+      default: true
     }
   },
 
   computed: {
     authorsDisplay() {
-      return this.resource.authors.join(", ")
+      if (this.resource.authors) {
+        return this.resource.authors.join(", ")
+      }
+      return null;
     }
-  }
+  },
+
+  // methods: {
+  //   handleClick(resource) {
+  //     console.log('r')
+  //     this.$emit('clicked', resource.id)
+  //   }
+  // }
 }
 
 </script>
@@ -31,13 +45,11 @@ export default {
 @import 'styles.css';
 
 .resource-card {
-  padding-top:10px;
+  /* padding-top:10px; */
   padding-bottom:10px;
-  display: flex;
-  align-items: left;
-  flex-direction: column;
   background: transparent;
   width:140px;
+  cursor: pointer;
 }
 
 .image {

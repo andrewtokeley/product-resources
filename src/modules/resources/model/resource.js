@@ -1,19 +1,18 @@
-//import { firebase } from "../firebaseInit.js";
-//const { DateTime } = require("luxon");
-//export { Resource, resourceConverter };
+import { Timestamp } from "firebase/firestore";
+const { DateTime } = require("luxon");
 
-export { Resource };
+export { Resource, resourceConverter };
 
 class Resource {
   constructor(config) {
     this.id = config.id;
     this.displayName = config.displayName;
-    this.url = config.url;
+    this.resourceUrl = config.resourceUrl;
     this.description = config.description;
     this.publishedDate = config.publishedDate;
     this.imageUrl = config.imageUrl;
     this.authors = config.authors;
-    this.category = config.category;
+    this.resourceType = config.resourceType;
     this.tags = config.tags;
     this.parentResourceId = config.parentResourceId;
     this.parentResourceName = config.parentResourceName;
@@ -21,45 +20,53 @@ class Resource {
     this.source = config.source;
   }
 
-  static null() {
-    return new Resource({ name: "" })
+  static default() {
+    // returns a default instance where all the fields, and their child properties are available.
+    return new Resource({ authors: [], tags: [] });
   }
 }
 
-// /**
-//  * FirestoreDataConverter implementation for User instances
-//  */
-// var adventureConverter = {
-//   toFirestore: function (adventure) {
-//     const result = {};
-//     if (adventure.uid != null) { result.uid = adventure.uid }
-//     if (adventure.startDate != null) { result.startDate = firebase.firestore.Timestamp.fromDate(adventure.startDate.toJSDate()); }
-//     if (adventure.endDate != null) { result.endDate = firebase.firestore.Timestamp.fromDate(adventure.endDate.toJSDate()); }
-//     if (adventure.name != null) { result.name = adventure.name }
-//     if (adventure.username != null) { result.username = adventure.username }
-//     if (adventure.description != null) { result.description = adventure.description }
-//     if (adventure.public != null) { result.public = adventure.public}
-//     if (adventure.allowSubscribe != null) { result.allowSubscribe = adventure.allowSubscribe}
-//     if (adventure.subscriptionKey != null) { result.subscriptionKey = adventure.subscriptionKey}
-//     return result;
-//   },
+/**
+ * FirestoreDataConverter implementation for User instances
+ */
+var resourceConverter = {
+  toFirestore: function (resource) {
+    const result = {};
+    // if (resource.id != null) { result.id = resource.id }
+    if (resource.description != null) { result.description = resource.description }
+    if (resource.resourceType != null) { result.resourceType = resource.resourceType }
+    if (resource.resourceUrl != null) { result.resourceUrl = resource.resourceUrl }
+    if (resource.displayName != null) { result.displayName = resource.displayName }
+    if (resource.publishedDate != null) { result.publishedDate = Timestamp.fromDate(resource.publishedDate.toJSDate()); }
+    if (resource.authors != null) { result.authors = resource.authors.map( a => a.trim()) }
+    if (resource.imageUrl != null) { result.imageUrl = resource.imageUrl }
+    if (resource.tags != null) { result.tags = resource.tags }
+    if (resource.parentResourceId != null) { result.parentResourceId = resource.parentResourceId }
+    if (resource.parentResourceName != null) { result.parentResourceName = resource.parentResourceName }
+    if (resource.relatedResources != null) { result.relatedResources = resource.relatedResources }
+    if (resource.source != null) { result.source = resource.source }
+    return result;
+  },
 
-//   fromFirestore: function (snapshot, options) {
-//     const data = snapshot.data(options);
+  fromFirestore: function (snapshot, options) {
+    const data = snapshot.data(options);
 
-//     const config = {
-//       id: snapshot.id,
-//       uid: data.uid,
-//       startDate: data.startDate ? DateTime.fromJSDate(data.startDate.toDate()) : null,
-//       endDate: data.endDate ? DateTime.fromJSDate(data.endDate.toDate()) : null,
-//       name: data.name,
-//       username: data.username,
-//       public: data.public ?? false,
-//       description: data.description,
-//       allowSubscribe: data.allowSubscribe ?? false,
-//       subscriptionKey: data.subscriptionKey,
-//     }
+    const config = {
+      id: snapshot.id,
+      displayName: data.displayName,
+      resourceUrl: data.resourceUrl,
+      description: data.description,
+      publishedDate: data.publishedDate ? DateTime.fromJSDate(data.publishedDate.toDate()) : null,
+      imageUrl: data.imageUrl,
+      authors: data.authors,
+      resourceType: data.resourceType,
+      tags: data.tags ?? [],
+      parentResourceId: data.parentResourceId,
+      parentResourceName: data.parentResourceName,
+      relatedResources: data.relatedResources,
+      source: data.source,
+    }
 
-//     return new Adventure(config);
-//   }
-// };
+    return new Resource(config);
+  }
+};

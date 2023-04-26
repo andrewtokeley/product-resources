@@ -31,19 +31,15 @@ export default {
 
   props: {
     // The bound value of the input, set by clients using the v-model property
-    modelValue: String,
+    modelValue: { 
+      type: String,
+      default: ""
+    }
   },
   
   computed: {
-    value: {
-      get() {
-        return this.modelValue;
-      },
-      set() {
-        // don't want to do anything here because we only want to let the client know about the value
-        // change after it's successfully been validated/saved asynchronously (see validation())
-        // We still need an empty implementation so the value property is writable though
-      }
+    value() {
+      return this.modelValue;
     }
   },
 

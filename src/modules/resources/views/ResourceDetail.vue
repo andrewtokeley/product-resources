@@ -1,9 +1,19 @@
 <template>
-  <modal-dialog :title="resource.displayName" @close="$emit('close')">
-    
-    <div>
-      <img :class="{ book: isBook}" :src="resource.imageUrl" />
-      <p>{{resource.description}}</p>
+  <modal-dialog 
+    :title="resource.displayName" 
+    :iconActions="iconActions"
+    :buttonActions="buttonActions"
+    @close="handleClose" 
+    @iconClick="handleIconClick"
+  >
+    <div v-if="!isWorking">
+      <div v-if="isEditing">
+        <edit-resource v-model="resource"></edit-resource>
+      </div>
+
+      <div v-else>
+        <view-resource :resource="resource"></view-resource>
+      </div>
     </div>
 
   </modal-dialog>  
@@ -11,58 +21,115 @@
 
 <script>
 import ModalDialog from '@/core/components/ModalDialog.vue'
+import EditResource from "@/modules/resources/views/EditResource"
+import ViewResource from './ViewResource.vue';
 
-import { getResource } from '@/modules/resources/services/resource-service'
 import { Resource } from '@/modules/resources/model/resource'
+import { getResource, updateResource } from '../services/resource-service';
 
 export default {
-  name: 'ResourceDetail',
+  name: 'resource-modal',
   components: {
     ModalDialog,
+    EditResource,
+    ViewResource,
   },
-  
   data() {
     return {
-      resource: Resource,
+      isWorking: {
+        type: Boolean,
+        default: true
+      },
+      isEditing: {
+        type: Boolean,
+        default: false
+      },
+      resource: {
+        type: Resource,
+        default: Resource.default()
+      },
     }
   },
 
   props: {
-    resourceId: String,
+    resourceId: {
+      type: String,
+      default: null
+    },
   },
 
   emits: ["close"],
 
-  mounted() {
-    getResource(this.resourceId).then ( resource => {
-      this.resource = resource
-    })
+  async mounted() {
+    this.isWorking = true;
+    this.isEditing = false;
+    this.resource = await getResource(this.resourceId)
+    this.isWorking = false;
   },
 
   computed: { 
-    isBook() {
-      if (this.resource.category) {
-        return this.resource.category.toLowerCase() == 'books'
-      }
-      return false;
+    
+    iconActions() {
+      var actions = [];
+      actions.push( {
+          id: 0,
+          name: "edit",
+          iconName: "edit",
+          show: !this.isEditing});
+      actions.push( {
+          id: 1,
+          name: "save",
+          iconName: "save",
+          show: this.isEditing});
+      return actions;
     },
+    buttonActions() {
+      var actions = [];
+      if (this.isEditing) {
+        actions.push( {
+          id: 0,
+          title: "Save",
+          isPrimary: true,
+        });
+        actions.push( {
+          id: 0,
+            title: "Cancel",
+            isPrimary: false,
+        });
+      } else {
+        actions.push( {
+          id: 0,
+          title: "View on Amazon...",
+          isPrimary: true,
+        });
+      }
+      return actions;
+    }
+  },
+
+  methods: {
+    
+    async handleIconClick(action) {
+      if (action.name == 'save') {
+        this.isEditing = false;
+        await updateResource(this.resource)
+      } else if (action.name == 'edit') {
+        this.isEditing = true;
+      }
+    },
+
+    handleClose() {
+      // silently remove the resource id from the url
+      history.pushState(
+        {},
+        null,
+        this.$route.path
+      );
+      this.$emit('close');
+    }
   }
 
 }
 
 </script>
 
-<style scoped>
-
-img {
-  height:112px;
-  width: 112px;
-  border-radius: 12px;
-}
-
-img.book {
-  height:215px;
-  width: 140px;
-}
-
-</style>

@@ -5,8 +5,13 @@
           'modal--fullscreen': fullscreen 
         }" 
         @click='preventClickPropogation'>
-      <base-icon class="modal__close-button" @click='$emit("close")'>close</base-icon>
-      <h1 v-if="title">
+        <div  class="modal__iconActions" >
+          <template v-for="action in iconActions" :key="action.id">
+            <base-icon v-if="action.show" @click="$emit('iconClick', action)">{{  action.iconName }}</base-icon>
+          </template>
+          <base-icon @click='$emit("close")'>close</base-icon>
+        </div>
+      <h1 v-if="title" :title="title">
         {{ title }}
       </h1>
       <div class="modal__content">
@@ -17,14 +22,14 @@
         <p>{{ subTitle }}</p>
       </div>
 
-      <div v-if="actions" class="modal__footer">
-        <template v-for="action in actions" :key="action.id">
+      <div v-if="buttonActions" class="modal__footer">
+        <template v-for="action in buttonActions" :key="action.id">
           <base-button
             :isPrimary="action.isPrimary"
             :isSecondary="action.isSecondary"
             :isDestructive="action.isDestructive"
             :showSpinner="action.showSpinner"
-            @click="handleClick(action)"
+            @click="$emit('buttonClick', action)"
             >{{ action.title }}</base-button
           >
         </template>
@@ -42,11 +47,10 @@ import BaseIcon from "./BaseIcon";
 export default defineComponent({
   name: "modal-dialog",
 
-  emits: ["close"],
+  emits: ["close", "iconClick", "buttonClick"],
   
   components: {
     BaseButton,
-    // CloseDialogButton,
     BaseIcon,
   },
 
@@ -63,7 +67,15 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
-    actions: Array,
+    iconActions: {
+      type: Array,
+      default: () => {[]}
+    },
+    buttonActions: {
+      type: Array,
+      default: () => {[]}
+    }
+
   },
 
   mounted() {
@@ -71,10 +83,6 @@ export default defineComponent({
   },
 
 methods: {
-  
-    handleClick(action) {
-      action.handle(action);
-    },
     
     preventClickPropogation(e) {
       e.stopPropagation();
@@ -131,19 +139,30 @@ methods: {
   box-sizing: border-box;
 }
 
-.modal__close-button {
+.modal h1 {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  margin:0px;
+}
+.modal__iconActions {
+  display: flex;
+  flex-direction: row;
   position:absolute;
   right: 10px;
   top: 10px;
 }
+.modal__iconActions .icon {
+  padding-left:10px;
+}
 
 .modal--fullscreen {
-  width: 100%;
-  height: 100%;
+  width: 90%;
+  height: 90%;
   max-height: 100%;
   max-width: 100%;
-  padding: 60px 60px;
-  border-radius: 0px;
+  padding: 60px 30px;
+  border-radius: 10px;
 }
 
 .modal__heading {
@@ -158,7 +177,7 @@ methods: {
   color: var(--prr-mediumgrey);
   font-size: 1em;
   padding-top: 1em;
-  padding-bottom: 0em;
+  padding-bottom: 1em;
   box-sizing: border-box;
   flex-grow: 1;
   overflow-y: scroll;

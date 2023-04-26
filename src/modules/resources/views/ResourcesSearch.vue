@@ -1,65 +1,49 @@
 <template>
-  <div class='resources'>
+  <div class='resources' >
     <header-bar></header-bar>
     <div class='content'>
-      <!-- <search-input @search="handleSearch()" v-model="searchTerm"></search-input> -->
-      
-      <div v-if="searchResults.length > 0" class="search-results">
-        <template v-for="category in uniqueCategories" :key="category">
-          <!-- <row-header :title="category" :moreLink="`/${category}`"></row-header> -->
-          <h1 v-if="searchTerm">
-            <router-link :to="`/${category.toLowerCase()}`">{{ category }}</router-link>
-          </h1>
-          <div :class="layoutClassForCategory(category)">
-            <div class="resource-item" @click="showDetail(resource.id)" v-for="resource in resourcesByCategory(category)" :key="resource.id">
-              
-              <book-card v-if="resource.category == 'Books'"
-                :resource="resource"
-              >
-              </book-card>
-              <podcast-card v-if="resource.category == 'Podcasts'"
-                :resource="resource"
-              >
-              </podcast-card>
-              <podcast-episode-card v-if="resource.category == 'Podcast Episodes'"
-              :resource="resource"
-              >
-              </podcast-episode-card>
-              
-            </div>
-          </div>
-        </template>
+      <div v-if="isLoading">
+        <loading-symbol></loading-symbol>
       </div>
-      <div v-else class="noresults">
+      <div v-if="searchResults.length > 0 && !isLoading" class="search-results">
+        <book-group v-if="books" @click="showDetail" heading="Books" :resources="books"></book-group>
+        <podcast-group v-if="podcasts" @click="showDetail" heading="Podcasts" :resources="podcasts"></podcast-group>
+        <podcast-episode-group v-if="episodes" @click="showDetail" heading="Podcast Episodes" :resources="episodes"></podcast-episode-group>
+      </div>
+      <div v-if="searchResults.length == 0 && !isLoading" class="noresults">
         We couldn't find anything matching, <i>{{ searchTerm }}</i>
       </div>
     </div>
 
-    <resource-detail v-if="showResourceDetail" @close="closeDetail" :resourceId="selectedResourceId"></resource-detail>
-
+    <resource-detail :fullscreen="true" v-if="showResourceDetail" @close="closeDetail" :resourceId="selectedResource.id"></resource-detail>
+    
   </div>
 </template>
 
 <script>
 import ResourceDetail from './ResourceDetail.vue'
-import PodcastCard from '../components/PodcastCard.vue'
-import BookCard from '../components/BookCard.vue'
-import PodcastEpisodeCard from '../components/PodcastEpisodeCard.vue'
 import HeaderBar from "@/core/components/HeaderBar.vue";
+import LoadingSymbol from "@/core/components/LoadingSymbol.vue";
 
-import { searchResources } from '../services/resource-service.js'
+import { searchByResourceType, searchByTag, searchByText } from '../services/resource-service.js'
+import BookGroup from '../components/BookGroup.vue'
+import PodcastGroup from '../components/PodcastGroup.vue'
+import PodcastEpisodeGroup from '../components/PodcastEpisodeGroup.vue'
+import { getResourceTypes, getTags } from '../services/lookup-service';
 // import RowHeader from '../components/RowHeader.vue'
 // import SearchInput from '@/core/components/SearchInput.vue'
 
 export default {
   
   name: 'ResourcesSearch',
+
   components: {
     ResourceDetail,
-    BookCard,
-    PodcastCard,
-    PodcastEpisodeCard,
     HeaderBar,
+    LoadingSymbol,
+    BookGroup,
+    PodcastGroup,
+    PodcastEpisodeGroup,
   },
 
   data() {
@@ -68,24 +52,71 @@ export default {
       searchTerm: null,
       searchResults: [],
       showResourceDetail: false,
-      selectedResourceId: ""
+      selectedResource: null,
+      isLoading: true,
+      resourceTypes: [],
+      tags: [],
+      bookResources: {
+        type: Array,
+        default: [{}]
+      }
     }
   },
 
-  mounted() {
-    this.searchCategory = this.$route.params.category
-    if (this.searchCategory == 'search') {
-      this.searchCategory = null
+  async mounted() {
+    const vm = this;
+    window.onpopstate = function() {
+      vm.closeDetail()
+    };
+    console.log('mounted')
+    this.isLoading = true;
+
+    this.resourceTypes = await getResourceTypes();
+    this.tags = await getTags();
+    
+    if (this.$route.params.typeId) {
+      await this.handleSearchByTypeKey(this.$route.params.typeId)
+      const resourceId = this.$route.query.r 
+      if (resourceId) {
+        const resource = this.searchResults.find ( r => r.id == resourceId );
+        this.showDetail(resource);
+      }
+    } else if (this.$route.params.tagId) {
+      await this.handleSearchByTagKey(this.$route.params.tagId)
+    } else if (this.$route.params.searchTerm) {
+      await this.handleSearchByText(this.$route.params.searchTerm);
     }
-    this.searchTerm = this.$route.params.searchTerm ?? ""
-    if (this.searchCategory || this.searchTerm) {
-      this.handleSearch()
-    }
+    this.isLoading = false;
   },
 
   methods: {
-    showDetail(resourceId) {
-      this.selectedResourceId = resourceId
+    async handleSearchByTagKey(key) {
+      let lookup = this.tags.items.find (i => i.key == key);
+      if (lookup) {
+        this.searchResults = await searchByTag(lookup);
+      }
+    },
+
+    async handleSearchByTypeKey(key) {
+      this.searchResults = await searchByResourceType(key);
+    },
+
+    async handleSearchByText(term) {
+      this.searchResults = await searchByText(term);
+    },
+
+    handleMenuAdd() {
+      this.$router.push('/add');
+    },
+
+    showDetail(resource) {
+      // sliently update url
+      history.pushState(
+        {},
+        null,
+        this.$route.path + '?r=' + encodeURIComponent(resource.id)
+      )
+      this.selectedResource = resource
       this.showResourceDetail = true
     },
 
@@ -93,25 +124,23 @@ export default {
       this.$router.push('/login')
     },
 
-    handleSearch() {
-      if (this.searchCategory == 'search' && this.searchTerm == '') {
-        this.$router.push('/');
-      }
-      searchResources(this.searchCategory, this.searchTerm).then ( (results) => {
-        this.searchResults = results
-      })
-    },
+    resourcesByType(key) {
+      const results = this.searchResults.filter ( resource => resource.resourceType.key == key )
+      if (results) {
+        console.log(results.length);
+        return results;
 
-    resourcesByCategory(category) {
-      return this.searchResults.filter ( resource => resource.category === category )
+      }
+      return [];
     },
 
     closeDetail() {
       //alert('close')
       this.showResourceDetail=false
     },
-    layoutClassForCategory(category) {
-      if (category == 'Podcast Episodes') {
+
+    layoutClassForType(type) {
+      if (type.key == 'episodes') {
         return 'vertical-list'
       }
       return 'horizontal-list'
@@ -119,9 +148,34 @@ export default {
   },
 
   computed: {
-    uniqueCategories() {
-      return [...new Set(this.searchResults.map(obj => obj.category))];
-    }
+    books() {
+      const results = this.resourcesByType('books')
+      return results.length>0 ? results : null
+    },
+    podcasts() {
+      const results = this.resourcesByType('podcasts')
+      return results.length>0 ? results : null
+    },
+    web() {
+      const results = this.resourcesByType('web')
+      return results.length>0 ? results : null
+    },
+    video() {
+      const results = this.resourcesByType('video')
+      return results.count>0 ? results : null
+    },
+    episodes() {
+      const results = this.resourcesByType('episodes')
+      return results.count>0 ? results : null
+    },
+    
+  //   uniqueResourceTypes() {
+  // //     const arrayUniqueByKey = [...new Map(array.map(item =>
+  // // [item[key], item])).values()];
+  //     const types = this.searchResults.map(t => t.resourceType);
+  //     const unique = [...new Map(types.map(item => [item['key'], item])).values()];
+  //     return unique
+  //   }
   }
 }
 
@@ -134,12 +188,17 @@ export default {
   flex-direction: column;
   align-items: center;
 }
+
 .content {
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 80%;
   max-width: 800px;
+}
+
+.content.loading {
+  display: none;
 }
 
 .searchWrapper {

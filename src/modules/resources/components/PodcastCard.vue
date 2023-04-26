@@ -21,7 +21,10 @@ export default {
 
   computed: {
     authorsDisplay() {
-      return this.resource.authors.join(", ")
+      if (this.resource.authors) {
+        return this.resource.authors.join(", ")
+      }
+      return null;
     }
   }
 }
@@ -37,6 +40,7 @@ export default {
   align-items: left;
   flex-direction: column;
   background: transparent;
+  cursor: pointer;
 }
 
 .image {

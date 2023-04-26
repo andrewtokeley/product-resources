@@ -2,8 +2,6 @@ import { initializeApp } from 'firebase/app';
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
-//const firebase = require('firebase/app')
-
 var firebaseConfig = {
   apiKey: process.env.VUE_APP_FB_API_KEY,
   authDomain: process.env.VUE_APP_FB_AUTH_DOMAIN,
@@ -15,7 +13,7 @@ var firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app)
-const auth = getAuth(app)
+const db = getFirestore(app);
+const auth = getAuth(app);
 
-export { db, auth }
+export { app, db, auth }

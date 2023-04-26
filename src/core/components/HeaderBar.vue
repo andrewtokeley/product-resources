@@ -3,27 +3,33 @@
     
     <div class="left-nav">
       <ul>
-        <li v-for="nav in navLinks" :key="nav.path" >
-          <router-link :class="{ selected: isSelected(nav)}" v-if="nav.path" class="nav" :to="nav.path">{{ nav.title.toUpperCase() }}</router-link>
-          <div v-else class="nav-with-submenu">
-            <a>{{ nav.title.toUpperCase() }}</a>    
-            <div class="submenu">
-              <ul>
-                <li v-for="category in categories" :key="category.id" >
-                  <category-button @click="handleSearch(null, category.id)">{{category.name}}</category-button>
-                </li>
-              </ul>
-          </div>
+        <li v-for="nav in navLinks" :key="nav.path">
+          <router-link 
+            :class="{ selected: isSelected(nav)}" 
+            :to="nav.path"
+          >
+          {{nav.title}}
+          </router-link>
+        </li>
+        <li class="nav-with-submenu">
+          <a>CATEGORIES</a>    
+          <div ref="submenuDiv" class="submenu">
+            <ul>
+              <li v-for="tag in tags.items" :key="tag.key" >
+                <tag-button :enableHoverEffect="true" @click="$router.push(`/tag/${tag.key}`)">{{tag.value}}</tag-button>
+              </li>
+            </ul>
           </div>
         </li>
       </ul>
     </div>
     
     <div class="spacer"></div>
+
     <div class="header__right">
       <search-input 
         v-model="searchTerm" 
-        @search="handleSearch(null, searchTerm)" 
+        @search="$router.push(`/search/${searchTerm}`)" 
         @mouseover="showCategories=false">
       </search-input>
       
@@ -38,56 +44,48 @@ import BaseIcon from '@/core/components/BaseIcon.vue'
 import { auth } from '@/core/services/firebaseInit'
 import { useUserStore } from '@/core/state/userStore'
 import SearchInput from './SearchInput.vue'
-import CategoryButton from '@/modules/resources/components/CategoryButton.vue'
+import TagButton from '@/modules/resources/components/TagButton.vue'
+
+import { refreshTags, refreshResourceTypes } from '@/modules/resources/services/lookup-service'
+import { getTags } from '@/modules/resources/services/lookup-service'
 
 export default {
   name: 'HeaderBar',
   components: {
     SearchInput,
-    CategoryButton,
+    TagButton,
     BaseIcon
   },
+
+  // emits: ['menuAdd'],
+
   props: {
     clearSearch: Boolean,
   },
+
   data() {
     return {
-      searchTerm: null,
+      searchTerm: "",
       navLinks: [],
-      categories: [],
+      tags: [],
+      types: [],
     }
   },
   
-  mounted() {
-    this.searchTerm = this.$route.params.searchTerm
-    this.categories = [
-      {id:'strategy', name:'Strategy'},
-      {id:'marty-cagan', name:'Marty Cagan'},
-      {id:'leadership', name:'Leadership'},
-      {id:'roadmaps', name:'Roadmapping Roadmapping'},
-      
-    ]
+  async mounted() {
+    this.searchTerm = this.$route.params.searchTerm;
+    console.log('ss')
     this.navLinks = [
-      {id: 'home', path:'/', order: 0, title:'Home'},
-      {id: 'books', path:'/books', order: 1, title:'Books'},
-      {id: 'podcasts', path:'/podcasts', order: 2, title:'Podcasts'},      
-      {id: 'posts', path:'/posts', order: 3, title:'Posts'},      
-      {id: 'categories', order: 4, title:'Categories'},
+      {id: 'home', path:'/', title:'HOME'},
+      {id: 'books', path:'/type/books', title:'BOOKS'},
+      {id: 'podcasts', path:'/type/podcasts', title:'PODCASTS'},
+      {id: 'web', path:'/type/web', title:'WEB'},
+      {id: 'video', path:'/type/video', title:'VIDEO'}
     ]
+    this.tags = await getTags();
   },
   
   methods: {
-    searchUrl(category, term) {
-      const categoryPath = category == null ? "search" : category;
-      const termPath = term == null ? "" : `/${term}`;
-      return `/${categoryPath.toLowerCase()}${termPath}`
-    },
-    handleSearch(category, term) {
-      this.$router.push( { path: this.searchUrl(category, term) });
-    },
-    handleLogin() {
-      this.$router.push('/login')
-    },
     handleLogout() {
       auth.signOut();
     },
@@ -108,7 +106,20 @@ export default {
             show: this.useUserStore.isLoggedIn,
             iconName: "menu_book",
             action: () => {
-              vm.$router.push('/add')
+              // vm.$emit('menuAdd');
+              vm.$router.push('add');
+            }
+          },
+          {
+            isDivider: true,
+            show: this.useUserStore.isLoggedIn,
+          },
+          {
+            name: "Refresh Lookups",
+            show: this.useUserStore.isLoggedIn,
+            action: () => {
+              refreshTags().then ( tags => this.tags = tags );
+              refreshResourceTypes();
             }
           },
           {
@@ -128,7 +139,7 @@ export default {
             show: !this.useUserStore.isLoggedIn,
             iconName: "login",
             action: () => {
-              vm.handleLogin()              
+              this.$router.push('/login');
             }
           },
         ]
@@ -149,17 +160,19 @@ export default {
 .header .spacer {
   flex-grow: 1;
 }
-.header h1 {
-  color: var(--prr-blue);
-}
 
-.nav-with-submenu {
+.left-nav {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+.left-nav .nav-with-submenu a {
   padding-top: 20px;
-  padding-bottom: 20px;
+  padding-bottom: 40px;
   font-weight: var(--prr-font-weight);
 }
 .nav-with-submenu:hover .submenu {
-  /* visibility: visible; */
+  visibility: visible;
   display: block;
 }
 .submenu {
@@ -177,7 +190,7 @@ export default {
 }
 
 .submenu li {
-  padding: 0px 10px;
+  padding: 5px 5px;
 }
 
 ul {
@@ -188,7 +201,7 @@ li {
   display: inline-block;
 }
 
-a.nav {
+.left-nav a {
   text-decoration: none;
   padding: 0px 10px 0px 10px;
   cursor: pointer;
@@ -197,24 +210,25 @@ a.nav {
   transition: border-bottom 300ms;
 }
 
-a.nav:hover, a.nav.selected {
+.left-nav a:hover, a.selected {
   transition: border-bottom 300ms;
   color: var(--prr-green);
 }
 
-a.nav.selected {
+.left-nav a.selected {
   font-weight: 800;
 }
 
-.nav a {
+/* .nav a {
   text-decoration: none;
   margin-right: 20px;
-}
+} */
 
 .header__right {
   display: flex;
   flex-direction: row;
   align-items: center;
+  margin-right:20px;
 }
 
 </style>

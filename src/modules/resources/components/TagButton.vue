@@ -1,10 +1,22 @@
 <template>
-  <button><slot></slot></button>
+  <button :class="{'enable-hover': enableHoverEffect, selected: selected}"><slot></slot></button>
 </template>
 
 <script>
 export default {
-  name: "category-button",  
+  name: "tag-button",  
+
+  props: {
+    enableHoverEffect: {
+      type: Boolean,
+      default: true,
+    },
+    selected: {
+      type: Boolean,
+      default: false,
+    },
+  },
+
 }
 
 </script>
@@ -23,7 +35,12 @@ export default {
     transition: 400ms;
   }
 
-  button:hover {
+  button:hover.enable-hover {
     background: var(--prr-green);
   }
+
+  button.selected {
+    background: var(--prr-green);
+  }
+  
 </style>

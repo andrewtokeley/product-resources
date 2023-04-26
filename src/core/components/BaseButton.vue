@@ -58,7 +58,11 @@ export default {
   margin-left: 10px;
   background: var(--prr-green);
   color: var(--prr-blue);
+  /* background: var(--prr-darkgrey);
+  color: white; */
   height: 40px;
+  font-weight: 800;
+  min-width: 120px;
   transition: background 400ms;
 }
 .base-button:focus {

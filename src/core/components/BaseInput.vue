@@ -1,5 +1,6 @@
 <template>
   <div class="base-input">
+    
     <div class="base-input__input-block">
       <input type="text" 
         @input="validate" 
@@ -105,7 +106,7 @@ export default defineComponent({
       return (this.options.inlineErrors ?? false) && this.errorMessage.length > 0;
     },
     showErrorBlock() {
-      return !(this.options.inlineErrors ?? false);
+      return this.options.inlineErrors ?? false;
     },
     value: {
       get() {
@@ -166,6 +167,7 @@ export default defineComponent({
 .base-input {
   display: flex;
   flex-direction: column;
+  margin-bottom: 10px;
 }
 
 .base-input__input-block {
@@ -188,7 +190,7 @@ export default defineComponent({
   width: 100%;
   outline: none;
   padding: 0px 10px;
-  box-sizing: border-box;
+  /* box-sizing: border-box; */
 }
 
 .base-input__input--borderless {
