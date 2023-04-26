@@ -79,10 +79,15 @@ export default defineComponent({
   },
 
   mounted() {
+    document.body.classList.add("modal-open");
     this.attachListeners()
   },
 
-methods: {
+  unmounted() {
+    document.body.classList.remove("modal-open");
+  },
+  
+  methods: {
     
     preventClickPropogation(e) {
       e.stopPropagation();

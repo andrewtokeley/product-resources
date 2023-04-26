@@ -15,7 +15,6 @@
         <view-resource :resource="resource"></view-resource>
       </div>
     </div>
-
   </modal-dialog>  
 </template>
 

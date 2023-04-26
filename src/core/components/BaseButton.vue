@@ -49,6 +49,8 @@ export default {
   position: relative;
   display: inline-block;
 	padding: 10px 20px;
+  margin-left: 10px;
+  margin-right: 10px;
   border-radius: 3px;
   text-align: center;
   text-decoration: none;

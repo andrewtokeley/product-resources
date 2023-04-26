@@ -27,12 +27,15 @@
     <div class="spacer"></div>
 
     <div class="header__right">
+      <base-button @click="showRecommendDialog = true">Recommend</base-button>
       <search-input 
         v-model="searchTerm" 
         @search="$router.push(`/search/${searchTerm}`)" 
         @mouseover="showCategories=false">
       </search-input>
       
+      <recommend-resource v-if="showRecommendDialog" @close="showRecommendDialog = false"></recommend-resource>
+
       <base-icon :menu="menuOptions">menu</base-icon>
     </div>
   
@@ -48,13 +51,17 @@ import TagButton from '@/modules/resources/components/TagButton.vue'
 
 import { refreshTags, refreshResourceTypes } from '@/modules/resources/services/lookup-service'
 import { getTags } from '@/modules/resources/services/lookup-service'
+import BaseButton from './BaseButton.vue'
+import RecommendResource from '@/modules/recommendations/views/RecommendResource.vue'
 
 export default {
   name: 'HeaderBar',
   components: {
     SearchInput,
     TagButton,
-    BaseIcon
+    BaseIcon,
+    BaseButton,
+    RecommendResource
   },
 
   // emits: ['menuAdd'],
@@ -69,6 +76,7 @@ export default {
       navLinks: [],
       tags: [],
       types: [],
+      showRecommendDialog: false,
     }
   },
   

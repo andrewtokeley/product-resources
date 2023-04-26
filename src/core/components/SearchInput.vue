@@ -96,7 +96,8 @@ export default {
   padding: 5px;
   background: var(--prr-extralightgrey);
   border-radius: 10px;
-  margin-right: 40px;
+  margin-right: 20px;
+  margin-left: 20px;
 }
 
 .search-input.selected {

@@ -1,10 +1,12 @@
 <template>
   <div class="view-resource">
-    <div>
+    <div :style="{ 'min-height': isBook ? '280px' : '100px' }"  class="topblock" >
       <book-card v-if="resource.resourceType.key=='books'" class="card" :showTitle="false" :resource="resource"></book-card>
       <podcast-card v-if="resource.resourceType.key=='podcasts'" class="card" :showTitle="false" :resource="resource"></podcast-card>
+      <p>{{resource.description}}</p>
+    </div>  
       
-      <div class="categories">
+    <div class="categories">
       <div class="tagGroup">
         <span>Tags: </span>
         <a v-for="tag in resource.tags" :key="tag.key" :href="`/tag/${tag.key}`">{{ tag.value }}</a>
@@ -13,13 +15,7 @@
         <span>Recommended by: </span>
         <a href="/tag/andrew-tokeley">Andrew Tokeley</a>
       </div>
-    </div>  
-    
-      <p>{{resource.description}}</p>
     </div>
-    
-    
-    
   </div>
 </template>
 
@@ -50,7 +46,7 @@ export default {
         }
         return false;
       },
-    },
+  },
 
 }
 </script>
@@ -60,14 +56,17 @@ export default {
 
 .card {
   float: left;
-  margin-right: 15px;
+  margin-right: 25px;
   margin-bottom: 5px;
 }
-/* 
-img.book {
-  height:215px;
-  width: 140px;
-} */
+
+.topblock.smallImage {
+  min-height:200px;
+}
+
+.topblock.largeImage {
+  min-height:250px;
+}
 
 .categories {
   float: left;
