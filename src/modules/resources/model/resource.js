@@ -22,9 +22,9 @@ class Resource {
 
   static default() {
     // returns a default instance where all the fields, and their child properties are available.
-    return new Resource({ authors: [], tags: [] });
+    return new Resource({ displayName: 'New Resource', authors: [], tags: [] });
   }
-}
+  }
 
 /**
  * FirestoreDataConverter implementation for User instances

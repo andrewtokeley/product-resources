@@ -14,11 +14,14 @@
         <li class="nav-with-submenu">
           <a>CATEGORIES</a>    
           <div ref="submenuDiv" class="submenu">
-            <ul>
-              <li v-for="tag in tags.items" :key="tag.key" >
-                <tag-button :enableHoverEffect="true" @click="$router.push(`/tag/${tag.key}`)">{{tag.value}}</tag-button>
-              </li>
-            </ul>
+            <div v-for="tagGroup in tagGroups" :key="tagGroup.name">
+              <h2>{{ tagGroup.groupName.toUpperCase() }}</h2>
+              <ul>
+                <li v-for="tag in tagGroup.tags" :key="tag.key" >
+                  <tag-button :enableHoverEffect="true" @click="$router.push(`/tag/${tag.key}`)">{{tag.value}}</tag-button>
+                </li>
+              </ul>
+            </div>
           </div>
         </li>
       </ul>
@@ -49,8 +52,8 @@ import { useUserStore } from '@/core/state/userStore'
 import SearchInput from './SearchInput.vue'
 import TagButton from '@/modules/resources/components/TagButton.vue'
 
-import { refreshTags, refreshResourceTypes } from '@/modules/resources/services/lookup-service'
-import { getTags } from '@/modules/resources/services/lookup-service'
+import { refreshTags, refreshResourceTypes, getTagsByGroup } from '@/modules/resources/services/lookup-service'
+// import { getTags } from '@/modules/resources/services/lookup-service'
 import BaseButton from './BaseButton.vue'
 import RecommendResource from '@/modules/recommendations/views/RecommendResource.vue'
 
@@ -64,7 +67,7 @@ export default {
     RecommendResource
   },
 
-  // emits: ['menuAdd'],
+  emits: ['menuAdd'],
 
   props: {
     clearSearch: Boolean,
@@ -77,6 +80,7 @@ export default {
       tags: [],
       types: [],
       showRecommendDialog: false,
+      tagGroups: [],
     }
   },
   
@@ -90,7 +94,8 @@ export default {
       {id: 'web', path:'/type/web', title:'WEB'},
       {id: 'video', path:'/type/video', title:'VIDEO'}
     ]
-    this.tags = await getTags();
+    //this.tags = await getTags();
+    this.tagGroups = await getTagsByGroup();
   },
   
   methods: {
@@ -114,8 +119,8 @@ export default {
             show: this.useUserStore.isLoggedIn,
             iconName: "menu_book",
             action: () => {
-              // vm.$emit('menuAdd');
-              vm.$router.push('add');
+              vm.$emit('menuAdd');
+              // vm.$router.push('add');
             }
           },
           {
@@ -159,6 +164,7 @@ export default {
 
 <style scoped>
 .header {
+  font-size: var(--prr-font-size-normal);
   display:flex;
   flex-direction: row;
   width: 100%;
@@ -191,14 +197,27 @@ export default {
   display:none;
   overflow: hidden;
   min-height: 100px;
-  padding: 20px 40px;
+  padding: 0px 50px 20px 50px;
   border-top: 1px solid var(--prr-green);
   box-shadow: 0 4px 4px rgba(0, 0, 0, 0.3);
   background: white;
 }
 
+.submenu h2 {
+  font-size: var(--prr-font-size-normal);
+  font-weight: 800;
+  /* font-weight: var(--prr-font-weight); */
+  margin-bottom: 5px;
+  color: var(--prr-darkgrey);
+  
+}
+
+.submenu ul {
+  padding-left: 0px;
+}
+
 .submenu li {
-  padding: 5px 5px;
+  padding: 5px 5px 5px 0px;
 }
 
 ul {

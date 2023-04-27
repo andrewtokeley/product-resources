@@ -50,7 +50,7 @@
           <div class="entry">
             <base-select
               v-model="resource.resourceType"
-              :selectOptions="resourceTypes.items"
+              :selectOptions="resourceTypes"
               :options="{ 
                 placeholder: 'Select Type'}"
             ></base-select>

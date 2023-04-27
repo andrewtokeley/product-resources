@@ -19,7 +19,7 @@
           <base-select
             v-model="local.resourceType"
             @input="update('resourceType', $event.target.value)"
-            :selectOptions="resourceTypes.items"
+            :selectOptions="resourceTypes"
             :options="{ 
               placeholder: 'Select Type'}"
           ></base-select>

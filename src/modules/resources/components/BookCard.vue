@@ -30,13 +30,7 @@ export default {
       return null;
     }
   },
-
-  // methods: {
-  //   handleClick(resource) {
-  //     console.log('r')
-  //     this.$emit('clicked', resource.id)
-  //   }
-  // }
+  
 }
 
 </script>

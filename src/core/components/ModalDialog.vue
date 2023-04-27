@@ -25,6 +25,7 @@
       <div v-if="buttonActions" class="modal__footer">
         <template v-for="action in buttonActions" :key="action.id">
           <base-button
+            v-if="action.show ?? true"
             :isPrimary="action.isPrimary"
             :isSecondary="action.isSecondary"
             :isDestructive="action.isDestructive"
@@ -164,8 +165,9 @@ export default defineComponent({
 .modal--fullscreen {
   width: 90%;
   height: 90%;
-  max-height: 100%;
-  max-width: 100%;
+  max-height: 900px;
+  min-height: 850px;
+  max-width: 900px;
   padding: 60px 30px;
   border-radius: 10px;
 }

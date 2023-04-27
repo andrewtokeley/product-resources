@@ -3,7 +3,7 @@ import { getFirestore, doc, getDoc, setDoc, deleteDoc } from "firebase/firestore
 
 import { Lookup, lookupConverter } from '@/modules/resources/model/lookup'
 
-export { refreshTags, refreshResourceTypes, getTags, getResourceTypes }
+export { refreshTags, refreshResourceTypes, getTags, getResourceTypes, getTagsByGroup }
 
 const COLLECTION_KEY = "lookups";
 const RESOURCE_TYPES_ID = "resource-types"
@@ -49,12 +49,27 @@ const deleteLookup = async function(lookupId) {
 }
 
 const getTags = async function() {
-  const result = await getLookup(TAG_ID);
+  const lookup = await getLookup(TAG_ID);
+  return lookup.items;
+}
+
+const getTagsByGroup = async function() {
+  console.log('g')
+  const tags = await getTags()
+
+  // get unique groups
+  let g = tags.map ( t => t.groups);
+  let groups = new Set(g.flat())
+  var result = [];
+  groups.forEach( g => {
+    result.push({groupName: g, tags: tags.filter(t => t.groups.includes(g))});
+  })
   return result;
 }
+
 const getResourceTypes = async function() {
-  const result = await getLookup(RESOURCE_TYPES_ID);
-  return result;
+  const lookup = await getLookup(RESOURCE_TYPES_ID);
+  return lookup.items;
 }
 
 const getLookup = async function(lookupId) {

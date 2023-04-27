@@ -1,6 +1,6 @@
 <template>
   <div class='resources' >
-    <header-bar></header-bar>
+    <header-bar @menuAdd="handleMenuAdd"></header-bar>
     <div class='content'>
       <div v-if="isLoading">
         <loading-symbol></loading-symbol>
@@ -15,7 +15,7 @@
       </div>
     </div>
 
-    <resource-detail :fullscreen="true" v-if="showResourceDetail" @close="closeDetail" :resourceId="selectedResource.id"></resource-detail>
+    <resource-detail :fullscreen="true" v-if="showResourceDetail || showResourceAdd" :mode="showResourceAdd ? 'add' : 'view'" @close="closeDetail" :resourceId="selectedResource ? selectedResource.id : null"></resource-detail>
     
   </div>
 </template>
@@ -52,6 +52,7 @@ export default {
       searchTerm: null,
       searchResults: [],
       showResourceDetail: false,
+      showResourceAdd: false,
       selectedResource: null,
       isLoading: true,
       resourceTypes: [],
@@ -91,7 +92,7 @@ export default {
 
   methods: {
     async handleSearchByTagKey(key) {
-      let lookup = this.tags.items.find (i => i.key == key);
+      let lookup = this.tags.find (i => i.key == key);
       if (lookup) {
         this.searchResults = await searchByTag(lookup);
       }
@@ -106,18 +107,20 @@ export default {
     },
 
     handleMenuAdd() {
-      this.$router.push('/add');
+      this.showResourceDetail = false;
+      this.showResourceAdd = true;
     },
 
     showDetail(resource) {
-      // sliently update url
+      // silently update url
       history.pushState(
         {},
         null,
         this.$route.path + '?r=' + encodeURIComponent(resource.id)
       )
       this.selectedResource = resource
-      this.showResourceDetail = true
+      this.showResourceDetail = true;
+      this.showResourceAdd = false;
     },
 
     handleLogin() {
@@ -135,8 +138,8 @@ export default {
     },
 
     closeDetail() {
-      //alert('close')
-      this.showResourceDetail=false
+      this.showResourceDetail = false;
+      this.showResourceAdd = false;
     },
 
     layoutClassForType(type) {

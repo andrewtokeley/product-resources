@@ -1,7 +1,7 @@
 <template>
   <div class="tag-selector">
       <ul>
-        <li v-for="tag in tags.items" :key="tag.key" >
+        <li v-for="tag in tags" :key="tag.key" >
           <tag-button :enableHoverEffect="false" :selected="isSelected(tag)" @click="toggleSelection(tag)">{{tag.value}}</tag-button>
         </li>
       </ul>

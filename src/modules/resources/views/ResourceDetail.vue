@@ -5,6 +5,7 @@
     :buttonActions="buttonActions"
     @close="handleClose" 
     @iconClick="handleIconClick"
+    @buttonClick="handleButtonClick"
   >
     <div v-if="!isWorking">
       <div v-if="isEditing">
@@ -24,7 +25,7 @@ import EditResource from "@/modules/resources/views/EditResource"
 import ViewResource from './ViewResource.vue';
 
 import { Resource } from '@/modules/resources/model/resource'
-import { getResource, updateResource } from '../services/resource-service';
+import { getResource, updateResource, addResource } from '../services/resource-service';
 
 export default {
   name: 'resource-modal',
@@ -55,14 +56,23 @@ export default {
       type: String,
       default: null
     },
+    mode: {
+      type: String,
+      default: 'view'
+    }
   },
 
   emits: ["close"],
 
   async mounted() {
+
     this.isWorking = true;
-    this.isEditing = false;
-    this.resource = await getResource(this.resourceId)
+    this.isEditing = this.mode == 'view' ? false : true;
+    if (this.mode != 'add') {
+      this.resource = await getResource(this.resourceId)
+    } else {
+      this.resource = Resource.default();
+    }
     this.isWorking = false;
   },
 
@@ -71,35 +81,36 @@ export default {
     iconActions() {
       var actions = [];
       actions.push( {
-          id: 0,
-          name: "edit",
+          id: 'edit',
           iconName: "edit",
           show: !this.isEditing});
-      actions.push( {
-          id: 1,
-          name: "save",
-          iconName: "save",
-          show: this.isEditing});
       return actions;
     },
     buttonActions() {
       var actions = [];
       if (this.isEditing) {
         actions.push( {
-          id: 0,
+          id: 'save',
           title: "Save",
           isPrimary: true,
         });
         actions.push( {
-          id: 0,
-            title: "Cancel",
-            isPrimary: false,
+          id: 'cancel',
+          title: "Cancel",
+          isSecondary: true,
         });
       } else {
         actions.push( {
-          id: 0,
-          title: "View on Amazon...",
+          id: 'delete',
+          title: "Delete",
+          isDestructive: true,
+          show: this.resource.resourceUrl
+        });
+        actions.push( {
+          id: 'view',
+          title: "View...",
           isPrimary: true,
+          show: this.resource.resourceUrl
         });
       }
       return actions;
@@ -109,11 +120,26 @@ export default {
   methods: {
     
     async handleIconClick(action) {
-      if (action.name == 'save') {
-        this.isEditing = false;
-        await updateResource(this.resource)
-      } else if (action.name == 'edit') {
+      if (action.id == 'edit') {
         this.isEditing = true;
+      }
+    },
+
+    async handleButtonClick(action) {
+      
+      if (action.id == 'cancel') {
+        this.isEditing = false;
+      } else if (action.id == 'save') {
+        if (this.resource.id) {
+          await updateResource(this.resource)
+        } else {
+          this.resource = await addResource(this.resource)
+        }
+        this.isEditing = false;
+      } else if (action.id == 'view') {
+        if (this.resource.resourceUrl) {
+          window.open(this.resource.resourceUrl, '_blank');
+        }
       }
     },
 
