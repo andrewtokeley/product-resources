@@ -1,31 +1,25 @@
 <template>
   <div class="modal__mask" @click='$emit("close")'>
-    <div class="modal" 
-        :class="{ 
-          'modal--fullscreen': fullscreen 
-        }" 
-        @click='preventClickPropogation'>
-        <div  class="modal__iconActions" >
-          <template v-for="action in iconActions" :key="action.id">
-            <base-icon v-if="action.show" @click="$emit('iconClick', action)">{{  action.iconName }}</base-icon>
-          </template>
-          <base-icon @click='$emit("close")'>close</base-icon>
-        </div>
-      <h1 v-if="title" :title="title">
-        {{ title }}
-      </h1>
+    <div class="modal" :class="{ 'modal--fullscreen': fullscreen }" @click='preventClickPropogation'>
+      <div  class="modal__iconActions" >
+        <template v-for="action in iconActions" :key="action.id">
+          <base-icon v-if="action.show" @click="$emit('iconClick', action)">{{  action.iconName }}</base-icon>
+        </template>
+        <base-icon @click='$emit("close")'>close</base-icon>
+      </div>
+
+      <div v-if="title"><h1 :title="title">{{ title }}</h1></div>
+      <div v-if="subTitle"><h2 :title="subTitle">{{ subTitle }}</h2></div>
+
       <div class="modal__content">
         <slot></slot>
       </div>
       
-      <div v-if="subTitle" class="modal__subTitle">
-        <p>{{ subTitle }}</p>
-      </div>
-
       <div v-if="buttonActions" class="modal__footer">
         <template v-for="action in buttonActions" :key="action.id">
           <base-button
             v-if="action.show ?? true"
+            :disabled="action.disabled"
             :isPrimary="action.isPrimary"
             :isSecondary="action.isSecondary"
             :isDestructive="action.isDestructive"
@@ -35,6 +29,7 @@
           >
         </template>
       </div>
+
     </div>
   </div>
 </template>
@@ -137,19 +132,39 @@ export default defineComponent({
   flex-direction: column;
   position: relative;
   max-width: 500px;
-  min-width: 350px;
+  min-width: 650px;
   max-height: 90%;
   background-color: white;
   border-radius: 5px;
-  padding: 20px 20px;
+  padding: 45px 0px 20px 0px;
   box-sizing: border-box;
+  overflow: hidden;
+}
+
+.modal--fullscreen {
+  width: 95%;
+  height: 90%;
+  max-height: 750px;
+  min-height: 450px;
+  max-width: 900px;
+  /* padding: 45px 0px 20px 0px; */
+  border-radius: 10px;
 }
 
 .modal h1 {
-  overflow: hidden;
+  overflow-x: hidden;
+  line-height:normal;
   white-space: nowrap;
   text-overflow: ellipsis;
-  margin:0px;
+  margin:5px 30px;
+}
+.modal h2 {
+  overflow-x: hidden;
+  line-height:normal;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  margin: 5px 30px 20px 30px;
+  color: var(--prr-mediumgrey);
 }
 .modal__iconActions {
   display: flex;
@@ -162,48 +177,46 @@ export default defineComponent({
   padding-left:10px;
 }
 
-.modal--fullscreen {
-  width: 90%;
-  height: 90%;
-  max-height: 900px;
-  min-height: 850px;
-  max-width: 900px;
-  padding: 60px 30px;
-  border-radius: 10px;
-}
-
-.modal__heading {
+/* .modal__heading {
   height: 30px;
   font-weight: bold;
   font-size: var(--prr-font-size-large);
   display: flex;
   align-items: center;
-}
+} */
 
 .modal__content {
   color: var(--prr-mediumgrey);
   font-size: 1em;
-  padding-top: 1em;
-  padding-bottom: 1em;
-  box-sizing: border-box;
   flex-grow: 1;
   overflow-y: scroll;
-}
-
-.modal__subTitle {
-  height: 40px;
-  color: var(--prr-mediumgrey);
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  padding: 0px 35px 0px 40px;
+  margin-bottom: 50px;
+  margin-right: 5px;
 }
 
 .modal__footer {
+  position: absolute;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
   height: 40px;
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  box-sizing: border-box;
+  /* box-sizing: border-box; */
+  margin: 10px 20px 20px 20px;
+}
+
+::-webkit-scrollbar {
+  -webkit-appearance: none;
+  width: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 5px;
+  background-color: rgba(0,0,0,.5);
+  -webkit-box-shadow: 0 0 1px rgba(255,255,255,.5);
 }
 
 @media only screen and (max-width: 600px) {

@@ -6,7 +6,7 @@
     <h1 v-else>{{ heading }}</h1>
     <ul>
       <li v-for="resource in resources" :key="resource.id">
-        <book-card :resource="resource" @click="$emit('click', resource)"></book-card>
+        <book-card :resource="resource" @recommend="$emit('recommend', resource)" @click="$emit('click', resource)"></book-card>
       </li>
     </ul>
   </div>
@@ -18,10 +18,10 @@ import BookCard from "./BookCard.vue"
 export default {
   name: "book-group",
   components: { 
-    BookCard 
+    BookCard,
   },
 
-  emits: ['click'],
+  emits: ['click', 'recommend'],
 
   props: {
     heading: String,
@@ -45,11 +45,13 @@ export default {
 
 .group ul {
   list-style-type: none;
+  padding-left:0px;
 }
 
 .group li {
   display: inline-block;
   padding-left: 20px;
+  padding-left:0px;
 }
 
 </style>

@@ -1,22 +1,23 @@
 <template>
   <div class='resources' >
-    <header-bar @menuAdd="handleMenuAdd"></header-bar>
+    <header-bar @menuAdd="handleMenuAdd" @recommend="handleRecommend"></header-bar>
     <div class='content'>
       <div v-if="isLoading">
         <loading-symbol></loading-symbol>
       </div>
       <div v-if="searchResults.length > 0 && !isLoading" class="search-results">
-        <book-group v-if="books" @click="showDetail" heading="Books" :resources="books"></book-group>
-        <podcast-group v-if="podcasts" @click="showDetail" heading="Podcasts" :resources="podcasts"></podcast-group>
-        <podcast-episode-group v-if="episodes" @click="showDetail" heading="Podcast Episodes" :resources="episodes"></podcast-episode-group>
+        <book-group v-if="books" @recommend="showRecommend" @click="showDetail" heading="Books" :resources="books"></book-group>
+        <podcast-group v-if="podcasts" @recommend="showRecommend" @click="showDetail" heading="Podcasts" :resources="podcasts"></podcast-group>
+        <podcast-episode-group v-if="episodes" @recommend="showRecommend" @click="showDetail" heading="Podcast Episodes" :resources="episodes"></podcast-episode-group>
+
       </div>
       <div v-if="searchResults.length == 0 && !isLoading" class="noresults">
         We couldn't find anything matching, <i>{{ searchTerm }}</i>
       </div>
     </div>
 
-    <resource-detail :fullscreen="true" v-if="showResourceDetail || showResourceAdd" :mode="showResourceAdd ? 'add' : 'view'" @close="closeDetail" :resourceId="selectedResource ? selectedResource.id : null"></resource-detail>
-    
+    <resource-detail :fullscreen="true" v-if="showResourceDetailDialog" :initialMode="showResourceDetailDialogMode" @close="closeDetail" :resourceId="selectedResource ? selectedResource.id : null"></resource-detail>
+    <recommend-dialog v-if="showRecommendDialog" @close="showRecommendDialog = false" :resource="selectedResource"></recommend-dialog>
   </div>
 </template>
 
@@ -25,11 +26,12 @@ import ResourceDetail from './ResourceDetail.vue'
 import HeaderBar from "@/core/components/HeaderBar.vue";
 import LoadingSymbol from "@/core/components/LoadingSymbol.vue";
 
-import { searchByResourceType, searchByTag, searchByText } from '../services/resource-service.js'
+import { searchByResourceTypes, searchByTag, searchByText } from '../services/resource-service.js'
 import BookGroup from '../components/BookGroup.vue'
 import PodcastGroup from '../components/PodcastGroup.vue'
 import PodcastEpisodeGroup from '../components/PodcastEpisodeGroup.vue'
 import { getResourceTypes, getTags } from '../services/lookup-service';
+import RecommendDialog from '@/modules/recommendations/views/RecommendDialog.vue';
 // import RowHeader from '../components/RowHeader.vue'
 // import SearchInput from '@/core/components/SearchInput.vue'
 
@@ -44,6 +46,7 @@ export default {
     BookGroup,
     PodcastGroup,
     PodcastEpisodeGroup,
+    RecommendDialog,
   },
 
   data() {
@@ -53,6 +56,8 @@ export default {
       searchResults: [],
       showResourceDetail: false,
       showResourceAdd: false,
+      showNewRecommendation: false,
+      showRecommendDialog: false,
       selectedResource: null,
       isLoading: true,
       resourceTypes: [],
@@ -99,7 +104,12 @@ export default {
     },
 
     async handleSearchByTypeKey(key) {
-      this.searchResults = await searchByResourceType(key);
+      var keys = [key];
+      if (key == 'podcasts') {
+        keys.push('episodes');
+      }
+      console.log('sss')
+      this.searchResults = await searchByResourceTypes(keys);
     },
 
     async handleSearchByText(term) {
@@ -108,7 +118,17 @@ export default {
 
     handleMenuAdd() {
       this.showResourceDetail = false;
+      this.showNewRecommendation = false;
       this.showResourceAdd = true;
+    },
+
+    handleRecommend() {
+      console.log('show');
+      this.showResourceDetail = false;
+      this.showNewRecommendation = true;
+      this.selectedResource = null;
+      this.showResourceAdd = false;
+      
     },
 
     showDetail(resource) {
@@ -121,6 +141,12 @@ export default {
       this.selectedResource = resource
       this.showResourceDetail = true;
       this.showResourceAdd = false;
+      this.showNewRecommendation = false;
+    },
+
+    showRecommend(resource) {
+      this.selectedResource = resource;
+      this.showRecommendDialog = true;
     },
 
     handleLogin() {
@@ -130,9 +156,7 @@ export default {
     resourcesByType(key) {
       const results = this.searchResults.filter ( resource => resource.resourceType.key == key )
       if (results) {
-        console.log(results.length);
         return results;
-
       }
       return [];
     },
@@ -140,6 +164,7 @@ export default {
     closeDetail() {
       this.showResourceDetail = false;
       this.showResourceAdd = false;
+      this.showNewRecommendation = false;
     },
 
     layoutClassForType(type) {
@@ -151,13 +176,31 @@ export default {
   },
 
   computed: {
+    showResourceDetailDialog() {
+      return (this.showResourceAdd || this.showResourceDetail || this.showNewRecommendation);
+    },
+
+    showResourceDetailDialogMode() { 
+      console.log('mpd')
+      if (this.showResourceAdd) return 'addResource';
+      if (this.showResourceDetail) return 'viewResource';
+      if (this.showNewRecommendation) {
+        if (this.selectedResource) {
+          return 'addRecommendation';
+        } else {
+          return 'newRecommendation';
+        }
+        
+      }
+      return '';
+    },
     books() {
       const results = this.resourcesByType('books')
       return results.length>0 ? results : null
     },
     podcasts() {
-      const results = this.resourcesByType('podcasts')
-      return results.length>0 ? results : null
+      const podcasts = this.resourcesByType('podcasts')
+      return podcasts.length>0 ? podcasts : null
     },
     web() {
       const results = this.resourcesByType('web')
@@ -165,20 +208,13 @@ export default {
     },
     video() {
       const results = this.resourcesByType('video')
-      return results.count>0 ? results : null
+      return results.length>0 ? results : null
     },
     episodes() {
       const results = this.resourcesByType('episodes')
-      return results.count>0 ? results : null
+      return results.length>0 ? results : null
     },
     
-  //   uniqueResourceTypes() {
-  // //     const arrayUniqueByKey = [...new Map(array.map(item =>
-  // // [item[key], item])).values()];
-  //     const types = this.searchResults.map(t => t.resourceType);
-  //     const unique = [...new Map(types.map(item => [item['key'], item])).values()];
-  //     return unique
-  //   }
   }
 }
 

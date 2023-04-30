@@ -15,7 +15,7 @@
           <a>CATEGORIES</a>    
           <div ref="submenuDiv" class="submenu">
             <div v-for="tagGroup in tagGroups" :key="tagGroup.name">
-              <h2>{{ tagGroup.groupName.toUpperCase() }}</h2>
+              <h2 v-if="showCategoryHeading(tagGroup)">{{ tagGroup.groupName.toUpperCase() }}</h2>
               <ul>
                 <li v-for="tag in tagGroup.tags" :key="tag.key" >
                   <tag-button :enableHoverEffect="true" @click="$router.push(`/tag/${tag.key}`)">{{tag.value}}</tag-button>
@@ -30,6 +30,7 @@
     <div class="spacer"></div>
 
     <div class="header__right">
+      <!-- <base-button @click="$emit('recommend')">Recommend</base-button> -->
       <base-button @click="showRecommendDialog = true">Recommend</base-button>
       <search-input 
         v-model="searchTerm" 
@@ -37,7 +38,7 @@
         @mouseover="showCategories=false">
       </search-input>
       
-      <recommend-resource v-if="showRecommendDialog" @close="showRecommendDialog = false"></recommend-resource>
+      <recommend-dialog v-if="showRecommendDialog" @close="showRecommendDialog = false"></recommend-dialog>
 
       <base-icon :menu="menuOptions">menu</base-icon>
     </div>
@@ -47,15 +48,16 @@
 
 <script>
 import BaseIcon from '@/core/components/BaseIcon.vue'
-import { auth } from '@/core/services/firebaseInit'
-import { useUserStore } from '@/core/state/userStore'
 import SearchInput from './SearchInput.vue'
 import TagButton from '@/modules/resources/components/TagButton.vue'
+import BaseButton from './BaseButton.vue'
+import RecommendDialog from '@/modules/recommendations/views/RecommendDialog.vue'
+
+import { auth } from '@/core/services/firebaseInit'
+import { useUserStore } from '@/core/state/userStore'
 
 import { refreshTags, refreshResourceTypes, getTagsByGroup } from '@/modules/resources/services/lookup-service'
-// import { getTags } from '@/modules/resources/services/lookup-service'
-import BaseButton from './BaseButton.vue'
-import RecommendResource from '@/modules/recommendations/views/RecommendResource.vue'
+// import RecommendResource from '@/modules/recommendations/views/RecommendResource.vue'
 
 export default {
   name: 'HeaderBar',
@@ -64,10 +66,11 @@ export default {
     TagButton,
     BaseIcon,
     BaseButton,
-    RecommendResource
+    RecommendDialog,
+    // RecommendResource
   },
 
-  emits: ['menuAdd'],
+  emits: ['menuAdd', 'recommend'],
 
   props: {
     clearSearch: Boolean,
@@ -86,7 +89,6 @@ export default {
   
   async mounted() {
     this.searchTerm = this.$route.params.searchTerm;
-    console.log('ss')
     this.navLinks = [
       {id: 'home', path:'/', title:'HOME'},
       {id: 'books', path:'/type/books', title:'BOOKS'},
@@ -94,7 +96,6 @@ export default {
       {id: 'web', path:'/type/web', title:'WEB'},
       {id: 'video', path:'/type/video', title:'VIDEO'}
     ]
-    //this.tags = await getTags();
     this.tagGroups = await getTagsByGroup();
   },
   
@@ -105,6 +106,9 @@ export default {
     isSelected(nav) {
       return nav.path === this.$route.path;
     },
+    showCategoryHeading(tagGroup) {
+      return tagGroup.groupName.toUpperCase() != 'GENERAL';
+    }
   },
   computed: {
     useUserStore() {
@@ -119,6 +123,7 @@ export default {
             show: this.useUserStore.isLoggedIn,
             iconName: "menu_book",
             action: () => {
+              console.log('add');
               vm.$emit('menuAdd');
               // vm.$router.push('add');
             }
@@ -197,7 +202,7 @@ export default {
   display:none;
   overflow: hidden;
   min-height: 100px;
-  padding: 0px 50px 20px 50px;
+  padding: 20px 50px 20px 50px;
   border-top: 1px solid var(--prr-green);
   box-shadow: 0 4px 4px rgba(0, 0, 0, 0.3);
   background: white;

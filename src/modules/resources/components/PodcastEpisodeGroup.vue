@@ -6,7 +6,7 @@
     <h1 v-else>{{ heading }}</h1>
     <ul>
       <li v-for="resource in resources" :key="resource.id">
-        <podcast-episode-card :resource="resource" @click="$emit('click', resource)" ></podcast-episode-card>
+        <podcast-episode-card @click="$emit('click', resource)" :resource="resource"></podcast-episode-card>
       </li>
     </ul>
   </div>
@@ -29,6 +29,10 @@ export default {
       default: () => {[]}
     }
   },
+  mounted() {
+    console.log('epis')
+  },
+
   computed: {
     showHeaderLink() {
       return this.resources && this.headingLink;
@@ -44,6 +48,5 @@ export default {
 
 .group li {
   display: inline-block;
-  padding-left: 20px;
 }
 </style>

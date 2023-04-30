@@ -1,16 +1,18 @@
 <template>
-  <div class="resource-card">
-    <img class="image" :src="resource.imageUrl"/>
-    <div>
-      <div class="title">{{ resource.displayName }}</div>
-      <div v-if="resource.parentResourceName" class="subTitle">{{ resource.parentResourceName }}</div>
-      <div class="body">{{ resource.description }}</div>
+  <div>
+    <div class="resource-card">
+      <img class="image" :src="resource.imageUrl"/>
       <div>
-        <div class="subTitle">{{ dateLengthDescription }}</div>
+        <div class="title">{{ resource.displayName }}</div>
+        <div v-if="resource.parentResourceName" class="subTitle">{{ resource.parentResourceName }}</div>
+        <div class="body">{{ resource.description }}</div>
+        <div>
+          <div class="subTitle">{{ dateLengthDescription }}</div>
+        </div>
       </div>
     </div>
+    <div class="divider"></div>
   </div>
-  <div class="divider"></div>
 </template>
 
 <script>
@@ -31,9 +33,11 @@ export default {
       return this.resource.authors.join(", ")
     },
     dateLengthDescription() {
-      const date = DateTime.fromJSDate(this.resource.publishedDate).toLocaleString(DateTime.DATE_MED);
-      const length = this.resource.lengthSeconds + "s";
-      return date + ' ' + length;
+      var date = this.resource.publishedDate.toLocaleString(DateTime.DATE_MED);
+      if (this.resource.lengthSeconds) {
+        date += this.resource.lengthSeconds + "s";
+      }
+      return date;
     }
   }
 }
@@ -45,6 +49,7 @@ export default {
 .resource-card {
   display: flex;
   flex-direction: row;
+  cursor: pointer;
 }
 .image {
   height:96px;

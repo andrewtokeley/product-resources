@@ -2,6 +2,9 @@
   <base-input 
     v-model="local"    
     @input="update"
+    :options="{ 
+        maximumLength: 300,
+        placeholder: 'Add Author(s)'}"
   ></base-input>
 </template>
 

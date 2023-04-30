@@ -12,6 +12,7 @@
         
       <select 
         v-model="selectedKey"
+        :placeholder="options.placeholder ? options.placeholder : ''"
         @change="handleSelect"
         >
         <option 
@@ -105,13 +106,14 @@ computed: {
       let newKey = event.target.value;
       
       // clear the placeholder text - note it may not be there if there's already a value set.
-      if (this.$refs.placeholder) {
-        this.$refs.placeholder.innerText = '';
-      }
+      // if (this.$refs.placeholder) {
+      //   this.$refs.placeholder.innerText = '';
+      // }
 
       // let the parent know which selected item has changed
 
       // check if the null option was selected
+      console.log('sseell')
       if (newKey == '') {
         this.$emit("update:modelValue", this.nullOption);
       } else {
@@ -139,7 +141,7 @@ select {
   appearance: none;
   background-color: transparent;
   border: none;
-  padding: 0 1em 0 0;
+  padding: 0 1em 0 10px;
   margin: 0;
   width: 100%;
   height:40px;
@@ -147,13 +149,14 @@ select {
   font-size: inherit;
   cursor: inherit;
   line-height: inherit;
-  color: var(--ish-darkgrey);
+  color: var(--prr-darkgrey);
   /* Stack above custom arrow */
-  z-index: 1;
+  /* z-index: 1; */
 
   /* Remove focus outline, will add on alternate element */
   outline: none;
 }
+
 .select select, .select::after {
   grid-area: select;
 }
@@ -173,28 +176,33 @@ select {
   font-size: var(--prr-font-size-normal);
   border-radius: 5px 5px 0px 0px;
     
-  padding: 0px 10px;
+  padding: 0px 0px;
   margin-bottom: 10px;
   cursor: pointer;
   
 }
 
-.select:hover {
+.select:hover, select:focus {
   background: var(--prr-lightgrey);
   border-bottom-width: 1px;
   border-radius: 5px 5px 0px 0px;
 }
 
-.select::after {
+/* .select > select:focus {
+  background: var(--prr-lightgrey);
+} */
+
+.select::after, .select:focus::after {
   content: "";
   justify-self: end;
   width: 0.8em;
   height: 0.5em;
+  margin-right: 10px;
   background-color: var(--prr-darkgrey);
   clip-path: polygon(100% 0%, 0 0%, 50% 100%);
 }
 
-select:focus + .focus {
+/* select:focus + .focus {
   position: absolute;
   top: -1px;
   left: -1px;
@@ -202,7 +210,7 @@ select:focus + .focus {
   bottom: -1px;
   border-bottom: 1px solid var(--prr-green);
   border-radius: inherit;
-}
+} */
 
 select[multiple] {
   padding-right: 0;

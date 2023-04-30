@@ -22,9 +22,21 @@ class Resource {
 
   static default() {
     // returns a default instance where all the fields, and their child properties are available.
-    return new Resource({ displayName: 'New Resource', authors: [], tags: [] });
+    return new Resource({ 
+      displayName: 'New Resource', 
+      resourceType: {key:'books', value:'Book'},
+      authors: [], 
+      tags: [] });
   }
+
+  get publishedDateFormatted() {
+    if (this.publishedDate && this.publishedDate.isValid) {
+      return this.publishedDate.toLocaleString(DateTime.DATE_FULL);
+    }
+    return null;
   }
+
+}
 
 /**
  * FirestoreDataConverter implementation for User instances
@@ -32,12 +44,17 @@ class Resource {
 var resourceConverter = {
   toFirestore: function (resource) {
     const result = {};
+    console.log('ttff')
     // if (resource.id != null) { result.id = resource.id }
     if (resource.description != null) { result.description = resource.description }
     if (resource.resourceType != null) { result.resourceType = resource.resourceType }
     if (resource.resourceUrl != null) { result.resourceUrl = resource.resourceUrl }
     if (resource.displayName != null) { result.displayName = resource.displayName }
-    if (resource.publishedDate != null) { result.publishedDate = Timestamp.fromDate(resource.publishedDate.toJSDate()); }
+    if (resource.publishedDate != null && resource.publishedDate.isValid) { 
+      result.publishedDate = Timestamp.fromDate(resource.publishedDate.toJSDate()); 
+    } else {
+      result.publishedDate = null;
+    }
     if (resource.authors != null) { result.authors = resource.authors.map( a => a.trim()) }
     if (resource.imageUrl != null) { result.imageUrl = resource.imageUrl }
     if (resource.tags != null) { result.tags = resource.tags }

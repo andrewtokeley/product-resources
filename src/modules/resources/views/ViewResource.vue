@@ -1,14 +1,18 @@
 <template>
   <div class="view-resource">
-    <div :style="{ 'min-height': isBook ? '280px' : '100px' }"  class="topblock" >
+    <div :style="{ 'min-height': isBook ? '280px' : '200px' }"  class="topblock" >
       <book-card v-if="resource.resourceType.key=='books'" class="card" :showTitle="false" :resource="resource"></book-card>
       <podcast-card v-if="resource.resourceType.key=='podcasts'" class="card" :showTitle="false" :resource="resource"></podcast-card>
       <p>{{resource.description}}</p>
     </div>  
       
     <div class="categories">
-      <div class="tagGroup">
-        <span>Tags: </span>
+      <div v-if="resource.publishedDateFormatted" class="tagGroup">
+        <span>Published: </span>
+        <span>{{ resource.publishedDateFormatted }}</span>
+      </div>
+      <div v-if="resource.tags" class="tagGroup">
+        <span>Categories: </span>
         <a v-for="tag in resource.tags" :key="tag.key" :href="`/tag/${tag.key}`">{{ tag.value }}</a>
       </div>
       <div class="tagGroup">
@@ -45,7 +49,7 @@ export default {
           return this.resource.resourceType.key == 'books'
         }
         return false;
-      },
+      }
   },
 
 }

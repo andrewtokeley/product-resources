@@ -17,6 +17,7 @@ const refreshTags = async function() {
     {key:'marty-cagan', value:'Marty Cagan', groups: ['Popular Authors']},
     {key:'teresa-torres', value:'Teresa Torres', groups: ['Popular Authors']},
     {key:'rich-mirinov', value:'Rich Mirinov', groups: ['Popular Authors']},
+    {key:'andrew-tokeley', value:'Andrew Tokeley', groups: ['Recommended By']},
     {key: 'leadership', value:'Leadership', groups: ['General']},
     {key: 'teaming', value:'Teaming', groups: ['General']},
     {key: 'stakeholder', value:'Stakeholder Management', groups: ['General']},

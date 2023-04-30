@@ -1,8 +1,13 @@
 <template>
-  <div class="resource-card">
-    <img class="image" :src="resource.imageUrl"/>
-    <div class="title">{{ resource.displayName }}</div>
-    <a class="subTitle">{{ authorsDisplay }}</a>
+  <div class="resource">
+    <div class="image">
+      <img :src="resource.imageUrl"  />
+    </div>
+    <div v-if="showTitle" class="description">
+      <h1 :title="resource.displayName" class="title">{{ resource.displayName }}</h1>
+      <h2 class="subTitle">{{ authorsDisplay }}</h2>
+      <p >{{ resource.description }}</p>
+    </div>
   </div>
 </template>
 
@@ -16,6 +21,10 @@ export default {
     resource: {
       type: Resource,
       default: null
+    },
+    showTitle: {
+      type: Boolean,
+      default: true
     }
   },
 
@@ -32,23 +41,38 @@ export default {
 </script>
 
 <style scoped>
-@import 'styles.css';
-.resource-card {
-  padding-top:10px;
-  padding-bottom:10px;
-  display: flex;
-  align-items: left;
-  flex-direction: column;
+.resource {
+  display:flex;
+  flex-direction: row;
+  padding-bottom:20px;
   background: transparent;
+  height: 112px;
   cursor: pointer;
+  overflow: hidden;
+}
+.title {
+  font-size: var(--prr-font-size-normal);
+  margin: 0px 0px 5px 0px;
+  padding-bottom: 0px;
+}
+.subTitle {
+  font-size: var(--prr-font-size-small);
+  margin: 5px 0px 5px 0px;
 }
 
-.image {
+.description {
+  overflow: hidden;
+   display: -webkit-box;
+   -webkit-line-clamp: 5; /* number of lines to show */
+           line-clamp: 5; 
+   -webkit-box-orient: vertical;
+}
+.image img {
   height:112px;
   width: 112px;
-  border-radius: 10px;
+  border-radius: 5px;
   object-fit: cover;
-  border: 1px solid lightgray
+  border: 1px solid lightgray;
+  margin-right: 20px;
 }
-
 </style>

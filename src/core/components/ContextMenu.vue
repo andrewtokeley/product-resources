@@ -190,20 +190,20 @@ export default {
   display: flex;
   align-items: center;
   cursor: default;
-  color: var(--ish-darkgrey);
-  font-size: var(--ish-font-size-normal);
+  color: var(--prr-darkgrey);
+  font-size: var(--prr-font-size-normal);
   /* height: 25px; */
   /* font-size: 0.875rem; */
   height: 1.25rem;
 }
 
 .context-menu__row:hover {
-  background: var(--ish-lightgrey);
+  background: var(--prr-lightgrey);
   cursor: pointer;
 }
 
 .context-menu__row--isLabel {
-  color: var(--ish-mediumgrey);
+  color: var(--prr-mediumgrey);
   font-style: italic;
 }
 .context-menu__row--isLabel:hover {
@@ -212,7 +212,7 @@ export default {
 }
 
 .context-menu__row--isSmallText {
-  font-size: var(--ish-font-size-small);
+  font-size: var(--prr-font-size-small);
 }
 
 .context-menu__row--isCentred {
@@ -231,7 +231,7 @@ export default {
 
 .context-menu__row__subText,
 .context-menu__row-full-width {
-  font-size: var(--ish-font-size-small);
+  font-size: var(--prr-font-size-small);
 }
 
 .context-menu__row__subText {

@@ -4,25 +4,17 @@ import { app } from "@/core/services/firebaseInit"
 import { getFirestore, query, collection, doc, getDocs, getDoc, where, addDoc, setDoc, deleteDoc } from "firebase/firestore"; 
 const db = getFirestore(app);
 
-export {  searchByResourceType, searchByTag, searchByText, getResource, updateResource, addResource, deleteResource }
+export {  searchByResourceTypes, searchByTag, searchByText, getResource, updateResource, addResource, deleteResource }
 
 const COLLECTION_KEY = "resources";
 
-
-const searchByResourceType = async function(key) {
+const searchByResourceTypes = async function(keys) {
 
   const q = query(collection(db, COLLECTION_KEY)
-    .withConverter(resourceConverter), where("resourceType.key", "==", key));
+    .withConverter(resourceConverter), where("resourceType.key", "in", keys));
   const querySnapshot = await getDocs(q);
   const result = [];
   querySnapshot.forEach((doc) => {
-    result.push(new Resource(doc.data()));
-    result.push(new Resource(doc.data()));
-    result.push(new Resource(doc.data()));
-    result.push(new Resource(doc.data()));
-    result.push(new Resource(doc.data()));
-    result.push(new Resource(doc.data()));
-    result.push(new Resource(doc.data()));
     result.push(new Resource(doc.data()));
   });
   return result
@@ -36,12 +28,6 @@ console.log('se')
   const result = [];
   console.log('tag');
   querySnapshot.forEach((doc) => {
-    result.push(new Resource(doc.data()));
-    result.push(new Resource(doc.data()));
-    result.push(new Resource(doc.data()));
-    result.push(new Resource(doc.data()));
-    result.push(new Resource(doc.data()));
-    result.push(new Resource(doc.data()));
     result.push(new Resource(doc.data()));
   });
   return result
@@ -90,7 +76,8 @@ const updateResource = async function(resource) {
 }
 
 const addResource = async function(resource) {
-  return await addDoc(collection(db, COLLECTION_KEY).withConverter(resourceConverter), resource);
+  let doc = await addDoc(collection(db, COLLECTION_KEY).withConverter(resourceConverter), resource);
+  return doc.id;
 }
 
 const deleteResource = async function(id) {

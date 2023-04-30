@@ -38,8 +38,13 @@ export default {
   },
   
   computed: {
-    value() {
-      return this.modelValue;
+    value: {
+      get() {
+        return this.modelValue;
+      },
+      set() {
+        // do nothing
+      }
     }
   },
 

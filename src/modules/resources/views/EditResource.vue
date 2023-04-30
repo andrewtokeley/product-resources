@@ -1,96 +1,75 @@
 <template>
   <div class="content" :class="{ working: isWorking }">        
     
-      <div class="line">
-        <div class="entry">
-          <base-input
-            v-model="local.displayName"
-            @input="update('displayName', $event.target.value)"
-            :options="{ 
-              maximumLength: 300,
-              inlineErrors: false,
-              placeholder: 'Add title'}"
-          ></base-input>
-      </div>
-      </div>
-
-      <div class="split-line">
-        <div class="entry">
-          <base-select
-            v-model="local.resourceType"
-            @input="update('resourceType', $event.target.value)"
-            :selectOptions="resourceTypes"
-            :options="{ 
-              placeholder: 'Select Type'}"
-          ></base-select>
-        </div>
-
-        <div class="entry">
-          <authors-list 
-            v-model="local.authors"
-            @input="update('authors', $event.target.value)"
-          >
-          </authors-list>
-        </div>
-      </div>
-
-      <div class="split-line">
-        <div class="entry">
-          <date-picker 
-            v-model="local.publishedDate"
-            @input="update('publishedDate', $event.target.value)"
-          ></date-picker>
-        </div>
-        <div class="entry"></div>
-      </div>
-
-      <div class="line">
-        <div class="entry">
-          <base-input
-            v-model="local.imageUrl"
-            @input="update('imageUrl', $event.target.value)"
-            :options="{ 
-              placeholder: 'Add Image URL'}"
-          ></base-input>
-        </div>
-      </div>
-
-      <div class="line">
-        <div class="entry">
-          <base-input
-            v-model="local.resourceUrl"
-            @input="update('resourceUrl', $event.target.value)"
-            :options="{ 
-              placeholder: 'Add Resource URL'}"
-          ></base-input>
-        </div>
-      </div>
+    <div class="label">What sort of resource is it?</div>
+    <div class="double-line">
+      <base-select
+        v-model="local.resourceType"
+        @input="update('resourceType', $event.target.value)"
+        :selectOptions="resourceTypes"
+        :options="{ 
+          placeholder: 'Select Type'}"
+      ></base-select>
       
-      <div class="line">
-        <div class="entry">
-          <base-multiline-text
-            v-model="local.description"
-            @input="update('description', $event.target.value)"
-            :options="{ 
-              placeholder: 'Add description',
-              numberOfLines: 10,
-              maximumLength: 1000, 
-              showCharacterCount: true}"
-          ></base-multiline-text>
-        </div>
-      </div>
-
-      <div v-if="local.tags" class="line">
-        <div class="entry">
-          <p>Select which tags apply to this resource.</p>
-          <tag-selector 
-            v-model="local.tags"
-            @input="update('tags', $event.target.value)"
-          ></tag-selector>
-        </div>
-      </div> 
-
+      <div></div>
     </div>
+
+    <base-input
+      v-model="local.displayName"
+      @input="update('displayName', $event.target.value)"
+      :options="{   
+        maximumLength: 300,
+        placeholder: 'Add title'}"
+    ></base-input>
+
+    <div class="double-line">
+      <authors-list 
+        v-model="local.authors"
+        @input="update('authors', $event.target.value)"
+      >
+      </authors-list>
+
+      <date-picker 
+        v-model="local.publishedDate"
+        :options="{ placeholder: 'Published Date' }"
+        @input="update('publishedDate', $event.target.value)"
+      >
+      </date-picker>
+    </div>
+
+    <base-input
+      v-model="local.imageUrl"
+      @input="update('imageUrl', $event.target.value)"
+      :options="{ 
+        placeholder: 'Add Image URL'}"
+    ></base-input>
+    
+    <base-input
+      v-model="local.resourceUrl"
+      @input="update('resourceUrl', $event.target.value)"
+      :options="{ 
+        placeholder: 'Add Resource URL'}"
+    ></base-input>
+        
+    <base-multiline-text
+      v-model="local.description"
+      @input="update('description', $event.target.value)"
+      :options="{ 
+        placeholder: 'Add Description',
+        numberOfLines: 10,
+        maximumLength: 1000, 
+        showCharacterCount: true}"
+    ></base-multiline-text>
+    
+    <div v-if="local.tags" class="line">
+      <p>Select which tags apply to this resource.</p>
+      <tag-selector 
+        v-model="local.tags"
+        @input="update('tags', $event.target.value)"
+      ></tag-selector>
+    </div> 
+
+  </div>
 </template>
 
 <script>
@@ -148,24 +127,25 @@ export default {
 
 <style scoped>
 
-
-.line, .split-line {
-  display:flex;
-  flex-direction: row;
-  justify-content:stretch;
+.double-line{
+display: flex;
+flex-direction: row;
+justify-content: space-around;
+gap:20px;
+/* not sure why I need to set this? */
+height: 50px;
+}
+.double-line :nth-child(2), .double-line :nth-child(1) {
+  width:100%;
+}
+.label {
+color: var(--prr-darkgrey);
+margin-top: 20px;
+margin-bottom: 5px;
 }
 
-.split-line {
-  display:flex;
-  flex-direction: row;
-  justify-content:space-between;
-  column-gap: 10px;
+.label.tight {
+margin-top: 0px;
 }
 
-.entry {
-  width: 100%;
-}
-/* .split-line .entry {
-  width: 40%;
-} */
 </style>

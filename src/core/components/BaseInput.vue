@@ -1,30 +1,29 @@
 <template>
   <div class="base-input">
-    
     <div class="base-input__input-block">
       <input type="text" 
-        @input="validate" 
+        @input="handleInput" 
+        @blur="handleBlur"
         @focus="$emit('focus')"
-        @blur="$emit('blur')"
         v-model="value"
-        :maxLength="options.maximumLength ?? 300"
-        :placeholder="options.placeholder ? options.placeholder : ''"
+        :maxLength="_options.maximumLength"
+        :placeholder="_options.placeholder"
         class="base-input__input" 
-        :attribute="{readonly: options.readOnly ?? false }"
+        :readonly="_options.readOnly"
         :class="{ 
-          'base-input__input--borderless': options.borderless ?? false,
-          'base-input__input--is-centred': options.centred ?? false,
-          'base-input__input--has-hover-effect': options.hoverEffect ?? true, 
-          'base-input__input--has-underline-effect': options.underlineEffect ?? true, 
-          'base-input__input--is-large': options.large ?? false, 
-          'base-input__input--is-blue': options.blue ?? false, 
-          'base-input__input--is-white': !options.blue ?? true, 
-          'base-input__input--has-error': errorMessage.length > 0,
+          'base-input__input--borderless': _options.borderless,
+          'base-input__input--is-centred': _options.centred,
+          'base-input__input--has-hover-effect': _options.hoverEffect, 
+          'base-input__input--has-underline-effect': _options.underlineEffect, 
+          'base-input__input--is-large': _options.large, 
+          'base-input__input--is-blue': _options.blue, 
+          'base-input__input--is-white': !_options.blue, 
+          'base-input__input--has-error': errorMessage && errorMessage.length > 0,
         }"
       />
     </div>
-    <div v-if="options.descriptionText" class='base-input__descriptionText' v-html="options.descriptionText"></div>
-    <div v-if="showErrorBlock" class='base-input__errorMessage'>{{ errorMessage }}</div>
+    <div v-if="_options.descriptionText" class='base-input__descriptionText' v-html="_options.descriptionText"></div>
+    <div v-if="_options.inlineErrors" class='base-input__errorMessage'>{{ errorMessage }}</div>
   </div>
 </template>
 
@@ -39,57 +38,35 @@ export default defineComponent({
   //   Icon,
   // },
 
-  emits: ["update:modelValue", "focus", "blur"],
+  emits: ["update:modelValue", "focus", "blur", "error"],
 
   props: {
+    id: String,
+    errorMessage: String,
+    // isMandatory: {
+    //   type: Boolean,
+    //   default: false,
+    // },
     // The bound value of the input, set by clients using the v-model property
     modelValue: String,
+    options: Object,
 
-    // Optional object literal to control how the input is displayed. Properties include;
-    // 
-    //  - hoverEffect: if true, hovering over input presents a grey background
-    //  - underlineEffect: if true, when input has focus a blue underline will be presented
-    //  - centred: if true, the contents of the input will be centred
-    //  - white: text will be white, rather than the default light grey
-    //  - placeholder: input placeholder
-    // }
-    options: {
-      type: Object,
-      default: function() {
-        return {
-          borderless: false,
-          hoverEffect: true,
-          underlineEffect: true,
-          centred: false,
-          large: false,
-          white: false,
-          placeholder: "",
-          descriptionText: null,
-          inlineErrors: false,
-          readOnly: false,
-          forceLowerCase: false,
-
-        }
-      }
-    },
-
-    // Optional delayed validation configuration. Should return {delay, callback} where delay is milliseconds to wait between key presses
-    // and callback is   a promise that will be called after delay. The callback with resolve if valid and be rejected with an
-    // appropriate error message if invalid. Good for expensive valiation processes you don't want to call.
-    // after every key press.
+    /**
+     * Optional delayed validation configuration. Should return object with properties
+     * - onBlur: if true the validation is called onBlur rather than after keypresses 
+     * - delay: milliseconds to wait before calling callback
+     * - callback: promise that accepts the current input value and resolves with (result, reason), the
+     * result of the validation and, if validation fails, the reason.
+     * 
+     * and callback is a promise that will be called after delay. The callback with resolve with the result of the validation 
+     * and an extra paramenter for an error message if invalid. Good for expensive valiation processes you don't want to call.
+     * after every key press (or on blur if onBlur is true)
+     */
     validation: {
       required: false,
       type: Object,
-      default: function () { return { delay: 200, callback: () => { return Promise.resolve(true) }}},
+      default: function () { return { onBlur: false, delay: 200, callback: () => { return Promise.resolve(true) }}},
     },
-
-    // // Optional client validation configuration. Keep the validation simply as callback will be called whenever the inout
-    // // changes, with no delay.
-    // clientValidation: {
-    //   required: false,
-    //   type: Object,
-    //   default: function () { return () => { return Promise.resolve(true) }}
-    // },
   },
 
   data() {
@@ -97,17 +74,32 @@ export default defineComponent({
       validationDelayTimer: Object,
       validationMessage: "",
       lastValue: null,
-      errorMessage: "",
     }
   },
-
+  
   computed: {
-    showInlineError() {
-      return (this.options.inlineErrors ?? false) && this.errorMessage.length > 0;
+    _options() {
+      return {
+        borderless: this.options.borderless ? this.options.borderless : false,
+        hoverEffect: this.options.hoverEffect ? this.options.hoverEffect : true,
+        underlineEffect: this.options.underlineEffect ? this.options.underlineEffect : true,
+        centred: this.options.centred ? this.options.centred : false,
+        large: this.options.large ? this.options.large : false,
+        white: this.options.white ? this.options.white : false,
+        placeholder: this.options.placeholder ? this.options.placeholder : "",
+        descriptionText: this.options.descriptionText ? this.options.descriptionText : null,
+        inlineErrors: this.options.inlineErrors ? this.options.inlineErrors : false,
+        readOnly: this.options.readOnly ? this.options.readOnly : false,
+        forceLowerCase: this.options.forceLowerCase ? this.options.forceLowerCase : false,
+      }
     },
-    showErrorBlock() {
-      return this.options.inlineErrors ?? false;
-    },
+
+    // showInlineError() {
+    //   return (this.options.inlineErrors ?? false) && this.errorMessage.length > 0;
+    // },
+    // showErrorBlock() {
+    //   return this.options.inlineErrors ?? false;
+    // },
     value: {
       get() {
         return this.modelValue;
@@ -121,38 +113,55 @@ export default defineComponent({
   },
 
   methods: {
-
-    validate(event) {
+    runValidation(value) {
       const vm = this;
+      
+      // set a timer to delay the check - this allows a number of keys to be pressed before we call validation callback
+      clearTimeout(this.validationDelayTimer);
+      
+      // if we don't cancel in the meantime this function will be called in a few ms.
+      this.validationDelayTimer = setTimeout(function () {
+        // only bother validating if the value is different.
+        if (value != vm.lastValue) {
+          vm.lastValue = value;
+          vm.validation.callback(value)
+            // .then( (response) => {
+            //   if (response.result) {
+            //     // clear error, we're good!
+            //     vm.errorMessage = null;
+            //   } else {
+            //     // let the user know there's a problem
+            //     vm.errorMessage = response.message ?? "Error";
+            //     vm.$emit('error', vm.id, response.message)
+            //   }
+            // })
+            // .catch( (error) => {
+            //   vm.errorMessage = error ?? "Error";
+            // })
+        }
+      }, this.validation.delay);
+    },
+
+    handleBlur() {
+      // let newValue = event.target.value;
+      
+      // if (this.isMandatory && newValue.length == 0) {
+      //   this.$emit('error', this.id, 'Mandatory');
+      //   this.errorMessage = "You need to filll in this field.";
+      // } else if (this.validation.onBlur) {
+      //   this.runValidation(newValue);
+      // } else {
+      //   this.errorMessage = ""
+      // }
+      this.$emit('blur');
+    },
+
+    handleInput(event) {
       let newValue = event.target.value;
       if (this.options.forceLowerCase) {
         newValue = newValue.toLowerCase();
       }
-
       this.$emit("update:modelValue", newValue);
-
-      // set a timer to delay the check - this allows a number of keys to be pressed before we call validation callback
-      if (this.validation) {
-        clearTimeout(this.validationDelayTimer);
-        
-        // if we don't cancel in the meantime this function will be called in a few ms.
-        this.validationDelayTimer = setTimeout(function () {
-
-          // only bother validating if the value is different.
-          if (newValue != vm.lastValue) {
-            vm.lastValue = newValue;
-            vm.validation.callback(newValue)
-              .then( () => {
-                vm.errorMessage = "";
-              })
-              .catch( (error) => {
-                vm.errorMessage = error ?? "";
-              })
-            }
-          }, this.validation.delay);
-      } else {
-        //this.$emit("update:modelValue", newValue);
-      } 
     },
     
     beforeUnmount() {
@@ -240,7 +249,7 @@ export default defineComponent({
 .base-input__errorMessage {
   position: relative;
   padding-top:5px;
-  height: 20px;
+  height: 15px;
   color: var(--prr-red);
   font-size: var(--prr-font-size-small);
 }

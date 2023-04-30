@@ -1,6 +1,7 @@
 <template>
-  <div class="date-picker" :class="{ 'date-picker--is-centred': options.centred }">
-    <flat-pickr v-model="value" :config="pickerConfig" placeholder="Add Start Date" ></flat-pickr>
+  <div class="date-picker" :class="{ 'date-picker--is-centred': _options.centred }">
+    <flat-pickr ref="datePickerWrap" v-model="value" :config="pickerConfig" :placeholder="_options.placeholder" ></flat-pickr>
+    <!-- <base-icon class="clear-icon" @click="clearDate">close</base-icon> -->
   </div>
 </template>
 
@@ -8,16 +9,19 @@
 const { DateTime } = require("luxon");
 import flatPickr from 'vue-flatpickr-component';
 import 'flatpickr/dist/flatpickr.css';
+// import BaseIcon from './BaseIcon.vue';
 
 export default {
   name: "date-picker",
   emits: ['update:modelValue'],
   
   components: {
-    flatPickr
+    flatPickr,
+    // BaseIcon
   },
 
   props: {
+ 
     modelValue: {
       type: DateTime,
       default: null
@@ -45,6 +49,16 @@ export default {
       }
     }
   },
+  
+  methods: {
+    clearDate() {
+      if (!this.$refs.datePickerWrap) {
+        console.log('nope')
+        return;
+      }
+      this.$refs.datePickerWrap.fp.clear();
+    },
+  },
 
   watch: {
     readOnly() {
@@ -54,6 +68,14 @@ export default {
   },
 
   computed: {
+
+    _options() {
+      return {
+        centred: this.options.centred ?? false,
+        placeholder: this.options.placeholder ?? "Enter date",
+      }
+    },
+
     formattedDate() {
       if (this.value) {
         return DateTime.fromISO(this.value).toLocaleString(DateTime.DATE_HUGE);  
@@ -73,9 +95,10 @@ export default {
         this.$emit('update:modelValue', DateTime.fromISO(value));
       }
     }
-  },
+  }
+}
 
-};
+
 </script>
 
 <style>
@@ -112,5 +135,9 @@ export default {
 
 .date-picker input:active {
   border-bottom-color: var(--prr-blue);
+}
+
+.clear-icon {
+  float:right;
 }
 </style>

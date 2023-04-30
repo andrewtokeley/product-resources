@@ -5,7 +5,8 @@
       @input="validate"
       v-model="value"
       :maxLength="_options.maximumLength"
-      :rows="options.numberOfLines"
+      :rows="_options.numberOfLines"
+      :readonly="_options.readOnly"
       :placeholder="_options.placeholder"
       class="base-multiline-text__textarea"
       :class="{
@@ -86,12 +87,13 @@ export default {
 
   computed: {
     _options() {
-      let result = {};
-      result.showCharacterCount = this.options.showCharacterCount ?? false;
-      result.maximumLength = this.options.maximumLength ?? 300;
-      result.numberOfLines = this.options.numberOfLines ?? 4;
-      result.placeholder = this.options.placeholder ?? "";
-      return result;
+      return {
+        showCharacterCount: this.options.showCharacterCount ?? false,
+        maximumLength: this.options.maximumLength ?? 300,
+        numberOfLines: this.options.numberOfLines ?? 4,
+        placeholder: this.options.placeholder ?? "",
+        readOnly: this.options.readOnly ?? false,
+      }
     },
     characterCount() {
       if (this._options.showCharacterCount) {
@@ -173,7 +175,7 @@ export default {
   font-size: var(--prr-font-size-normal);
   outline: none;
   resize: none;
-  margin-bottom: 20px;
+  /* margin-bottom: 20px; */
 }
 
 .base-multiline-text__textarea:hover {
@@ -189,7 +191,7 @@ export default {
 
 .base-multiline-text__characterCount {
   position: relative;
-  top: -20px;
+  top: 0px;
   float: right;
   height: 20px;
   font-size: var(--prr-font-size-small);
