@@ -10,6 +10,7 @@ class Resource {
     this.resourceUrl = config.resourceUrl;
     this.description = config.description;
     this.publishedDate = config.publishedDate;
+    this.audioLengthInSeconds = config.audioLengthInSeconds;
     this.imageUrl = config.imageUrl;
     this.authors = config.authors;
     this.resourceType = config.resourceType;
@@ -36,6 +37,28 @@ class Resource {
     return null;
   }
 
+  get pubishedDataAndLengthFormatted() {
+    if (this.publishedDate && this.publishedDate.isValid) {
+      var formatted = this.publishedDate.toLocaleString(DateTime.DATE_MED);
+      if (this.audioLengthInSeconds) {
+        formatted += this.audioLengthInSeconds   + "s";
+      }
+    }
+    return formatted;
+  }
+
+  get authorsList() {
+    return this.authors.join(', ');
+  }
+
+  get actionText() {
+    switch (this.resourceType.key) {
+      case 'books': return "Buy..."
+      case 'podcasts': return "Listen..."
+      case 'episodes': return "Listen..."
+      default: return "Read..."
+    }
+  }
 }
 
 /**
@@ -55,6 +78,7 @@ var resourceConverter = {
     } else {
       result.publishedDate = null;
     }
+    if (resource.audioLengthInSeconds != null) { result.audioLengthInSeconds = resource.audioLengthInSeconds }
     if (resource.authors != null) { result.authors = resource.authors.map( a => a.trim()) }
     if (resource.imageUrl != null) { result.imageUrl = resource.imageUrl }
     if (resource.tags != null) { result.tags = resource.tags }
@@ -74,6 +98,7 @@ var resourceConverter = {
       resourceUrl: data.resourceUrl,
       description: data.description,
       publishedDate: data.publishedDate ? DateTime.fromJSDate(data.publishedDate.toDate()) : null,
+      audioLengthInSeconds: data.audioLengthInSeconds,
       imageUrl: data.imageUrl,
       authors: data.authors,
       resourceType: data.resourceType,

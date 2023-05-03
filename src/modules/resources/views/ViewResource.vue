@@ -1,46 +1,54 @@
 <template>
   <div class="view-resource">
-    <div :style="{ 'min-height': isBook ? '280px' : '200px' }"  class="topblock" >
-      <book-card v-if="resource.resourceType.key=='books'" class="card" :showTitle="false" :resource="resource"></book-card>
-      <podcast-card v-if="resource.resourceType.key=='podcasts'" class="card" :showTitle="false" :resource="resource"></podcast-card>
+    <div class="topblock" :class="{ rectangle: isBook, square : !isBook }" >
+      <img class="image" :src="resource.imageUrl" />
       <p>{{resource.description}}</p>
     </div>  
-      
+    <div class="recommendations">
+      <recommendation-widget 
+        v-for="recommendation in recommendations" 
+        :key="recommendation.id"
+        :recommendation="recommendation">
+      </recommendation-widget>
+    </div>
     <div class="categories">
       <div v-if="resource.publishedDateFormatted" class="tagGroup">
-        <span>Published: </span>
+        <span class="label">Published: </span>
         <span>{{ resource.publishedDateFormatted }}</span>
       </div>
-      <div v-if="resource.tags" class="tagGroup">
-        <span>Categories: </span>
+      <div v-if="resource.tags && resource.tags.length > 0" class="tagGroup">
+        <span class="label">Categories: </span>
         <a v-for="tag in resource.tags" :key="tag.key" :href="`/tag/${tag.key}`">{{ tag.value }}</a>
       </div>
-      <div class="tagGroup">
-        <span>Recommended by: </span>
-        <a href="/tag/andrew-tokeley">Andrew Tokeley</a>
-      </div>
     </div>
+
   </div>
 </template>
 
 <script>
 import { Resource } from "@/modules/resources/model/resource";
-import BookCard from "@/modules/resources/components/BookCard.vue";
-import PodcastCard from '@/modules/resources/components/PodcastCard.vue';
+import RecommendationWidget from '@/modules/recommendations/components/RecommendationWidget.vue';
+import { getRecommendations } from "@/modules/recommendations/services/recommendation-service";
 
 export default {
-  components: { BookCard, PodcastCard },
+  components: { RecommendationWidget },
   name: "view-resource",
 
   props: {
     resource: {
       type: Resource,
       default: Resource.default()
+    },
+  },
+
+  data() {
+    return {
+      recommendations: [],
     }
   },
 
-  mounted() {
-    
+  async mounted() {
+    this.recommendations = await getRecommendations(this.resource.id);
   },
 
   computed: {
@@ -57,23 +65,38 @@ export default {
 
 <style scoped>
 
-
-.card {
+.topblock.square {
+  min-height: 150px;
+  margin-bottom: 20px;
+}
+.topblock.rectangle {
+  min-height: 240px;
+  margin-bottom: 20px;
+}
+.topblock .image {
   float: left;
-  margin-right: 25px;
+  /* margin-right: 25px; */
   margin-bottom: 5px;
 }
 
-.topblock.smallImage {
-  min-height:200px;
+.topblock img {
+  border-radius: 5px;
+  object-fit: cover;
+  margin-right: 20px;
+  border: 1px solid black;
 }
 
-.topblock.largeImage {
-  min-height:250px;
+.topblock.square img {
+  height:150px;
+  width:150px;
 }
 
-.categories {
-  float: left;
+.topblock.rectangle img {
+  width:150px;
+  height:240px;
+}
+.topblock p {
+  white-space: pre-wrap;
 }
 
 .categories a {
@@ -83,4 +106,20 @@ export default {
 .categories .tagGroup {
   margin-bottom: 10px;
 }
+
+.label {
+  color: var(--prr-mediumgrey);
+}
+
+.recommendations {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  flex-wrap: wrap;
+}
+/* .recommendation {
+  width:50%;
+  margin: 20px 0px 40px 0px;
+} */
+
 </style>

@@ -1,14 +1,14 @@
 <template>
 <div class="icon" :class="{'icon--spinning': showSpinner}" :style="rotateStyle" >
   <div ref="iconDiv" 
-      :title="tooltip" class="icon" 
+      :title="title" class="icon" 
       :class="{ 
         'material-icons': isMaterialIconProp, 
-        'icon--clickable': options.isClickable ?? true 
+        'icon--clickable': _options.isClickable ?? true 
       }" 
       @click.prevent.stop="handleClick">
     <svg v-if="!isMaterialIconProp">
-      <path :d="options.svgPath" />
+      <path :d="_options.svgPath" />
     </svg>
     <span class="icon__text">
       <slot></slot>
@@ -33,7 +33,6 @@
 <script>
 import { defineComponent } from "vue";
 import ContextMenu from "@/core/components/ContextMenu.vue"
-//import { constants } from "../../constants";
 
 export default defineComponent({
   name: "BaseIcon",
@@ -48,7 +47,7 @@ export default defineComponent({
  * options: 
  */
   props: {
-    tooltip: {
+    title: {
       type: String,
       default: "",
     },
@@ -69,21 +68,7 @@ export default defineComponent({
     options: {
       type: Object,
       default: () => {
-        return {
-          size: "26px",
-          colour: "var(--prr-lightgray)",
-          background: {
-            size: "40px",
-            borderRadius: "20px",
-            colour: "transparent"
-          },
-          hover: {
-            colour: "var(--prr-lightgray)",
-            backgroundColour: "rgba(60,64,67,.08)"
-          },
-          isMaterialIcon: true,
-          isClickable: true,
-        }
+        return {}
       },
       required: false,
     }
@@ -104,18 +89,36 @@ export default defineComponent({
     this.isMouseOver = false;
     if (this.isMaterialIcon) {
       // set default state
-      this.$refs.iconDiv.style.width = this.options.background.size ?? "40px";
-      this.$refs.iconDiv.style.height = this.options.background.size ?? "40px";
-      this.$refs.iconDiv.style.borderRadius = this.options.background.borderRadius ?? "2px";
-      this.$refs.iconDiv.style.fontSize = this.options.size ?? "32px";
-      this.$refs.iconDiv.style.color = this.options.colour ?? "black";
-      this.$refs.iconDiv.style.backgroundColor = this.options.background.colour ?? "white";
+      this.$refs.iconDiv.style.width = this._options.background.size;
+      this.$refs.iconDiv.style.height = this._options.background.size;
+      this.$refs.iconDiv.style.borderRadius = this._options.background.borderRadius;
+      this.$refs.iconDiv.style.fontSize = this._options.size;
+      this.$refs.iconDiv.style.color = this._options.colour;
+      this.$refs.iconDiv.style.backgroundColor = this._options.background.colour;
     }
     this.addListeners();
   },
 
   computed: {
-    
+
+    _options() {
+      return {
+        size: this.options.size ?? "26px",
+        colour: this.options.colour ?? "var(--prr-lightgray)",
+        background: {
+          size: this.options.background?.size ?? "40px",
+          borderRadius: this.options.background?.borderRadius ?? "20px",
+          colour: this.options.background?.colour ?? "transparent"
+        },
+        hover: {
+          colour: this.options.hover?.colour ?? "var(--prr-lightgray)",
+          backgroundColour: this.options.hover?.backgroundColour ?? "rgba(60,64,67,.08)"
+        },
+        isMaterialIcon: this.options.isMaterialIcon ?? true,
+        isClickable: this.options.isClickable ?? true,
+      }
+    },
+
     rotateStyle() {
       
       if (this.rotate > 0) {

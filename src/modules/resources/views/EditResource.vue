@@ -1,7 +1,6 @@
 <template>
   <div class="content" :class="{ working: isWorking }">        
     
-    <div class="label">What sort of resource is it?</div>
     <div class="double-line">
       <base-select
         v-model="local.resourceType"
@@ -37,20 +36,22 @@
       </date-picker>
     </div>
 
-    <base-input
-      v-model="local.imageUrl"
-      @input="update('imageUrl', $event.target.value)"
-      :options="{ 
-        placeholder: 'Add Image URL'}"
-    ></base-input>
-    
-    <base-input
-      v-model="local.resourceUrl"
-      @input="update('resourceUrl', $event.target.value)"
-      :options="{ 
-        placeholder: 'Add Resource URL'}"
-    ></base-input>
-        
+    <div class="double-line">
+      <base-input
+        v-model="local.imageUrl"
+        @input="update('imageUrl', $event.target.value)"
+        :options="{ 
+          placeholder: 'Add Image URL'}"
+      ></base-input>
+      
+      <base-input
+        v-model="local.resourceUrl"
+        @input="update('resourceUrl', $event.target.value)"
+        :options="{ 
+          placeholder: 'Add Resource URL'}"
+      ></base-input>
+    </div>
+
     <base-multiline-text
       v-model="local.description"
       @input="update('description', $event.target.value)"
@@ -107,7 +108,8 @@ export default {
   },
 
   async mounted() {
-    this.resourceTypes = await getResourceTypes();
+    const lookup = await getResourceTypes();
+    this.resourceTypes = lookup.keyValues;
   },
   
   computed: {

@@ -1,15 +1,19 @@
 <template>
-  <div class='resources' >
-    <header-bar @menuAdd="handleMenuAdd" @recommend="handleRecommend"></header-bar>
+  <div class='page' >
+    <header-bar @menuAdd="handleMenuAdd"></header-bar>
     <div class='content'>
       <div v-if="isLoading">
         <loading-symbol></loading-symbol>
       </div>
+      <div><h1 v-if="title">{{ title }}</h1></div>
+      <div><p v-if="summary">{{ summary }}</p></div>
+
       <div v-if="searchResults.length > 0 && !isLoading" class="search-results">
         <book-group v-if="books" @recommend="showRecommend" @click="showDetail" heading="Books" :resources="books"></book-group>
-        <podcast-group v-if="podcasts" @recommend="showRecommend" @click="showDetail" heading="Podcasts" :resources="podcasts"></podcast-group>
+        <book-group v-if="web" @recommend="showRecommend" @click="showDetail" heading="Websites" :resources="web"></book-group>
+        <book-group v-if="posts" @recommend="showRecommend" @click="showDetail" heading="Posts" :resources="posts"></book-group>
+        <book-group v-if="podcasts" @recommend="showRecommend" @click="showDetail" heading="Podcasts" :resources="podcasts"></book-group>
         <podcast-episode-group v-if="episodes" @recommend="showRecommend" @click="showDetail" heading="Podcast Episodes" :resources="episodes"></podcast-episode-group>
-
       </div>
       <div v-if="searchResults.length == 0 && !isLoading" class="noresults">
         We couldn't find anything matching, <i>{{ searchTerm }}</i>
@@ -28,12 +32,10 @@ import LoadingSymbol from "@/core/components/LoadingSymbol.vue";
 
 import { searchByResourceTypes, searchByTag, searchByText } from '../services/resource-service.js'
 import BookGroup from '../components/BookGroup.vue'
-import PodcastGroup from '../components/PodcastGroup.vue'
+// import PodcastGroup from '../components/PodcastGroup.vue'
 import PodcastEpisodeGroup from '../components/PodcastEpisodeGroup.vue'
-import { getResourceTypes, getTags } from '../services/lookup-service';
+import { getTags } from '../services/lookup-service';
 import RecommendDialog from '@/modules/recommendations/views/RecommendDialog.vue';
-// import RowHeader from '../components/RowHeader.vue'
-// import SearchInput from '@/core/components/SearchInput.vue'
 
 export default {
   
@@ -44,13 +46,14 @@ export default {
     HeaderBar,
     LoadingSymbol,
     BookGroup,
-    PodcastGroup,
     PodcastEpisodeGroup,
     RecommendDialog,
   },
 
   data() {
     return {
+      title: null,
+      summary: null,
       searchCategory: null,
       searchTerm: null,
       searchResults: [],
@@ -60,8 +63,8 @@ export default {
       showRecommendDialog: false,
       selectedResource: null,
       isLoading: true,
-      resourceTypes: [],
-      tags: [],
+      // resourceTypes: [],
+      // tagsLookup: Object,
       bookResources: {
         type: Array,
         default: [{}]
@@ -71,48 +74,63 @@ export default {
 
   async mounted() {
     const vm = this;
+
     window.onpopstate = function() {
       vm.closeDetail()
     };
-    console.log('mounted')
-    this.isLoading = true;
 
-    this.resourceTypes = await getResourceTypes();
-    this.tags = await getTags();
+    this.isLoading = true;
     
-    if (this.$route.params.typeId) {
-      await this.handleSearchByTypeKey(this.$route.params.typeId)
-      const resourceId = this.$route.query.r 
-      if (resourceId) {
-        const resource = this.searchResults.find ( r => r.id == resourceId );
+    this.loadSearchResults()
+
+    // sometimes the request also needs to load the details modal over the page
+    const resourceId = this.$route.query.r 
+    if (resourceId) {
+      const resource = this.searchResults.find ( r => r.id == resourceId );
+      if (resource) {
         this.showDetail(resource);
       }
-    } else if (this.$route.params.tagId) {
-      await this.handleSearchByTagKey(this.$route.params.tagId)
-    } else if (this.$route.params.searchTerm) {
-      await this.handleSearchByText(this.$route.params.searchTerm);
     }
+    
     this.isLoading = false;
   },
 
   methods: {
-    async handleSearchByTagKey(key) {
-      let lookup = this.tags.find (i => i.key == key);
-      if (lookup) {
-        this.searchResults = await searchByTag(lookup);
+    async loadSearchResults() {
+      if (this.$route.params.typeId) {
+        await this.loadResourcesByType(this.$route.params.typeId);
+      } else if (this.$route.params.tagId) {
+        await this.loadResourcesByTag(this.$route.params.tagId)
+      } else if (this.$route.params.searchTerm) {
+        await this.loadResourcesByTextSearch(this.$route.params.searchTerm);
       }
     },
 
-    async handleSearchByTypeKey(key) {
-      var keys = [key];
-      if (key == 'podcasts') {
-        keys.push('episodes');
+    async loadResourcesByType(typeKey) {
+      var typeKeys = [typeKey];
+      // always load episodes with podcast series
+      if (typeKey == 'podcasts') {
+        typeKeys.push('episodes');
       }
-      console.log('sss')
-      this.searchResults = await searchByResourceTypes(keys);
+      if (typeKey == 'websites') {
+        typeKeys.push('posts');
+      }
+      this.searchResults = await searchByResourceTypes(typeKeys);
+      
     },
 
-    async handleSearchByText(term) {
+    async loadResourcesByTag(tagKey) {
+      const lookup = await getTags();
+      let item = lookup.items.find( k => k.key == tagKey);
+      let tagKeyValue = { key: item.key, value: item.value };
+      if (tagKeyValue) {
+        this.searchResults = await searchByTag(tagKeyValue);
+        this.title = item.value.toUpperCase();
+        this.summary = item.description;
+      }
+    },
+    
+    async loadResourcesByTextSearch(term) {
       this.searchResults = await searchByText(term);
     },
 
@@ -120,15 +138,6 @@ export default {
       this.showResourceDetail = false;
       this.showNewRecommendation = false;
       this.showResourceAdd = true;
-    },
-
-    handleRecommend() {
-      console.log('show');
-      this.showResourceDetail = false;
-      this.showNewRecommendation = true;
-      this.selectedResource = null;
-      this.showResourceAdd = false;
-      
     },
 
     showDetail(resource) {
@@ -161,7 +170,10 @@ export default {
       return [];
     },
 
-    closeDetail() {
+    async closeDetail(reload) {
+      if (reload) {
+        await this.loadSearchResults()
+      }
       this.showResourceDetail = false;
       this.showResourceAdd = false;
       this.showNewRecommendation = false;
@@ -203,7 +215,7 @@ export default {
       return podcasts.length>0 ? podcasts : null
     },
     web() {
-      const results = this.resourcesByType('web')
+      const results = this.resourcesByType('websites')
       return results.length>0 ? results : null
     },
     video() {
@@ -214,6 +226,10 @@ export default {
       const results = this.resourcesByType('episodes')
       return results.length>0 ? results : null
     },
+    posts() {
+      const results = this.resourcesByType('posts')
+      return results.length>0 ? results : null
+    },
     
   }
 }
@@ -222,7 +238,7 @@ export default {
 
 <style scoped>
 
-.resources {
+.page {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -233,11 +249,20 @@ export default {
   flex-direction: column;
   align-items: center;
   width: 80%;
-  max-width: 800px;
+  max-width: 860px;
 }
 
 .content.loading {
   display: none;
+}
+
+.content h1 {
+  font-size: var(--prr-font-size-large);
+  margin-top: 20px;
+  margin-bottom: 5px;
+}
+.content p {
+  margin: 0px 10px;
 }
 
 .searchWrapper {
@@ -277,23 +302,6 @@ export default {
 .resource-item {
   padding: 10px;
   cursor: pointer;
-}
-
-h1 {
-  font-family: "Google Sans",Roboto,Arial,sans-serif;
-    font-size: 1.125rem;
-    font-weight: 400;
-    letter-spacing: 0;
-    line-height: 1.5rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    display: -webkit-box;
-    max-height: 48px;
-    color: #202124;
-    margin-top: 40px;
-    margin-bottom: 12px;
 }
 
 .noresults {

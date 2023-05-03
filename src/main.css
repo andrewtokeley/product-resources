@@ -26,6 +26,7 @@ body {
   /* background-color: rgb(228, 228, 228); */
   font-family: var(--prr-font-family);
   font-weight: var(--prr-font-weight);
+  color: var(--prr-darkgrey);
   box-sizing: border-box;
   overscroll-behavior-y: contain;
 }
@@ -37,5 +38,9 @@ body.modal-open {
 a {
   cursor: pointer;
   color: var(--prr-darkgrey);
+  transition: 300ms;
 }
-
+a:hover {
+  cursor: pointer;
+  color: var(--prr-green);
+}

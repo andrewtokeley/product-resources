@@ -1,17 +1,18 @@
 
 import { Resource, resourceConverter } from '../model/resource'
 import { app } from "@/core/services/firebaseInit"
-import { getFirestore, query, collection, doc, getDocs, getDoc, where, addDoc, setDoc, deleteDoc } from "firebase/firestore"; 
+import { getFirestore, query, collection, doc, getDocs, getDoc, where, addDoc, setDoc, deleteDoc, limit } from "firebase/firestore"; 
 const db = getFirestore(app);
 
 export {  searchByResourceTypes, searchByTag, searchByText, getResource, updateResource, addResource, deleteResource }
 
 const COLLECTION_KEY = "resources";
 
-const searchByResourceTypes = async function(keys) {
-
-  const q = query(collection(db, COLLECTION_KEY)
-    .withConverter(resourceConverter), where("resourceType.key", "in", keys));
+const searchByResourceTypes = async function(keys, resultLimit) {
+  console.log('limit')
+  if (!resultLimit) { resultLimit = 50 }
+  const q = query(collection(db, COLLECTION_KEY).withConverter(resourceConverter), 
+    where("resourceType.key", "in", keys), limit(resultLimit));
   const querySnapshot = await getDocs(q);
   const result = [];
   querySnapshot.forEach((doc) => {
@@ -20,13 +21,11 @@ const searchByResourceTypes = async function(keys) {
   return result
 };
 
-const searchByTag = async function(tag) {
-console.log('se')
+const searchByTag = async function(tagKeyValue) {
   const q = query(collection(db, COLLECTION_KEY)
-    .withConverter(resourceConverter), where("tags", "array-contains", tag));
+    .withConverter(resourceConverter), where("tags", "array-contains", tagKeyValue));
   const querySnapshot = await getDocs(q);
   const result = [];
-  console.log('tag');
   querySnapshot.forEach((doc) => {
     result.push(new Resource(doc.data()));
   });

@@ -19,11 +19,19 @@
       
       <div class="label" v-if="!resourceExists">If you'd like to leave a public review...</div>
 
-      <base-input v-model="recommendation.name" 
-          @blur="validate('name')"
-          :errorMessage="errorMessage['name']"
-          :options="{ placeholder: 'Your Name (optional)', readOnly: isSaving}">
+      <div class="double-line">
+        <base-input v-model="recommendation.name" 
+            @blur="validate('name')"
+            :errorMessage="errorMessage['name']"
+            :options="{ placeholder: 'Your Name (optional)', readOnly: isSaving}">
+          </base-input>
+
+        <base-input v-model="recommendation.website" 
+          @blur="validate('website')"
+          :errorMessage="errorMessage['website']"
+          :options="{ placeholder: 'Your LinkedIn/Website (optional)', inlineErrors: true, readOnly: isSaving}">
         </base-input>
+      </div>
 
       <base-multiline-text 
         v-model="recommendation.reason"
@@ -73,6 +81,7 @@ mounted() {
   if (this.resource) {
     this.recommendation.resourceUrl = this.resource.resourceUrl;
     this.recommendation.resourceId = this.resource.id;
+    this.recommendation.resourceType = this.resource.resourceType;
     this.resourceExists = true;
   } else {
     this.resourceExists = false;
@@ -117,6 +126,7 @@ methods: {
     let result = this.recommendation.errorStateFor(prop);
     this.errorMessage[prop] = result.errorMessage;
     if (result.data) {
+      console.log('dd')
       this.recommendation[prop] = result.data;
     }
   }

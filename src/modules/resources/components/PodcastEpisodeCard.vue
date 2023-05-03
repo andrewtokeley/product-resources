@@ -7,7 +7,7 @@
         <div v-if="resource.parentResourceName" class="subTitle">{{ resource.parentResourceName }}</div>
         <div class="body">{{ resource.description }}</div>
         <div>
-          <div class="subTitle">{{ dateLengthDescription }}</div>
+          <div class="subTitle">{{ resource.pubishedDataAndLengthFormatted }}</div>
         </div>
       </div>
     </div>
@@ -16,7 +16,6 @@
 </template>
 
 <script>
-const { DateTime } = require("luxon");
 import { Resource } from '@/modules/resources/model/resource'
 export default {
   name: 'PodcastEpisodeCard',
@@ -27,19 +26,6 @@ export default {
       default: null
      }
   },
-
-  computed: {
-    authorsDisplay() {
-      return this.resource.authors.join(", ")
-    },
-    dateLengthDescription() {
-      var date = this.resource.publishedDate.toLocaleString(DateTime.DATE_MED);
-      if (this.resource.lengthSeconds) {
-        date += this.resource.lengthSeconds + "s";
-      }
-      return date;
-    }
-  }
 }
 
 </script>

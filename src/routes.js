@@ -1,10 +1,11 @@
 import Login from './modules/login/views/LoginView'
 import Search from './modules/resources/views/ResourcesSearch'
 import UpdateResource from './modules/resources/views/UpdateResource'
-import Home from './modules/resources/views/ResourcesHome'
+import Home from './modules/home/views/ResourcesHome'
 
 export default [
   {path: '/login', component:Login, meta: { showHeader: false }},
+  
   // home page
   {path: '/', component:Home, meta: { clearSearch: true }},
   

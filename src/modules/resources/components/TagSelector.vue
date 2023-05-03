@@ -36,7 +36,8 @@ export default {
   emits: ['update:modelValue'],
 
   async mounted() {
-    this.tags = await getTags();
+    let lookup = await getTags();
+    this.tags = lookup.keyValues;
     this.selectedTags = this.modelValue;
   },
 

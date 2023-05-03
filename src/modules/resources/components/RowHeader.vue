@@ -1,38 +1,65 @@
 <template>
   <div class="row-header">
-    <h1 v-if="moreLink" @mouseover="showMoreText=true" @mouseleave="showMoreText=false">
-      <router-link class="link" :to="moreLink">{{  title  }}</router-link>
-      <div class="more-text" :class="{showMoreText: visible}">see all</div>
-    </h1>
-    <h1 v-else>
-      {{  title  }}
-    </h1>
+    
+    <router-link v-if="headingLink" class="link" :to="headingLink">
+      <h1>{{ heading }}
+        <span class="see-all" v-if="headingLink">
+          see all >
+        </span>
+      </h1>
+    </router-link>          
+    <h1 v-else>{{ heading }}</h1>
   </div>
 </template>
 
 <script>
 
 export default {
-  name: "RowHeader",
+  name: "row-header",
   props: {
-    title: String,
-    moreLink: null,
+    heading: String,
+    headingLink: String,
   }
 }
 </script>
 
 <style scoped>
 
-.link {
-  display: inline-block;
+.material-icons {
+  padding-top:5px;
+}
+.row-header {
+  position: relative;
+  margin-left: 20px;
 }
 
-.more-text {
-  opacity: 0;
-  transition: 400ms;
-}
-.more-text.visible {
+.row-header:hover .see-all, .see-all:hover {
+  visibility: visible;
   opacity: 1;
+  margin-left: 10px;
+}
+.see-all {
+  opacity: 0;
+  color: var(--prr-mediumgrey);
+  cursor: pointer;
+  font-size: var(--prr-font-size-small);
+  font-weight: 400;
+  visibility: hidden;
+  text-transform: none;
+  margin-left: -70px;
+  transition: 500ms;
+}
+
+.link {
+  text-decoration: none;  
+  color: var(--prr-darkgrey);
+}
+
+h1 {
+  font-size: var(--prr-font-size-medium);
+  text-transform: uppercase;
+  cursor: pointer;
+
 }
 
 </style>

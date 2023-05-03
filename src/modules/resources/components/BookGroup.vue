@@ -1,24 +1,27 @@
 <template>
-  <div class="group">
-    <h1 v-if="showHeaderLink">
-        <router-link :to="headingLink">{{ heading }}</router-link>
-    </h1>
-    <h1 v-else>{{ heading }}</h1>
-    <ul>
-      <li v-for="resource in resources" :key="resource.id">
-        <book-card :resource="resource" @recommend="$emit('recommend', resource)" @click="$emit('click', resource)"></book-card>
-      </li>
-    </ul>
+  <div class="book-group">
+    <row-header :heading="_heading" :headingLink="headingLink"></row-header>    
+    <div class="row" :class="{ singleRow: singleRow }">
+      <book-card 
+        v-for="resource in resources"
+        :key="resource.id"
+        :resource="resource" 
+        @recommend="$emit('recommend', resource)" 
+        @click="$emit('click', resource)">
+      </book-card>
+    </div>
   </div>
 </template>
 
 <script>
 import BookCard from "./BookCard.vue"
+import RowHeader from './RowHeader.vue';
 
 export default {
   name: "book-group",
   components: { 
     BookCard,
+    RowHeader,
   },
 
   emits: ['click', 'recommend'],
@@ -26,12 +29,27 @@ export default {
   props: {
     heading: String,
     headingLink: String,
+    singleRow: {
+      type: Boolean,
+      default: false
+    },
+    includeItemCount:  {
+      type: Boolean,
+      default: true
+    },
     resources: {
       type: Array,
       default: () => {[]}
     }
   },
   computed: {
+    _heading() {
+      var heading = this.heading;
+      if (this.includeItemCount) {
+        heading += ` (${this.resources.length})`;
+      }
+      return heading;
+    },
     showHeaderLink() {
       return this.resources && this.headingLink;
     }
@@ -41,17 +59,31 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 
-.group ul {
-  list-style-type: none;
-  padding-left:0px;
+h1 {
+  text-transform: uppercase;
 }
 
-.group li {
-  display: inline-block;
-  padding-left: 20px;
-  padding-left:0px;
+.book-group {
+  position: relative;
+  width: 100%;
+  overflow-x: scroll;
+  padding: 5px;
 }
+
+.row {
+  margin-left: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap:15px;
+  overflow: scroll;
+}
+
+.row.singleRow {
+  flex-wrap: nowrap;
+}
+
 
 </style>

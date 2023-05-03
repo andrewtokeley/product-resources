@@ -65,7 +65,14 @@ class Recommendation {
           this.name = "Anon";
         }
         return Result.success();
+      },
+      website: (value) => {
+        if (!value || value.length == 0) {
+          return Result.success();
+        }
+        return this.validateUrl(value);  
       }
+
     }
   }
 
@@ -74,7 +81,6 @@ class Recommendation {
    * @returns whether all the properties are valid.
    */
   isValid() {
-    console.log('val')
     var valid = true;
     let props = Object.getOwnPropertyNames(this);
     for (const i in props) {

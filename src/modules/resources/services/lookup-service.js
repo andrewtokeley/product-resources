@@ -3,7 +3,7 @@ import { getFirestore, doc, getDoc, setDoc, deleteDoc } from "firebase/firestore
 
 import { Lookup, lookupConverter } from '@/modules/resources/model/lookup'
 
-export { refreshTags, refreshResourceTypes, getTags, getResourceTypes, getTagsByGroup }
+export { refreshTags, refreshResourceTypes, getTags, getResourceTypes, getTagItemsByGroup }
 
 const COLLECTION_KEY = "lookups";
 const RESOURCE_TYPES_ID = "resource-types"
@@ -13,14 +13,21 @@ const db = getFirestore(app);
 const refreshTags = async function() {
   await deleteLookup(TAG_ID);
   const lookup = new Lookup({id:TAG_ID, items:[
-    {key:'strategy', value:'Strategy', groups: ['General']},
-    {key:'marty-cagan', value:'Marty Cagan', groups: ['Popular Authors']},
-    {key:'teresa-torres', value:'Teresa Torres', groups: ['Popular Authors']},
-    {key:'rich-mirinov', value:'Rich Mirinov', groups: ['Popular Authors']},
-    {key:'andrew-tokeley', value:'Andrew Tokeley', groups: ['Recommended By']},
-    {key: 'leadership', value:'Leadership', groups: ['General']},
-    {key: 'teaming', value:'Teaming', groups: ['General']},
-    {key: 'stakeholder', value:'Stakeholder Management', groups: ['General']},
+    {key:'strategy', value:'Strategy', groups: ['_General'], description: "This is a strategy description" },
+    {key:'marty-cagan', value:'Marty Cagan', groups: ['Popular Voices']},
+    {key:'teresa-torres', value:'Teresa Torres', groups: ['Popular Voices']},
+    {key:'rich-mirinov', value:'Rich Mirinov', groups: ['Popular Voices']},
+    {key:'andrew-tokeley', value:'Andrew Tokeley', groups: ['Popular Voices']},
+    {key: 'leadership', value:'Leadership', groups: ['_General']},
+    {key: 'teaming', value:'Teaming', groups: ['_General']},
+    {key: 'stakeholder', value:'Stakeholder Management', groups: ['_General']},
+    {key: 'analytics', value:'Analytics', groups: ['_General']},
+    {key: 'okr', value:'OKRs', groups: ['_General']},
+    {key: 'decision', value:'Decision Making', groups: ['_General']},
+    {key: 'fundamentals', value:'Fundamentals', groups: ['_General']},
+    {key: 'discovery', value:'Discovery', groups: ['_General']},
+    {key: 'innovation', value:'Innovation', groups: ['_General']},
+    {key: 'growth', value:'Growth', groups: ['_General']},
   ]});
   await addLookup(lookup)
   return lookup;
@@ -49,28 +56,39 @@ const deleteLookup = async function(lookupId) {
   return await deleteDoc(ref)
 }
 
+/**
+ * 
+ * @returns lookup instance, with properties items and keyValues.
+ */
 const getTags = async function() {
-  const lookup = await getLookup(TAG_ID);
-  return lookup.items;
+  return await getLookup(TAG_ID);
 }
 
-const getTagsByGroup = async function() {
-  console.log('g')
-  const tags = await getTags()
+/**
+ * 
+ * @returns array containing objects with properties groupName and tags, where tags is the 
+ * full lookup item of the tags in the group 
+ */
+const getTagItemsByGroup = async function() {
+console.log('stop')
+  const lookup = await getTags();
 
-  // get unique groups
-  let g = tags.map ( t => t.groups);
+  let g = lookup.items.map ( t => t.groups);
   let groups = new Set(g.flat())
   var result = [];
   groups.forEach( g => {
-    result.push({groupName: g, tags: tags.filter(t => t.groups.includes(g))});
-  })
+    var tags = lookup.items.filter(t => t.groups.includes(g));
+    result.push({groupName: g, tags: tags });
+  });
   return result;
 }
 
+/**
+ * 
+ * @returns lookup instance, with properties items and keyValues.
+ */
 const getResourceTypes = async function() {
-  const lookup = await getLookup(RESOURCE_TYPES_ID);
-  return lookup.items;
+  return await getLookup(RESOURCE_TYPES_ID);
 }
 
 const getLookup = async function(lookupId) {

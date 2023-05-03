@@ -1,9 +1,6 @@
 <template>
   <div class="group">
-    <h1 v-if="showHeaderLink">
-        <router-link :to="headingLink">{{ heading }}</router-link>
-    </h1>
-    <h1 v-else>{{ heading }}</h1>
+    <row-header :title="heading" :link="headingLink"></row-header>    
     <ul>
       <li v-for="resource in resources" :key="resource.id">
         <podcast-card :resource="resource" @click="$emit('click', resource)"></podcast-card>
@@ -14,12 +11,14 @@
 
 <script>
 import PodcastCard from './PodcastCard.vue'
+import RowHeader from './RowHeader.vue'
 
 export default {
   name: "podcast-group",
   emits: ['click'],
   components: { 
-    PodcastCard 
+    PodcastCard,
+    RowHeader,
   },
   props: {
     heading: String,
@@ -40,10 +39,12 @@ export default {
 <style scoped>
 .group ul {
   list-style-type: none;
+  padding-left:0px;
 }
 
 .group li {
   display: inline-block;
   padding-left: 20px;
+  padding-left:0px;
 }
 </style>

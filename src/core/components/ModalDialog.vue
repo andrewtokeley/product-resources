@@ -186,7 +186,6 @@ export default defineComponent({
 } */
 
 .modal__content {
-  color: var(--prr-mediumgrey);
   font-size: 1em;
   flex-grow: 1;
   overflow-y: scroll;

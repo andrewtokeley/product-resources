@@ -1,22 +1,24 @@
 <template>
   <div class="resource">
-    <div @click="$emit('click', resource)" class="image">
-      <img :src="resource.imageUrl"  />
+    <div class="left">
+      <resource-image :resource="resource" @info="$emit('click', resource)" @recommend="$emit('recommend', resource)"></resource-image>
+      <div v-if="showTitle">
+        <h1 :title="resource.displayName">{{ resource.displayName }}</h1>
+        <h2>{{ authorsDisplay }}</h2>
+      </div>
     </div>
-    <div v-if="showTitle" class="description">
-      <h1 :title="resource.displayName" class="title">{{ resource.displayName }}</h1>
-      <h2 class="subTitle">{{ authorsDisplay }}</h2>
+    <div v-if="showDescription" class="description">
       <p class="description">{{ resource.description }}</p>
-      <base-button @click="$emit('recommend', resource)">Leave a Review</base-button>
     </div>
   </div>
 </template>
 
 <script>
 import { Resource } from '@/modules/resources/model/resource'
-import BaseButton from '@/core/components/BaseButton.vue';
+import ResourceImage from '@/modules/resources/components/ResourceImage.vue';
+
 export default {
-  components: { BaseButton },
+  components: { ResourceImage },
   name: 'ResourceCard',
   emits: ['recommend', 'click'],
   props: {
@@ -27,10 +29,22 @@ export default {
     showTitle: {
       type: Boolean,
       default: true
+    },
+    showDescription: {
+      type: Boolean,
+      default: false
     }
   },
 
+  methods: {
+    openResource(url) {
+      window.open(url, '_blank');
+    }
+  },
   computed: {
+    squareImage() {
+      return this.resource.resourceType.value.toLowerCase().includes('podcast');
+    },
     authorsDisplay() {
       if (this.resource.authors) {
         return this.resource.authors.join(", ")
@@ -45,21 +59,39 @@ export default {
 
 <style scoped>
 .resource {
+  position: relative;
   display:flex;
   flex-direction: row;
-  padding-bottom:20px;
   background: transparent;
-  height: 215px;
-  overflow: hidden;
+  margin-bottom: 20px;
 }
-.title {
-  font-size: var(--prr-font-size-normal);
+
+.left {
+  display: block;
+  margin-right: 10px;
+  display:flex;
+  flex-direction: column;
+  align-items: left;
+  width: 140px;
+}
+
+h1 {
+  font-size: var(--prr-font-size-small);
+  font-weight: 500;
   margin: 0px 0px 5px 0px;
   padding-bottom: 0px;
+  overflow: hidden;
+   display: -webkit-box;
+   -webkit-line-clamp: 2; /* number of lines to show */
+           line-clamp: 2; 
+   -webkit-box-orient: vertical;
 }
-.subTitle {
+
+h2 {
   font-size: var(--prr-font-size-small);
   margin: 5px 0px 5px 0px;
+  font-weight: 400;
+  color: var(--prr-mediumgrey)
 }
 
 .description {
@@ -68,15 +100,6 @@ export default {
    -webkit-line-clamp: 5; /* number of lines to show */
            line-clamp: 5; 
    -webkit-box-orient: vertical;
-}
-.image img {
-  height:215px;
-  width: 140px;
-  border-radius: 5px;
-  object-fit: cover;
-  border: 1px solid lightgray;
-  margin-right: 20px;
-  cursor: pointer;
 }
 
 </style>

@@ -14,7 +14,7 @@
         <li class="nav-with-submenu">
           <a>CATEGORIES</a>    
           <div ref="submenuDiv" class="submenu">
-            <div v-for="tagGroup in tagGroups" :key="tagGroup.name">
+            <div v-for="tagGroup in tagGroups" :key="tagGroup.groupName">
               <h2 v-if="showCategoryHeading(tagGroup)">{{ tagGroup.groupName.toUpperCase() }}</h2>
               <ul>
                 <li v-for="tag in tagGroup.tags" :key="tag.key" >
@@ -55,9 +55,7 @@ import RecommendDialog from '@/modules/recommendations/views/RecommendDialog.vue
 
 import { auth } from '@/core/services/firebaseInit'
 import { useUserStore } from '@/core/state/userStore'
-
-import { refreshTags, refreshResourceTypes, getTagsByGroup } from '@/modules/resources/services/lookup-service'
-// import RecommendResource from '@/modules/recommendations/views/RecommendResource.vue'
+import { refreshTags, refreshResourceTypes, getTagItemsByGroup } from '@/modules/resources/services/lookup-service'
 
 export default {
   name: 'HeaderBar',
@@ -67,14 +65,13 @@ export default {
     BaseIcon,
     BaseButton,
     RecommendDialog,
-    // RecommendResource
   },
-
-  emits: ['menuAdd', 'recommend'],
 
   props: {
     clearSearch: Boolean,
   },
+
+  emits: ['menuAdd'],
 
   data() {
     return {
@@ -93,27 +90,34 @@ export default {
       {id: 'home', path:'/', title:'HOME'},
       {id: 'books', path:'/type/books', title:'BOOKS'},
       {id: 'podcasts', path:'/type/podcasts', title:'PODCASTS'},
-      {id: 'web', path:'/type/web', title:'WEB'},
+      {id: 'websites', path:'/type/websites', title:'WEB'},
       {id: 'video', path:'/type/video', title:'VIDEO'}
     ]
-    this.tagGroups = await getTagsByGroup();
+    this.tagGroups = await getTagItemsByGroup();
+    console.log('ddd')
   },
   
   methods: {
+
     handleLogout() {
       auth.signOut();
     },
+
     isSelected(nav) {
       return nav.path === this.$route.path;
     },
+
     showCategoryHeading(tagGroup) {
-      return tagGroup.groupName.toUpperCase() != 'GENERAL';
+      return tagGroup.groupName.toUpperCase() != '_GENERAL';
     }
   },
+
   computed: {
+    
     useUserStore() {
       return useUserStore()
     },
+
     menuOptions() {
       const vm = this;
       return {
@@ -174,6 +178,7 @@ export default {
   flex-direction: row;
   width: 100%;
   height: 70px;
+  z-index: 10;
 }
 
 .header .spacer {
