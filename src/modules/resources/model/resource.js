@@ -24,6 +24,7 @@ class Resource {
   static default() {
     // returns a default instance where all the fields, and their child properties are available.
     return new Resource({ 
+      id: null,
       displayName: 'New Resource', 
       resourceType: {key:'books', value:'Book'},
       authors: [], 
@@ -67,8 +68,7 @@ class Resource {
 var resourceConverter = {
   toFirestore: function (resource) {
     const result = {};
-    console.log('ttff')
-    // if (resource.id != null) { result.id = resource.id }
+    
     if (resource.description != null) { result.description = resource.description }
     if (resource.resourceType != null) { result.resourceType = resource.resourceType }
     if (resource.resourceUrl != null) { result.resourceUrl = resource.resourceUrl }

@@ -13,7 +13,7 @@ export default {
   props: {
     size: {
       type: Number,
-      default: 30,
+      default: 50,
     },
     borderSize: {
       type: Number,
@@ -30,7 +30,7 @@ export default {
       return `border: ${this.borderSize}px solid transparent; width: ${this.size}px; height: ${this.size}px;`;
     },
     loaderStyles() {
-      return `border: ${this.borderSize}px solid var(--prr-lightblue); border-top: ${this.borderSize}px solid var(--prr-orange); `;
+      return `border: ${this.borderSize}px solid var(--prr-green); border-top: ${this.borderSize}px solid var(--prr-orange); `;
     },
   },
 };
@@ -40,6 +40,8 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;  
+  justify-content: center;
+  height: 100%;
 }
 .wrapper {
   position: relative;

@@ -48,7 +48,7 @@ export default {
 .base-button {
   position: relative;
   display: inline-block;
-	padding: 10px 20px;
+	/* padding: 10px 20px; */
   margin-left: 10px;
   margin-right: 10px;
   border-radius: 3px;
@@ -62,8 +62,8 @@ export default {
   color: var(--prr-blue);
   /* background: var(--prr-darkgrey);
   color: white; */
-  height: 40px;
-  font-weight: 800;
+  height: 30px;
+  font-weight: 600;
   min-width: 120px;
   transition: background 400ms;
 }

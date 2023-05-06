@@ -10,7 +10,7 @@
 <script>  
 // import { getResourceTypes } from "@/modules/resources/services/lookup-service"
 import BaseSelect from "@/core/components/BaseSelect.vue";
-import { getResourceTypes } from '../services/lookup-service';
+import { getResourceTypes } from '@/modules/resources/services/lookup-service';
 
 export default {
   name: "resource-type-select",
@@ -25,19 +25,26 @@ export default {
   },
   
   async mounted() {
-    this.resourceTypes = await getResourceTypes()
+    const lookup = await getResourceTypes()
+    this.resourceTypes  = lookup.keyValues;
   },
 
   computed: {
     local: {
       get() {
-        return this.modelValue ? this.modelValue : [{key: 'book', value: 'Books'}];
+        return this.modelValue ? this.modelValue : {key: 'book', value: 'Books'};
       },
       set(value) {
         this.$emit('update:modelValue', value);
       }
     }
   },
- 
+  
+  methods: {
+    update(event) {
+      var newValue = event.target.value;
+      this.$emit('update:modelValue', newValue);
+    }
+  }
 }
 </script>

@@ -2,14 +2,30 @@
 import { Resource, resourceConverter } from '../model/resource'
 import { app } from "@/core/services/firebaseInit"
 import { getFirestore, query, collection, doc, getDocs, getDoc, where, addDoc, setDoc, deleteDoc, limit } from "firebase/firestore"; 
+import { getAllRecommendations } from '@/modules/recommendations/services/recommendation-service';
 const db = getFirestore(app);
 
-export {  searchByResourceTypes, searchByTag, searchByText, getResource, updateResource, addResource, deleteResource }
+export {  getResourcesFull, searchByResourceTypes, searchByTag, searchByText, getResource, updateResource, addResource, deleteResource }
 
 const COLLECTION_KEY = "resources";
 
+/**
+ * @param {*} type 
+ * Returns a Resource instance, injecting a recommendations array property
+ * @param {*} resultLimit 
+ */
+const getResourcesFull = async function(type, resultLimit) {
+  var resources = await searchByResourceTypes([type], resultLimit);
+  var recommendations = await getAllRecommendations()
+  for (var i = 0; i<resources.length; i++) {
+    let resource = resources[i];
+    resource.recommendations = recommendations.filter( r => r.resourceId == resource.id );
+    resource.numberOfRecommendations = resource.recommendations.length;
+  }
+  return resources;
+}
+
 const searchByResourceTypes = async function(keys, resultLimit) {
-  console.log('limit')
   if (!resultLimit) { resultLimit = 50 }
   const q = query(collection(db, COLLECTION_KEY).withConverter(resourceConverter), 
     where("resourceType.key", "in", keys), limit(resultLimit));

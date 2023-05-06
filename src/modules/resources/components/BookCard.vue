@@ -1,12 +1,12 @@
 <template>
   <div class="resource">
-    <div class="left">
+    <figure>
       <resource-image :resource="resource" @info="$emit('click', resource)" @recommend="$emit('recommend', resource)"></resource-image>
-      <div v-if="showTitle">
+      <figcaption v-if="showTitle" >
         <h1 :title="resource.displayName">{{ resource.displayName }}</h1>
         <h2>{{ authorsDisplay }}</h2>
-      </div>
-    </div>
+      </figcaption>
+    </figure>
     <div v-if="showDescription" class="description">
       <p class="description">{{ resource.description }}</p>
     </div>
@@ -37,9 +37,9 @@ export default {
   },
 
   methods: {
-    openResource(url) {
-      window.open(url, '_blank');
-    }
+    // openResource(url) {
+    //   window.open(url, '_blank');
+    // }
   },
   computed: {
     squareImage() {
@@ -66,13 +66,21 @@ export default {
   margin-bottom: 20px;
 }
 
-.left {
-  display: block;
-  margin-right: 10px;
-  display:flex;
+figure {
+  display: table;
+  margin: 0px;
+  height: fit-content;
+  /* margin-right: 10px; */
+  /* display:flex;
   flex-direction: column;
-  align-items: left;
-  width: 140px;
+  align-items: left; */
+  /* max-width: 100%; */
+  /* width: 140px; */
+}
+
+figcaption {
+  display:table-caption;
+  caption-side:bottom;
 }
 
 h1 {

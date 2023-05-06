@@ -1,35 +1,37 @@
 <template>
   <div class="modal__mask" @click='$emit("close")'>
     <div class="modal" :class="{ 'modal--fullscreen': fullscreen }" @click='preventClickPropogation'>
-      <div  class="modal__iconActions" >
-        <template v-for="action in iconActions" :key="action.id">
-          <base-icon v-if="action.show" @click="$emit('iconClick', action)">{{  action.iconName }}</base-icon>
-        </template>
-        <base-icon @click='$emit("close")'>close</base-icon>
-      </div>
+      <loading-symbol class="loader" v-if="isLoading"></loading-symbol>
+      <template v-else>
+        <div  class="modal__iconActions" >
+          <template v-for="action in iconActions" :key="action.id">
+            <base-icon v-if="action.show" @click="$emit('iconClick', action)">{{  action.iconName }}</base-icon>
+          </template>
+          <base-icon @click='$emit("close")'>close</base-icon>
+        </div>
 
-      <div v-if="title"><h1 :title="title">{{ title }}</h1></div>
-      <div v-if="subTitle"><h2 :title="subTitle">{{ subTitle }}</h2></div>
+        <div v-if="title"><h1 :title="title">{{ title }}</h1></div>
+        <div v-if="subTitle"><h2 :title="subTitle">{{ subTitle }}</h2></div>
 
-      <div class="modal__content">
-        <slot></slot>
-      </div>
-      
-      <div v-if="buttonActions" class="modal__footer">
-        <template v-for="action in buttonActions" :key="action.id">
-          <base-button
-            v-if="action.show ?? true"
-            :disabled="action.disabled"
-            :isPrimary="action.isPrimary"
-            :isSecondary="action.isSecondary"
-            :isDestructive="action.isDestructive"
-            :showSpinner="action.showSpinner"
-            @click="$emit('buttonClick', action)"
-            >{{ action.title }}</base-button
-          >
-        </template>
-      </div>
-
+        <div class="modal__content">
+          <slot></slot>
+        </div>
+        
+        <div v-if="buttonActions" class="modal__footer">
+          <template v-for="action in buttonActions" :key="action.id">
+            <base-button
+              v-if="action.show ?? true"
+              :disabled="action.disabled"
+              :isPrimary="action.isPrimary"
+              :isSecondary="action.isSecondary"
+              :isDestructive="action.isDestructive"
+              :showSpinner="action.showSpinner"
+              @click="$emit('buttonClick', action)"
+              >{{ action.title }}</base-button
+            >
+          </template>
+        </div>
+      </template>
     </div>
   </div>
 </template>
@@ -39,16 +41,12 @@ import { defineComponent } from "vue";
 
 import BaseButton from "./BaseButton";
 import BaseIcon from "./BaseIcon";
+import LoadingSymbol from "./LoadingSymbol.vue";
 
 export default defineComponent({
   name: "modal-dialog",
-
   emits: ["close", "iconClick", "buttonClick"],
-  
-  components: {
-    BaseButton,
-    BaseIcon,
-  },
+  components: { BaseButton, BaseIcon, LoadingSymbol },
 
   props: {
     title: {
@@ -70,6 +68,10 @@ export default defineComponent({
     buttonActions: {
       type: Array,
       default: () => {[]}
+    },
+    isLoading: {
+      type: Boolean,
+      default: true,
     }
 
   },
@@ -132,13 +134,17 @@ export default defineComponent({
   flex-direction: column;
   position: relative;
   max-width: 500px;
-  min-width: 650px;
+  min-width: 450px;
   max-height: 90%;
   background-color: white;
   border-radius: 5px;
   padding: 45px 0px 20px 0px;
   box-sizing: border-box;
   overflow: hidden;
+}
+
+.loader {
+  align-items: center;
 }
 
 .modal--fullscreen {
@@ -154,7 +160,7 @@ export default defineComponent({
 .modal h1 {
   overflow-x: hidden;
   line-height:normal;
-  white-space: nowrap;
+  /* white-space: nowrap; */
   text-overflow: ellipsis;
   margin:5px 30px;
 }

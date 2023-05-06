@@ -1,10 +1,14 @@
 import Login from './modules/login/views/LoginView'
 import Search from './modules/resources/views/ResourcesSearch'
 import UpdateResource from './modules/resources/views/UpdateResource'
+import ManageResources from './modules/admin/views/ManageResources'
+import ManageRecommendations from './modules/admin/views/ManageRecommendations'
+import Approve from './modules/recommendations/views/ApproveRecommendations'
+import About from './modules/about/views/AboutView'
 import Home from './modules/home/views/ResourcesHome'
 
 export default [
-  {path: '/login', component:Login, meta: { showHeader: false }},
+  {path: '/login', component:Login, meta: { hideHeader: true }},
   
   // home page
   {path: '/', component:Home, meta: { clearSearch: true }},
@@ -17,6 +21,15 @@ export default [
   
   // show all resources of a type 
   {path: '/type/:typeId/', component:Search},
+
+  // approve recommendations
+  {path: '/approve', component:Approve},
+  
+  {path: '/about', component:About},
+  
+  {path: '/admin/resources', component:ManageResources },
+
+  {path: '/admin/recommendations', component:ManageRecommendations },
 
   {path: '/update/:id', component:UpdateResource},
   {path: '/add', component:UpdateResource},

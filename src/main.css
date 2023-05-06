@@ -4,7 +4,7 @@
   --prr-lightblue:#32a5d3;
   --prr-extralightgrey: rgb(241, 243, 244);
   --prr-lightgrey: rgb(231, 231, 231);
-  --prr-mediumgrey: rgb(122, 122, 122);
+  --prr-mediumgrey: rgb(204, 206, 210);
   --prr-darkgrey: #222222;
   --prr-orange: #ff914d;
   --prr-red: #ad0606;
@@ -15,16 +15,18 @@
 
   --prr-font-weight: 400;
   --prr-font-family: 'Work Sans', sans-serif;
-  --prr-font-size-small: 0.8em;
-  --prr-font-size-normal: 1.0rem;
-  --prr-font-size-medium: 1.2em;
-  --prr-font-size-large: 1.5em;
+  --prr-font-size-small: 12px;
+  /* --prr-font-size-normal: 0.9rem; */
+  --prr-font-size-normal: 14px;
+  --prr-font-size-medium: 16px;
+  --prr-font-size-large: 18px;
 }
 
 body {
   background-color: white;
   /* background-color: rgb(228, 228, 228); */
   font-family: var(--prr-font-family);
+  font-size: var(--prr-font-size-normal);
   font-weight: var(--prr-font-weight);
   color: var(--prr-darkgrey);
   box-sizing: border-box;

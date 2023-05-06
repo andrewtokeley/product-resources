@@ -6,11 +6,11 @@
         'material-icons': isMaterialIconProp, 
         'icon--clickable': _options.isClickable ?? true 
       }" 
-      @click.prevent.stop="handleClick">
+      @click.prevent.stop="handleClick" >
     <svg v-if="!isMaterialIconProp">
       <path :d="_options.svgPath" />
     </svg>
-    <span class="icon__text">
+    <span class="icon__text material-symbols-outlined">
       <slot></slot>
     </span>
   </div>
@@ -172,7 +172,7 @@ export default defineComponent({
     },
 
     isMaterialIcon() {
-      return this.options.icon.materialIcon;
+      return this._options.icon.materialIcon;
     },
 
     addListeners() {
@@ -180,21 +180,24 @@ export default defineComponent({
 
       vm.$refs.iconDiv.addEventListener("mouseenter", () => {
         vm.isMouseOver = true;
+        vm.showContextMenu = vm.menu ? true : false;
+        
         // change the background colour based on options
-        if (vm.options.hover) {
-          vm.$refs.iconDiv.style.color = vm.options.hover.colour;
-          vm.$refs.iconDiv.style.backgroundColor = vm.options.hover.backgroundColour;
+        if (vm._options.hover) {
+          vm.$refs.iconDiv.style.color = vm._options.hover.colour;
+          vm.$refs.iconDiv.style.backgroundColor = vm._options.hover.backgroundColour;
         }
       });
 
       this.$refs.iconDiv.addEventListener("mouseleave", () => {
         vm.isMouseOver = false;
-        if (vm.options.background) {
+        //vm.showContextMenu = false;
+        if (vm._options.background) {
           // return to default state. A race condition existed when you closed the sidebar by pressing
           // the cross and this code ran after the component was unmounted.
           if (vm.$refs.iconDiv) {
-            vm.$refs.iconDiv.style.color = vm.options.colour ?? "black";
-            vm.$refs.iconDiv.style.backgroundColor = vm.options.background.colour ?? "white";
+            vm.$refs.iconDiv.style.color = vm._options.colour ?? "black";
+            vm.$refs.iconDiv.style.backgroundColor = vm._options.background.colour ?? "white";
           }
           
         }
@@ -205,7 +208,7 @@ export default defineComponent({
       if (this.menu) {
         this.showContextMenu = !this.showContextMenu;
       } else {
-        if (this.options.isClickable ?? true) {
+        if (this._options.isClickable ?? true) {
           this.$emit("click");
         }
       }

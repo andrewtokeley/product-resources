@@ -37,12 +37,15 @@
         @search="$router.push(`/search/${searchTerm}`)" 
         @mouseover="showCategories=false">
       </search-input>
-      
-      <recommend-dialog v-if="showRecommendDialog" @close="showRecommendDialog = false"></recommend-dialog>
-
       <base-icon :menu="menuOptions">menu</base-icon>
     </div>
-  
+
+    <recommend-dialog v-if="showRecommendDialog" @close="showRecommendDialog = false"></recommend-dialog>
+    <resource-detail 
+      v-if="showResourceDialog" 
+      displayMode="add" 
+      @close="showResourceDialog = false" 
+      ></resource-detail>
   </div>
 </template>
 
@@ -52,6 +55,7 @@ import SearchInput from './SearchInput.vue'
 import TagButton from '@/modules/resources/components/TagButton.vue'
 import BaseButton from './BaseButton.vue'
 import RecommendDialog from '@/modules/recommendations/views/RecommendDialog.vue'
+import ResourceDetail from '@/modules/resources/views/ResourceDetail.vue'
 
 import { auth } from '@/core/services/firebaseInit'
 import { useUserStore } from '@/core/state/userStore'
@@ -65,6 +69,7 @@ export default {
     BaseIcon,
     BaseButton,
     RecommendDialog,
+    ResourceDetail,
   },
 
   props: {
@@ -80,6 +85,7 @@ export default {
       tags: [],
       types: [],
       showRecommendDialog: false,
+      showResourceDialog: false,
       tagGroups: [],
     }
   },
@@ -122,23 +128,32 @@ export default {
       const vm = this;
       return {
         menuItems: [
+        {
+            name: "ADMIN",
+            show: this.useUserStore.isAdmin,
+            iconName: "settings",
+            isLabel: true,
+          },
           {
-            name: "New Resource...",
-            show: this.useUserStore.isLoggedIn,
-            iconName: "menu_book",
+            name: "Resources...",
+            show: this.useUserStore.isAdmin,
+            // iconName: "menu_book",
             action: () => {
-              console.log('add');
-              vm.$emit('menuAdd');
-              // vm.$router.push('add');
+              this.$router.push('/admin/resources');
+              //vm.showResourceDialog = true;
+              // vm.$emit('menuAdd');
             }
           },
           {
-            isDivider: true,
-            show: this.useUserStore.isLoggedIn,
+            name: "Reccommendations...",
+            show: this.useUserStore.isAdmin,
+            action: () => {
+              vm.$router.push('/admin/recommendations');
+            }
           },
           {
             name: "Refresh Lookups",
-            show: this.useUserStore.isLoggedIn,
+            show: this.useUserStore.isAdmin,
             action: () => {
               refreshTags().then ( tags => this.tags = tags );
               refreshResourceTypes();
@@ -146,7 +161,7 @@ export default {
           },
           {
             isDivider: true,
-            show: this.useUserStore.isLoggedIn,
+            show: this.useUserStore.isAdmin,
           },
           {
             name: "Logout",
@@ -164,6 +179,15 @@ export default {
               this.$router.push('/login');
             }
           },
+          {
+            isDivider: true,
+          },
+          {
+            name: "About...",
+            action: () => {
+              this.$router.push('/about');
+            }
+          },
         ]
       }
     }
@@ -173,11 +197,13 @@ export default {
 
 <style scoped>
 .header {
-  font-size: var(--prr-font-size-normal);
+  font-size: var(--prr-font-size-medium);
   display:flex;
   flex-direction: row;
-  width: 100%;
+  /* width: 100%; */
   height: 70px;
+  min-width: 1100px;
+  max-width: 2000px;
   z-index: 10;
 }
 

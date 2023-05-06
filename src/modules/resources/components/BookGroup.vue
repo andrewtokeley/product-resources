@@ -73,16 +73,18 @@ h1 {
 }
 
 .row {
-  margin-left: 20px;
+  /* margin-left: 20px; */
   display: flex;
   flex-wrap: wrap;
-  align-content: flex-start;
-  gap:15px;
+  align-content: center;
+  justify-content: flex-start;
   overflow: scroll;
+  gap: 10px;
 }
 
 .row.singleRow {
   flex-wrap: nowrap;
+  justify-content: space-evenly;
 }
 
 

@@ -4,19 +4,21 @@
     :subTitle="subTitle"
     :iconActions="iconActions"
     :buttonActions="buttonActions"
+    :fullscreen="true"
+    :isLoading="isWorking"
     @close="handleClose" 
     @iconClick="handleIconClick"
     @buttonClick="handleButtonClick"
   >
-    <div v-if="!isWorking">
-      <div v-if="mode == MODE_EDIT_RESOURCE || mode == MODE_ADD_RESOURCE">
-        <edit-resource v-model="editResource"></edit-resource>
-      </div>
-
-      <div v-if="mode == MODE_VIEW_RESOURCE">
-        <view-resource :resource="resource"></view-resource>
-      </div>
+    
+    <div v-if="mode == MODE_EDIT_RESOURCE || mode == MODE_ADD_RESOURCE">
+      <edit-resource v-model="editResource"></edit-resource>
     </div>
+
+    <div v-if="mode == MODE_VIEW_RESOURCE">
+      <view-resource :resource="editResource"></view-resource>
+    </div>
+  
   </modal-dialog>  
 </template>
 
@@ -39,49 +41,36 @@ export default {
   },
   data() {
     return {
-      MODE_VIEW_RESOURCE: "viewResource",
-      MODE_EDIT_RESOURCE: "editResource",
-      MODE_ADD_RESOURCE: "addResource",
-      mode: 'viewResource',
-      isWorking: {
-        type: Boolean,
-        default: true
-      },
-      // isEditing: {
-      //   type: Boolean,
-      //   default: false
-      // },
-      resource: {
-        type: Resource,
-        default: Resource.default()
-      },
-      // this instance will be a copy of the root resource to allow a cancel action
+      MODE_VIEW_RESOURCE: "view",
+      MODE_EDIT_RESOURCE: "edit",
+      MODE_ADD_RESOURCE: "add",
+      mode: 'view',
+      isWorking: true,
       editResource: {
         type: Resource,
         default: Resource.default()
-      }
+      },
     }
   },
 
   props: {
-    resourceId: {
+    resource: {
       type: String,
       default: null
     },
-    initialMode: {
+    displayMode: {
       type: String,
       default: 'view'
     }
   },
 
   emits: ["close"],
-
+  
   async mounted() {
-    console.log('mount')
     this.isWorking = true;
-    this.mode = this.initialMode;
+    this.mode = this.displayMode;
     if (this.mode == this.MODE_VIEW_RESOURCE) {
-      this.resource = await getResource(this.resourceId)
+      this.editResource = cloneDeep(this.resource);
     } else {
       if (this.mode == this.MODE_ADD_RESOURCE) {
         this.editResource = Resource.default();
@@ -96,12 +85,14 @@ export default {
     },
     title() {
       if (this.mode == this.MODE_ADD_RESOURCE) return "New Resource";      
-      if (this.mode == this.MODE_EDIT_RESOURCE) return this.editResource.displayName;
-      if (this.mode == this.MODE_VIEW_RESOURCE) return this.resource.displayName;
-      return "";
+      else return this.editResource.displayName;
+      // if (this.mode == this.MODE_EDIT_RESOURCE) return this.editResource.displayName;
+      // if (this.mode == this.MODE_VIEW_RESOURCE) return this.resource.displayName;
+      // return "";
+
     },
     subTitle() {
-      if (this.mode == this.MODE_VIEW_RESOURCE) return this.resource.authorsList;
+      if (this.mode == this.MODE_VIEW_RESOURCE) return this.editResource.authorsList;
       return null;
     },
     iconActions() {
@@ -109,7 +100,7 @@ export default {
       actions.push( {
           id: 'edit',
           iconName: "edit",
-          show: this.mode == this.MODE_VIEW_RESOURCE && this.useUserStore.isLoggedIn}
+          show: this.mode == this.MODE_VIEW_RESOURCE && this.useUserStore.isAdmin}
           );
       return actions;
     },
@@ -133,13 +124,13 @@ export default {
           id: 'delete',
           title: "Delete...",
           isDestructive: true,
-          show: this.resource && this.useUserStore.isLoggedIn,
+          show: this.editResource && this.useUserStore.isAdmin,
         });
         actions.push( {
           id: 'view',
-          title: this.resource.actionText,
+          title: this.editResource.actionText,
           isPrimary: true,
-          show: this.resource.resourceUrl
+          show: this.editResource.resourceUrl
         });
       }
       return actions;
@@ -150,9 +141,8 @@ export default {
     
     async handleIconClick(action) {
       if (action.id == 'edit') {
-        console.log('ddd')
         // take a copy of the resource
-        this.editResource = cloneDeep(this.resource)
+        //this.editResource = cloneDeep(this.resource)
         // this.isEditing = true;
         this.mode = this.MODE_EDIT_RESOURCE;
       }
@@ -168,20 +158,19 @@ export default {
       } else if (action.id == 'save') {
         if (this.mode == this.MODE_EDIT_RESOURCE) {
           await updateResource(this.editResource);
-          this.resource = cloneDeep(this.editResource);
+          // this.editResource = cloneDeep(this.editResource);
         } else if (this.mode == this.MODE_ADD_RESOURCE) {
-          console.log('add');
           const id = await addResource(this.editResource);
-          this.resource = await getResource(id);
+          this.editResource = await getResource(id);
         }
         this.mode = this.MODE_VIEW_RESOURCE;
       } else if (action.id == 'view') {
-        if (this.resource.resourceUrl) {
+        if (this.editResource.resourceUrl) {
           window.open(this.resource.resourceUrl, '_blank');
         }
       } else if (action.id == 'delete') {
-        if (this.resource.id) {
-          await deleteResource(this.resource.id);
+        if (this.editResource.id) {
+          await deleteResource(this.editResource.id);
           this.$router.push('/');
         }
       }

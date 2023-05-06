@@ -1,53 +1,53 @@
 <template>
-  <div class='page' >
-    <header-bar @menuAdd="handleMenuAdd"></header-bar>
-    <div class='content'>
-      <div v-if="isLoading">
-        <loading-symbol></loading-symbol>
-      </div>
+  <div class='resources-search'>
+    <div v-if="isLoading">
+      <loading-symbol></loading-symbol>
+    </div>
+    <div v-else class="search-results">
       <div><h1 v-if="title">{{ title }}</h1></div>
       <div><p v-if="summary">{{ summary }}</p></div>
 
-      <div v-if="searchResults.length > 0 && !isLoading" class="search-results">
-        <book-group v-if="books" @recommend="showRecommend" @click="showDetail" heading="Books" :resources="books"></book-group>
-        <book-group v-if="web" @recommend="showRecommend" @click="showDetail" heading="Websites" :resources="web"></book-group>
-        <book-group v-if="posts" @recommend="showRecommend" @click="showDetail" heading="Posts" :resources="posts"></book-group>
-        <book-group v-if="podcasts" @recommend="showRecommend" @click="showDetail" heading="Podcasts" :resources="podcasts"></book-group>
-        <podcast-episode-group v-if="episodes" @recommend="showRecommend" @click="showDetail" heading="Podcast Episodes" :resources="episodes"></podcast-episode-group>
+      <div v-if="searchResults.length > 0 && !isLoading" >
+        <book-group v-if="books" heading="Books" :resources="books"></book-group>
+        <book-group v-if="web" heading="Websites" :resources="web"></book-group>
+        <book-group v-if="posts" heading="Posts" :resources="posts"></book-group>
+        <book-group v-if="podcasts" heading="Podcasts" :resources="podcasts"></book-group>
+        <podcast-episode-group v-if="episodes" heading="Podcast Episodes" :resources="episodes"></podcast-episode-group>
       </div>
       <div v-if="searchResults.length == 0 && !isLoading" class="noresults">
         We couldn't find anything matching, <i>{{ searchTerm }}</i>
       </div>
-    </div>
+    
+      <!-- <resource-detail 
+        :fullscreen="true" 
+        v-if="showResourceDetailDialog" 
+        :initialMode="showResourceDetailDialogMode" 
+        @close="closeDetail" 
+        :resourceId="selectedResource ? selectedResource.id : null"></resource-detail>
 
-    <resource-detail :fullscreen="true" v-if="showResourceDetailDialog" :initialMode="showResourceDetailDialogMode" @close="closeDetail" :resourceId="selectedResource ? selectedResource.id : null"></resource-detail>
-    <recommend-dialog v-if="showRecommendDialog" @close="showRecommendDialog = false" :resource="selectedResource"></recommend-dialog>
+      <recommend-dialog v-if="showRecommendDialog" @close="showRecommendDialog = false" :resource="selectedResource"></recommend-dialog> -->
+    </div>
   </div>
 </template>
 
 <script>
-import ResourceDetail from './ResourceDetail.vue'
-import HeaderBar from "@/core/components/HeaderBar.vue";
+// import ResourceDetail from './ResourceDetail.vue'
 import LoadingSymbol from "@/core/components/LoadingSymbol.vue";
+import BookGroup from '../components/BookGroup.vue'
+import PodcastEpisodeGroup from '../components/PodcastEpisodeGroup.vue'
+// import RecommendDialog from '@/modules/recommendations/views/RecommendDialog.vue';
 
 import { searchByResourceTypes, searchByTag, searchByText } from '../services/resource-service.js'
-import BookGroup from '../components/BookGroup.vue'
-// import PodcastGroup from '../components/PodcastGroup.vue'
-import PodcastEpisodeGroup from '../components/PodcastEpisodeGroup.vue'
 import { getTags } from '../services/lookup-service';
-import RecommendDialog from '@/modules/recommendations/views/RecommendDialog.vue';
 
 export default {
   
   name: 'ResourcesSearch',
 
   components: {
-    ResourceDetail,
-    HeaderBar,
     LoadingSymbol,
     BookGroup,
     PodcastEpisodeGroup,
-    RecommendDialog,
   },
 
   data() {
@@ -57,11 +57,11 @@ export default {
       searchCategory: null,
       searchTerm: null,
       searchResults: [],
-      showResourceDetail: false,
-      showResourceAdd: false,
-      showNewRecommendation: false,
-      showRecommendDialog: false,
-      selectedResource: null,
+      // showResourceDetail: false,
+      // showResourceAdd: false,
+      // showNewRecommendation: false,
+      // showRecommendDialog: false,
+      // selectedResource: null,
       isLoading: true,
       // resourceTypes: [],
       // tagsLookup: Object,
@@ -73,30 +73,32 @@ export default {
   },
 
   async mounted() {
-    const vm = this;
+    //const vm = this;
 
-    window.onpopstate = function() {
-      vm.closeDetail()
-    };
+    // close the category list?
+    // window.onpopstate = function() {
+    //   vm.closeDetail()
+    // };
 
-    this.isLoading = true;
+    // this.isLoading = true;
     
     this.loadSearchResults()
 
     // sometimes the request also needs to load the details modal over the page
-    const resourceId = this.$route.query.r 
-    if (resourceId) {
-      const resource = this.searchResults.find ( r => r.id == resourceId );
-      if (resource) {
-        this.showDetail(resource);
-      }
-    }
+    // const resourceId = this.$route.query.r 
+    // if (resourceId) {
+    //   const resource = this.searchResults.find ( r => r.id == resourceId );
+    //   if (resource) {
+    //     this.showDetail(resource);
+    //   }
+    // }
     
-    this.isLoading = false;
+    // this.isLoading = false;
   },
 
   methods: {
     async loadSearchResults() {
+      this.isLoading = true;
       if (this.$route.params.typeId) {
         await this.loadResourcesByType(this.$route.params.typeId);
       } else if (this.$route.params.tagId) {
@@ -104,6 +106,7 @@ export default {
       } else if (this.$route.params.searchTerm) {
         await this.loadResourcesByTextSearch(this.$route.params.searchTerm);
       }
+      this.isLoading = false;
     },
 
     async loadResourcesByType(typeKey) {
@@ -134,33 +137,33 @@ export default {
       this.searchResults = await searchByText(term);
     },
 
-    handleMenuAdd() {
-      this.showResourceDetail = false;
-      this.showNewRecommendation = false;
-      this.showResourceAdd = true;
-    },
+    // handleMenuAdd() {
+    //   this.showResourceDetail = false;
+    //   this.showNewRecommendation = false;
+    //   this.showResourceAdd = true;
+    // },
 
-    showDetail(resource) {
-      // silently update url
-      history.pushState(
-        {},
-        null,
-        this.$route.path + '?r=' + encodeURIComponent(resource.id)
-      )
-      this.selectedResource = resource
-      this.showResourceDetail = true;
-      this.showResourceAdd = false;
-      this.showNewRecommendation = false;
-    },
+    // showDetail(resource) {
+    //   // silently update url
+    //   history.pushState(
+    //     {},
+    //     null,
+    //     this.$route.path + '?r=' + encodeURIComponent(resource.id)
+    //   )
+    //   this.selectedResource = resource
+    //   this.showResourceDetail = true;
+    //   this.showResourceAdd = false;
+    //   this.showNewRecommendation = false;
+    // },
 
-    showRecommend(resource) {
-      this.selectedResource = resource;
-      this.showRecommendDialog = true;
-    },
+    // showRecommend(resource) {
+    //   this.selectedResource = resource;
+    //   this.showRecommendDialog = true;
+    // },
 
-    handleLogin() {
-      this.$router.push('/login')
-    },
+    // handleLogin() {
+    //   this.$router.push('/login')
+    // },
 
     resourcesByType(key) {
       const results = this.searchResults.filter ( resource => resource.resourceType.key == key )
@@ -170,42 +173,42 @@ export default {
       return [];
     },
 
-    async closeDetail(reload) {
-      if (reload) {
-        await this.loadSearchResults()
-      }
-      this.showResourceDetail = false;
-      this.showResourceAdd = false;
-      this.showNewRecommendation = false;
-    },
+    // async closeDetail(reload) {
+    //   if (reload) {
+    //     await this.loadSearchResults()
+    //   }
+    //   this.showResourceDetail = false;
+    //   this.showResourceAdd = false;
+    //   this.showNewRecommendation = false;
+    // },
 
-    layoutClassForType(type) {
-      if (type.key == 'episodes') {
-        return 'vertical-list'
-      }
-      return 'horizontal-list'
-    }
+    // layoutClassForType(type) {
+    //   if (type.key == 'episodes') {
+    //     return 'vertical-list'
+    //   }
+    //   return 'horizontal-list'
+    // }
   },
 
   computed: {
-    showResourceDetailDialog() {
-      return (this.showResourceAdd || this.showResourceDetail || this.showNewRecommendation);
-    },
+    // showResourceDetailDialog() {
+    //   return (this.showResourceAdd || this.showResourceDetail || this.showNewRecommendation);
+    // },
 
-    showResourceDetailDialogMode() { 
-      console.log('mpd')
-      if (this.showResourceAdd) return 'addResource';
-      if (this.showResourceDetail) return 'viewResource';
-      if (this.showNewRecommendation) {
-        if (this.selectedResource) {
-          return 'addRecommendation';
-        } else {
-          return 'newRecommendation';
-        }
+    // showResourceDetailDialogMode() { 
+    //   console.log('mpd')
+    //   if (this.showResourceAdd) return 'add';
+    //   if (this.showResourceDetail) return 'view';
+    //   // if (this.showNewRecommendation) {
+    //   //   if (this.selectedResource) {
+    //   //     return 'addRecommendation';
+    //   //   } else {
+    //   //     return 'newRecommendation';
+    //   //   }
         
-      }
-      return '';
-    },
+    //   // }
+    //   return '';
+    // },
     books() {
       const results = this.resourcesByType('books')
       return results.length>0 ? results : null
@@ -238,70 +241,25 @@ export default {
 
 <style scoped>
 
-.page {
+.resources-search {
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-}
-
-.content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 80%;
-  max-width: 860px;
-}
-
-.content.loading {
-  display: none;
-}
-
-.content h1 {
-  font-size: var(--prr-font-size-large);
-  margin-top: 20px;
-  margin-bottom: 5px;
-}
-.content p {
-  margin: 0px 10px;
-}
-
-.searchWrapper {
-  display:flex;
-  flex-direction: row;
-  align-items: center;
-  width: 80%;
-  height: 100px;
-  border-radius: 18px;
-  background: white;
-  padding: 20px;
 }
 
 .search-results {
   width: 100%;
-  overflow-x:hidden;
-  margin-bottom: 100px;
 }
 
-.searchInput {
-  width: 90%;
+h1 {
+  font-size: var(--prr-font-size-large);
+  margin-top: 20px;
+  margin-bottom: 5px;
 }
 
-.horizontal-list {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  overflow-x: scroll;
-}
-
-.vertical-list {
-  display: flex;
-  flex-direction: column;
-  overflow-x: scroll;
-}
-
-.resource-item {
-  padding: 10px;
-  cursor: pointer;
+p {
+  margin: 0px 10px;
 }
 
 .noresults {

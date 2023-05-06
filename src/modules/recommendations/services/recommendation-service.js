@@ -12,6 +12,7 @@ export { getRecommendation,
   addRecommendation, 
   deleteRecommendation,
   getFeaturedRecommendations,
+  getAllRecommendations,
 }
 
 const COLLECTION_KEY = "recommendations";
@@ -24,6 +25,18 @@ const getRecommendation = async function(id) {
   } else {
     return null;
   }
+}
+
+const getAllRecommendations = async function(resultLimit) {
+  if (!resultLimit) { resultLimit = 100 }
+  const q = query(collection(db, COLLECTION_KEY)
+    .withConverter(recommendationConverter), limit(resultLimit));
+  const querySnapshot = await getDocs(q);
+  const result = [];
+  querySnapshot.forEach((doc) => {
+    result.push(new Recommendation(doc.data()));
+  });
+  return result 
 }
 
 const getRecommendations = async function(resourceId) {

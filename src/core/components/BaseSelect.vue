@@ -167,7 +167,7 @@ select {
   align-items: center;
   position: relative;
 
-  min-width: 15ch;
+  min-width: 35ch;
   height:40px;
 
   background: var(--prr-extralightgrey);

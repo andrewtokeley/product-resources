@@ -30,7 +30,6 @@ export default {
         //signInFlow: "popup",
         signInOptions: [
           {
-            //provider: firebase.auth.GoogleAuthProvider.PROVIDER_ID,
             provider: firebase.auth.GoogleAuthProvider.PROVIDER_ID,
             fullLabel: "Log in with Google",
           }
@@ -64,9 +63,9 @@ export default {
 </script>
 
 <style>
-.firebaseui-title {
+/* .firebaseui-title {
   display: none;
-}
+} */
 </style>
 
 <style scoped>
@@ -83,11 +82,31 @@ export default {
 }
 
 .login__ui {
+  margin-top: 100px;
   height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
+.mdl-shadow--2dp {
+    box-shadow: none;
+}
+
+.firebaseui-info-bar {
+    margin-top: 20px;
+}
+
+div.mdl-progress::after {
+    display: block;
+    color: black;
+    content: "Authenticating";
+    margin: 20px auto;
+    text-align: center;
+}
+
+.mdl-progress {
+    height: 5px;
+}
 </style>
 

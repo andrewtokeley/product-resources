@@ -23,6 +23,7 @@
               >
                   <icon
                       v-if="menuItem.iconName ?? false"
+                      :options="{ hover: { backgroundColour: 'transparent' }, isClickable:  false }"
                       @click="handleMenuItemClick(nil, menuItem)"
                       >{{ menuItem.iconName }}</icon
                   >
@@ -164,7 +165,7 @@ export default {
 </script>
 <style>
 .context-menu-mask {
-  z-index: 1;
+  z-index: 100;
   position: fixed;
   top: 0px;
   left: 0px;
@@ -203,8 +204,9 @@ export default {
 }
 
 .context-menu__row--isLabel {
-  color: var(--prr-mediumgrey);
-  font-style: italic;
+  color: var(--prr-darkgrey);
+  text-transform: uppercase;
+  font-weight: bold;
 }
 .context-menu__row--isLabel:hover {
   background: transparent;

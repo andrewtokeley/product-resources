@@ -40,11 +40,11 @@ export default {
 
 .quote {
   color: var(--prr-darkgrey);
-  font-size: var(--prr-font-size-normal);
+  font-size: var(--prr-font-size-medium);
   font-style: italic;
 }
 .quote.noreason {
-  font-size: var(--prr-font-size-normal);
+  font-size: var(--prr-font-size-medium);
   font-style:normal;
 }
 .by {

@@ -9,45 +9,37 @@
 import ResourceImage from '@/modules/resources/components/ResourceImage.vue';
 import RecommendationWidget from '@/modules/recommendations/components/RecommendationWidget.vue'
 
-import { Resource } from '@/modules/resources/model/resource'
 import { Recommendation } from '@/modules/recommendations/model/recommendation';
 import { getResource } from '@/modules/resources/services/resource-service';
 
+import { ref } from 'vue'
+
 export default {
-  components: { ResourceImage, RecommendationWidget },
+  components: { ResourceImage, RecommendationWidget},
   name: 'feature-card',
   emits: ['recommend', 'click'],
+  data() { return { isLoading: true } },  
   props: {
     recommendation: {
       type: Recommendation,
       required: true
     }
   },
-  data() {
+  async setup(props) {
+    const resource = ref(null);
+    resource.value = await getResource(props.recommendation.resourceId);
     return {
-      resource: Resource.default(),
+      resource
     }
   },
-
-  async mounted() {
-    //get the resource related to the recommendation
-    this.resource = await getResource(this.recommendation.resourceId);
+  mounted() {
+    this.isloading = false;
   },
-
   methods: {
-    openResource(url) {
-      window.open(url, '_blank');
-    }
-  },
-  computed: {
-    authorsDisplay() {
-      if (this.resource.authors) {
-        return this.resource.authors.join(", ")
-      }
-      return null;
-    }
-  },
-  
+    // openResource(url) {
+    //   window.open(url, '_blank');
+    // }
+  },  
 }
 
 </script>
@@ -56,23 +48,19 @@ export default {
 
 
 .featured-card {
-  /* display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 0px; */
-  padding:10px;
+  margin: 25px 0px 0px 20px;
   height: 240px;
+  max-width: 400px;
+  min-width: 300px;
+  flex: 1 1 0px;
   border-radius: 10px;
   background: var(--prr-extralightgrey);
 }
 .quote {
-  margin-top:40px;
-  padding: 10px;
-  /* flex-grow:1; */
+  margin-left: 20px;
 }
 .image {
   float: left;
   vertical-align: middle;
-  /* flex-grow: 2; */
 }
 </style>

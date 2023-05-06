@@ -3,6 +3,7 @@
     :subTitle="subTitle" 
     :title="resourceExists ? 'Review' : 'Recommend'" 
     :buttonActions="buttonActions" 
+    :isLoading="false"
     @buttonClick="handleButtonClick"
     @close="$emit('close')">
     <div class="content" >
