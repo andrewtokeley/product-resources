@@ -30,7 +30,7 @@ export default {
 }
 .row-header {
   position: relative;
-  margin-left: 20px;
+  margin-left: 0px;
 }
 
 .row-header:hover .see-all, .see-all:hover {
@@ -40,7 +40,7 @@ export default {
 }
 .see-all {
   opacity: 0;
-  color: var(--prr-mediumgrey);
+  color: var(--prr-darkgrey);
   cursor: pointer;
   font-size: var(--prr-font-size-small);
   font-weight: 400;
@@ -56,9 +56,9 @@ export default {
 }
 
 h1 {
-  font-size: var(--prr-font-size-medium);
+  font-size: var(--prr-font-size-large);
   text-transform: uppercase;
-  cursor: pointer;
+  /* cursor: pointer; */
 
 }
 

@@ -13,6 +13,7 @@
     <div>
       <view-resource
         :resource="viewResource"
+        @back="handleBackButton"
         @changeResource="handleChangeResource">
       </view-resource>
     </div>
@@ -96,12 +97,14 @@ export default {
   },      
   
   methods: {
-    handleChangeResource(resource) {
+
+    async handleChangeResource(resource) {
       this.viewResource = resource;
-      this.showBackButton = true
+      this.showBackButton = true;
     },
     async handleBackButton() {
       this.viewResource = await getResource(this.viewResource.parentResourceId);
+      this.showBackButton = false;
     },
     async handleButtonClick(action) {
       if (action.id == 'view') {

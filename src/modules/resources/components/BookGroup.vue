@@ -9,19 +9,27 @@
         @recommend="$emit('recommend', resource)" 
         @click="$emit('click', resource)">
       </book-card>
+      <div v-if="showAddRecommendation" class="add-resource-card">
+        
+          <base-icon @click="handleAddRecommendation"
+            :options="{ size: '40px' }">add_circle</base-icon>
+        
+      </div>
     </div>
   </div>
 </template>
 
 <script>
-import BookCard from "./BookCard.vue"
-import RowHeader from './RowHeader.vue';
+import BookCard from "@/modules/resources/components/BookCard.vue"
+import RowHeader from '@/modules/resources/components/RowHeader.vue';
+import BaseIcon from "@/core/components/BaseIcon.vue";
 
 export default {
   name: "book-group",
   components: { 
     BookCard,
     RowHeader,
+    BaseIcon,
   },
 
   emits: ['click', 'recommend'],
@@ -40,6 +48,10 @@ export default {
     resources: {
       type: Array,
       default: () => {[]}
+    },
+    showAddRecommendation: {
+      type: Boolean,
+      default: false,
     }
   },
   computed: {
@@ -52,6 +64,13 @@ export default {
     },
     showHeaderLink() {
       return this.resources && this.headingLink;
+    }
+  },
+  methods: {
+    handleAddRecommendation() {
+      console.log('gg')
+      this.$router.replace({ query: { r: 'new'}});
+      this.$forceUpdate();
     }
   }
 
@@ -87,5 +106,14 @@ h1 {
   justify-content: space-evenly;
 }
 
+.add-resource-card {
+  display:flex;
+  flex-direction: column;
+  justify-content: center;
+  border-radius: 15px;
+  width: 140px;
+  height: 205px;
+  background: var(--prr-extralightgrey);
+}
 
 </style>

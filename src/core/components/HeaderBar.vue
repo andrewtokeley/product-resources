@@ -42,8 +42,8 @@
 
     <recommend-dialog v-if="showRecommendDialog" @close="showRecommendDialog = false"></recommend-dialog>
     <resource-detail 
+      :resource="resourceFromQueryString"
       v-if="showResourceDialog" 
-      displayMode="add" 
       @close="showResourceDialog = false" 
       ></resource-detail>
   </div>
@@ -60,6 +60,8 @@ import ResourceDetail from '@/modules/resources/views/ResourceDetail.vue'
 import { auth } from '@/core/services/firebaseInit'
 import { useUserStore } from '@/core/state/userStore'
 import { refreshTags, refreshResourceTypes, getTagItemsByGroup } from '@/modules/resources/services/lookup-service'
+import { Resource } from '@/modules/resources/model/resource'
+import { getResource } from '@/modules/resources/services/resource-service'
 
 export default {
   name: 'HeaderBar',
@@ -87,6 +89,7 @@ export default {
       showRecommendDialog: false,
       showResourceDialog: false,
       tagGroups: [],
+      resourceFromQueryString: Resource,
     }
   },
   
@@ -100,7 +103,20 @@ export default {
       {id: 'video', path:'/type/video', title:'VIDEO'}
     ]
     this.tagGroups = await getTagItemsByGroup();
-    console.log('ddd')
+    
+    const resourceId = this.$route.query.r   
+  
+    if (resourceId) {
+      if (resourceId.toLowerCase() == 'new') {
+        this.showRecommendDialog = true;
+      } else {
+        const resource = await getResource(resourceId);
+        if (resource) {
+          this.resourceFromQueryString = resource;
+          this.showResourceDialog = true;
+        }
+      }
+    }   
   },
   
   methods: {
@@ -237,6 +253,7 @@ export default {
   border-top: 1px solid var(--prr-green);
   box-shadow: 0 4px 4px rgba(0, 0, 0, 0.3);
   background: white;
+  z-index: 1000;
 }
 
 .submenu h2 {

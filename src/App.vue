@@ -30,7 +30,6 @@ body,
   flex-direction: column;
   align-items: center;
    */
-  width: 90%;
   margin: 0 auto;
   height: 100%;
   width: 100%;
@@ -40,7 +39,7 @@ body,
 .page {
   /* width: 80%; */
   /* width: 900px; */
-  max-width: 1000px;
+  max-width: 900px;
   margin: 0 auto;
   /* display: flex;
   flex-direction: column;

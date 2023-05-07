@@ -154,7 +154,7 @@ export default defineComponent({
   display:flex;
   flex-direction: column;
   position: relative;
-  max-width: 500px;
+  max-width: 800px;
   min-width: 450px;
   max-height: 90%;
   background-color: white;
@@ -221,7 +221,7 @@ export default defineComponent({
   font-size: 1em;
   flex-grow: 1;
   overflow-y: scroll;
-  padding: 0px 35px 0px 40px;
+  padding: 0px 35px 0px 30px;
   margin-bottom: 50px;
   margin-right: 5px;
 }

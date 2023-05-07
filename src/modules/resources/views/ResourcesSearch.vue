@@ -8,24 +8,15 @@
       <div><p v-if="summary">{{ summary }}</p></div>
 
       <div v-if="searchResults.length > 0 && !isLoading" >
-        <book-group v-if="books" heading="Books" :resources="books"></book-group>
-        <book-group v-if="web" heading="Websites" :resources="web"></book-group>
-        <book-group v-if="posts" heading="Posts" :resources="posts"></book-group>
-        <book-group v-if="podcasts" heading="Podcasts" :resources="podcasts"></book-group>
-        <podcast-episode-group v-if="episodes" heading="Podcast Episodes" :resources="episodes"></podcast-episode-group>
+        <book-group v-if="books" :showAddRecommendation="true" heading="Books" :resources="books"></book-group>
+        <book-group v-if="web" :showAddRecommendation="true" heading="Websites" :resources="web"></book-group>
+        <book-group v-if="posts" :showAddRecommendation="true" heading="Posts" :resources="posts"></book-group>
+        <book-group v-if="podcasts" :showAddRecommendation="true" heading="Podcasts" :resources="podcasts"></book-group>
+        <podcast-episode-group v-if="episodes" :showAddRecommendation="true" heading="Podcast Episodes" :resources="episodes"></podcast-episode-group>
       </div>
       <div v-if="searchResults.length == 0 && !isLoading" class="noresults">
         We couldn't find anything matching, <i>{{ searchTerm }}</i>
       </div>
-    
-      <!-- <resource-detail 
-        :fullscreen="true" 
-        v-if="showResourceDetailDialog" 
-        :initialMode="showResourceDetailDialogMode" 
-        @close="closeDetail" 
-        :resourceId="selectedResource ? selectedResource.id : null"></resource-detail>
-
-      <recommend-dialog v-if="showRecommendDialog" @close="showRecommendDialog = false" :resource="selectedResource"></recommend-dialog> -->
     </div>
   </div>
 </template>
@@ -57,14 +48,7 @@ export default {
       searchCategory: null,
       searchTerm: null,
       searchResults: [],
-      // showResourceDetail: false,
-      // showResourceAdd: false,
-      // showNewRecommendation: false,
-      // showRecommendDialog: false,
-      // selectedResource: null,
       isLoading: true,
-      // resourceTypes: [],
-      // tagsLookup: Object,
       bookResources: {
         type: Array,
         default: [{}]
@@ -73,27 +57,7 @@ export default {
   },
 
   async mounted() {
-    //const vm = this;
-
-    // close the category list?
-    // window.onpopstate = function() {
-    //   vm.closeDetail()
-    // };
-
-    // this.isLoading = true;
-    
-    this.loadSearchResults()
-
-    // sometimes the request also needs to load the details modal over the page
-    // const resourceId = this.$route.query.r 
-    // if (resourceId) {
-    //   const resource = this.searchResults.find ( r => r.id == resourceId );
-    //   if (resource) {
-    //     this.showDetail(resource);
-    //   }
-    // }
-    
-    // this.isLoading = false;
+    await this.loadSearchResults()
   },
 
   methods: {
@@ -137,34 +101,6 @@ export default {
       this.searchResults = await searchByText(term);
     },
 
-    // handleMenuAdd() {
-    //   this.showResourceDetail = false;
-    //   this.showNewRecommendation = false;
-    //   this.showResourceAdd = true;
-    // },
-
-    // showDetail(resource) {
-    //   // silently update url
-    //   history.pushState(
-    //     {},
-    //     null,
-    //     this.$route.path + '?r=' + encodeURIComponent(resource.id)
-    //   )
-    //   this.selectedResource = resource
-    //   this.showResourceDetail = true;
-    //   this.showResourceAdd = false;
-    //   this.showNewRecommendation = false;
-    // },
-
-    // showRecommend(resource) {
-    //   this.selectedResource = resource;
-    //   this.showRecommendDialog = true;
-    // },
-
-    // handleLogin() {
-    //   this.$router.push('/login')
-    // },
-
     resourcesByType(key) {
       const results = this.searchResults.filter ( resource => resource.resourceType.key == key )
       if (results) {
@@ -173,42 +109,10 @@ export default {
       return [];
     },
 
-    // async closeDetail(reload) {
-    //   if (reload) {
-    //     await this.loadSearchResults()
-    //   }
-    //   this.showResourceDetail = false;
-    //   this.showResourceAdd = false;
-    //   this.showNewRecommendation = false;
-    // },
-
-    // layoutClassForType(type) {
-    //   if (type.key == 'episodes') {
-    //     return 'vertical-list'
-    //   }
-    //   return 'horizontal-list'
-    // }
   },
 
   computed: {
-    // showResourceDetailDialog() {
-    //   return (this.showResourceAdd || this.showResourceDetail || this.showNewRecommendation);
-    // },
-
-    // showResourceDetailDialogMode() { 
-    //   console.log('mpd')
-    //   if (this.showResourceAdd) return 'add';
-    //   if (this.showResourceDetail) return 'view';
-    //   // if (this.showNewRecommendation) {
-    //   //   if (this.selectedResource) {
-    //   //     return 'addRecommendation';
-    //   //   } else {
-    //   //     return 'newRecommendation';
-    //   //   }
-        
-    //   // }
-    //   return '';
-    // },
+    
     books() {
       const results = this.resourcesByType('books')
       return results.length>0 ? results : null

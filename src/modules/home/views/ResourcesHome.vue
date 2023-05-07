@@ -66,6 +66,7 @@ section {
   border-radius: 15px;
   background: var(--prr-extralightgrey);
   overflow: hidden;
+  padding: 0px 10px;
 }
 section.featured {
   width: 100%;

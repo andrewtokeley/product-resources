@@ -8,46 +8,54 @@
     @close="$emit('close')">
     <div class="content" >
 
-      <p v-if="!resourceExists">Thank you so much for recommending a new resource!</p>
-      <!-- <p v-else>Thanks for leaving a review!</p> -->
-
-      <base-input v-if="!resourceExists"
-        v-model="recommendation.resourceUrl" 
-        @blur="validate('resourceUrl')"
-        :errorMessage="errorMessage['resourceUrl']"
-        :options="{ placeholder: 'Link to Resource', readOnly: isSaving, inlineErrors: false }">
-      </base-input>
-      
-      <div class="label" v-if="!resourceExists">If you'd like to leave a public review...</div>
-
-      <div class="double-line">
-        <base-input v-model="recommendation.name" 
-            @blur="validate('name')"
-            :errorMessage="errorMessage['name']"
-            :options="{ placeholder: 'Your Name (optional)', readOnly: isSaving}">
-          </base-input>
-          
-        <base-input v-model="recommendation.website" 
-          @blur="validate('website')"
-          :errorMessage="errorMessage['website']"
-          :options="{ placeholder: 'Your LinkedIn/Website (optional)', inlineErrors: true, readOnly: isSaving}">
+      <div class="left">
+        <p v-if="!resourceExists">Thank you so much for recommending a new resource!</p>
+        
+        <base-input v-if="!resourceExists"
+          v-model="recommendation.resourceUrl" 
+          @blur="validate('resourceUrl')"
+          :errorMessage="errorMessage['resourceUrl']"
+          :options="{ placeholder: 'Link to Resource', readOnly: isSaving, inlineErrors: false }">
         </base-input>
+
+        <div class="label">We think it's important for all resources to have at least one written recommendation.</div>
+        <base-multiline-text 
+          v-model="recommendation.reason"
+          @blur="validate('reason')"
+          :errorMessage="errorMessage['reason']"
+          :options="{ numberOfLines: 5, 
+            maximumLength: 1000, 
+            inlineErrors: false,
+            showCharacterCount: true, 
+            placeholder: 'Reason for recommending', 
+            readOnly: isSaving}">
+        </base-multiline-text>
+
+        <div class="label" v-if="!resourceExists">Personalise your review (optional)</div>
+
+        <div class="double-line">
+          <base-input v-model="recommendation.name" 
+              @blur="validate('name')"
+              :errorMessage="errorMessage['name']"
+              :options="{ placeholder: 'Your Name', readOnly: isSaving}">
+            </base-input>
+            
+          <base-input v-model="recommendation.website" 
+            @blur="validate('website')"
+            :errorMessage="errorMessage['website']"
+            :options="{ placeholder: 'Your LinkedIn/Website', inlineErrors: true, readOnly: isSaving}">
+          </base-input>
+        </div>
+        <div v-if="!resourceExists" class="label">We'll check out the resource and assuming it's relevant, publish it shortly.</div>
+        <div v-else class="label">We'll publish your review shortly.</div>
       </div>
       
-      <base-multiline-text 
-        v-model="recommendation.reason"
-        @blur="validate('reason')"
-        :errorMessage="errorMessage['reason']"
-        :options="{ numberOfLines: 5, 
-          maximumLength: 1000, 
-          inlineErrors: false,
-          showCharacterCount: true, 
-          placeholder: 'Why do you like it?', 
-          readOnly: isSaving}">
-      </base-multiline-text>
+      <div class="right" >
+        <p v-if="!recommendation.reason">- Preview -</p>
+        <recommendation-widget v-if="recommendation.reason" :recommendation="recommendation"></recommendation-widget>
+      </div>
       
-      <div v-if="!resourceExists" class="label">We'll check out the resource and assuming it's relevant, publish it shortly.</div>
-      <div v-else class="label">We'll publish your review shortly.</div>
+      
       
     </div>
   </modal-dialog>
@@ -62,11 +70,12 @@ import { Recommendation } from '../model/recommendation'
 import { Resource } from '@/modules/resources/model/resource'
 
 import { addRecommendation } from '@/modules/recommendations/services/recommendation-service'
-import { validateObject, validateProperty } from '@/core/model/validation'
+import { isObjectValid, validateProperty } from '@/core/model/validation'
+import RecommendationWidget from '../components/RecommendationWidget.vue'
 
 export default {
 name: "recommend-dialog",
-components: { BaseInput, BaseMultilineText, ModalDialog },  
+components: { BaseInput, BaseMultilineText, ModalDialog, RecommendationWidget },  
 emits: ['close','save'],
 props: {
   resource: {
@@ -118,8 +127,8 @@ methods: {
 
   async handleAdd() {
     const _this = this;
-    let validate = validateObject(this.recommendation, this.recommendation.schema);
-    if (validate.success) {
+    let valid = isObjectValid(this.recommendation, this.recommendation.schema);
+    if (valid) {
       this.isSaving = true;
       await addRecommendation(this.recommendation);
       setTimeout(function () {
@@ -142,10 +151,25 @@ methods: {
 
 <style scoped>
 
-.content.centred {
+.content {
   display:flex;
   align-items: center;
   justify-items: center;
+  /* justify-content: center; */
+}
+.left {
+  width: 400px;
+}
+.right {
+  margin-left: 30px;
+  width: 300px;
+  /* background: var(--prr-extralightgrey);
+  border-radius: 15px; */
+}
+.right p {
+  width: 100%;
+  text-align: center;
+  font-weight: bold;
 }
 .double-line{
 display: flex;

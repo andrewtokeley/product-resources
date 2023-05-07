@@ -1,5 +1,19 @@
 <template>
   <div class="view-resource">
+    <div class="categories">
+      <div v-if="resource.parentResourceName" class="tagGroup singleRow">
+        <span class="label">Parent Resource: </span>
+        <span><a @click="$emit('back')">{{ resource.parentResourceName }}</a></span>
+      </div>
+      <div v-if="resource.publishedDateFormatted" class="tagGroup">
+        <span class="label">Published: </span>
+        <span>{{ resource.publishedDateFormatted }}</span>
+      </div>
+      <div v-if="resource.tags && resource.tags.length > 0" class="tagGroup">
+        <span class="label">Categories: </span>
+        <a v-for="tag in resource.tags" :key="tag.key" :href="`/tag/${tag.key}`">{{ tag.value }}</a>
+      </div>
+    </div>
     <div class="topblock" :class="{ rectangle: isBook, square : !isBook }" >
       <img class="image" :src="resource.imageUrl ?? resource.parentResourceImageUrl" />
       <p>{{resource.description}}</p>
@@ -11,24 +25,15 @@
         :recommendation="recommendation">
       </recommendation-widget>
     </div>
-    <div class="categories">
-      <div v-if="resource.publishedDateFormatted" class="tagGroup">
-        <span class="label">Published: </span>
-        <span>{{ resource.publishedDateFormatted }}</span>
-      </div>
-      <div v-if="resource.tags && resource.tags.length > 0" class="tagGroup">
-        <span class="label">Categories: </span>
-        <a v-for="tag in resource.tags" :key="tag.key" :href="`/tag/${tag.key}`">{{ tag.value }}</a>
-      </div>
-    </div>
-    <div v-if="relatedResources?.length > 0" class="related">
+    <template v-if="relatedResources?.length > 0">
       <h2>Related</h2>
-      <template v-for="resource in relatedResources" :key="resource.id">
-        <h3><a @click="$emit('changeResource', resource)"> {{ resource.displayName }} </a></h3>
+      <div v-for="resource in relatedResources" :key="resource.id" 
+        class="related"
+        @click="$emit('changeResource', resource)">
+        <h3>{{ resource.displayName }}</h3>
         <p>{{resource.description}}</p>
-        <hr />
-      </template>
-    </div>
+      </div>
+    </template>
 
   </div>
 </template>
@@ -42,7 +47,7 @@ import { getRelatedResources } from '../services/resource-service';
 export default {
   components: { RecommendationWidget },
   name: "view-resource",
-  emit: ['changeResource'],
+  emit: ['changeResource', 'back'],
   props: {
     resource: {
       type: Resource,
@@ -77,7 +82,6 @@ export default {
 </script>
 
 <style scoped>
-
 .topblock.square {
   min-height: 150px;
   margin-bottom: 20px;
@@ -112,6 +116,15 @@ export default {
   white-space: pre-wrap;
 }
 
+.tagGroup.singleRow{
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.singleRow .label {
+  text-overflow: ellipsis;
+}
+
 .categories a {
   margin-right: 10px;
 }
@@ -134,5 +147,11 @@ export default {
   width:50%;
   margin: 20px 0px 40px 0px;
 } */
-
+.related {
+  background: var(--prr-extralightgrey);
+  border-radius: 15px;
+  padding: 10px;
+  margin-bottom: 15px;
+  cursor: pointer;
+}
 </style>
