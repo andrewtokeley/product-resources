@@ -1,7 +1,7 @@
 <template>
   <div class="view-resource">
     <div class="topblock" :class="{ rectangle: isBook, square : !isBook }" >
-      <img class="image" :src="resource.imageUrl" />
+      <img class="image" :src="resource.imageUrl ?? resource.parentResourceImageUrl" />
       <p>{{resource.description}}</p>
     </div>  
     <div class="recommendations">
@@ -21,6 +21,14 @@
         <a v-for="tag in resource.tags" :key="tag.key" :href="`/tag/${tag.key}`">{{ tag.value }}</a>
       </div>
     </div>
+    <div v-if="relatedResources?.length > 0" class="related">
+      <h2>Related</h2>
+      <template v-for="resource in relatedResources" :key="resource.id">
+        <h3><a @click="$emit('changeResource', resource)"> {{ resource.displayName }} </a></h3>
+        <p>{{resource.description}}</p>
+        <hr />
+      </template>
+    </div>
 
   </div>
 </template>
@@ -29,11 +37,12 @@
 import { Resource } from "@/modules/resources/model/resource";
 import RecommendationWidget from '@/modules/recommendations/components/RecommendationWidget.vue';
 import { getRecommendations } from "@/modules/recommendations/services/recommendation-service";
+import { getRelatedResources } from '../services/resource-service';
 
 export default {
   components: { RecommendationWidget },
   name: "view-resource",
-
+  emit: ['changeResource'],
   props: {
     resource: {
       type: Resource,
@@ -44,11 +53,15 @@ export default {
   data() {
     return {
       recommendations: [],
+      relatedResources: [],
     }
   },
 
-  async mounted() {
-    this.recommendations = await getRecommendations(this.resource.id);
+  watch: {
+    async resource() {
+      this.recommendations = await getRecommendations(this.resource.id);
+      this.relatedResources = await getRelatedResources(this.resource.id);    
+    }
   },
 
   computed: {

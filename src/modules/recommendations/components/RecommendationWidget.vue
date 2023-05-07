@@ -54,8 +54,7 @@ export default {
 
 hr {
   width: 40%;
-  border: 0px;
-  border-bottom: 1px solid var(--prr-mediumgrey);
   margin-bottom: 30px;
 }
+
 </style>

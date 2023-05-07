@@ -85,7 +85,6 @@ import AuthorsList from "@/modules/resources/components/AuthorsList"
 import { Resource } from '@/modules/resources/model/resource';
 import { cloneDeep, tap, set } from 'lodash';
 import { getResourceTypes } from '../services/lookup-service';
-import { validateProperty } from '@/core/model/validation';
 
 export default {
   components: { 

@@ -1,15 +1,20 @@
 <template>
   <modal-dialog 
-    :title="resource.displayName" 
-    :subTitle="resource.authorsList"
+    :title="viewResource.displayName" 
+    :subTitle="viewResource.authorsList"
     :buttonActions="buttonActions"
     :fullscreen="true"
     :isLoading="false"
+    :showBackButton="showBackButton"
     @close="handleClose" 
     @buttonClick="handleButtonClick"
+    @backButtonClick="handleBackButton"
   >
     <div>
-      <view-resource :resource="resource"></view-resource>
+      <view-resource
+        :resource="viewResource"
+        @changeResource="handleChangeResource">
+      </view-resource>
     </div>
   </modal-dialog>  
 </template>
@@ -17,10 +22,10 @@
 <script>
 import ModalDialog from '@/core/components/ModalDialog.vue'
 import ViewResource from './ViewResource.vue';
-
+import { cloneDeep } from 'lodash';
 import { useUserStore } from '@/core/state/userStore'
-import { approveResource, unapproveResource } from '../services/resource-service';
-
+import { approveResource, getResource, unapproveResource } from '../services/resource-service';
+import { Resource } from "@/modules/resources/model/resource"
 export default {
   name: 'resource-modal',
   components: {
@@ -33,12 +38,22 @@ export default {
       default: null
     }
   },
+  data() {
+    return {
+      viewResource: Resource.default(),
+      showBackButton: false,
+    }
+  },
 
-  emits: ["close", "updatedApproval"],
+  emits: ["close", "updatedApproval", "addRelated"],
   
+  mounted() {
+    this.viewResource = cloneDeep(this.resource);
+  },
+
   computed: { 
     approvalError() {
-      let validation = this.resource.validate();
+      let validation = this.viewResource.validate();
       if (validation) {
         // validation[propName].errorMessage exists, but may change to array for this to be easier 
         return "error"
@@ -55,41 +70,55 @@ export default {
           title: "Approve",
           align: 'left',
           disabled: this.approvalError?.length > 0,
-          show: !this.resource.approved && this.useUserStore.isAdmin,
+          show: !this.viewResource.approved && this.useUserStore.isAdmin,
         },
         {
           id: 'unpublish',
           title: "Un-Approve",
           align: 'left',
           isSecondary: true,
-          show: this.resource.approved && this.useUserStore.isAdmin,
+          show: this.viewResource.approved && this.useUserStore.isAdmin,
+        },
+        {
+          id: 'addRelated',
+          title: "Add Related Resource...",
+          align: 'left',
+          show: this.useUserStore.isAdmin && this.viewResource.parentResourceId == null,
         },
         {
           id: 'view',
           title: this.resource.actionText,
           isPrimary: true,
-          show: this.resource.resourceUrl != null && this.resource.resourceUrl.length > 0
+          show: this.viewResource.resourceUrl != null && this.viewResource.resourceUrl.length > 0
         },
       ]
     }
   },      
   
   methods: {
-    
+    handleChangeResource(resource) {
+      this.viewResource = resource;
+      this.showBackButton = true
+    },
+    async handleBackButton() {
+      this.viewResource = await getResource(this.viewResource.parentResourceId);
+    },
     async handleButtonClick(action) {
-      console.log('ggg')
       if (action.id == 'view') {
         if (this.resource.resourceUrl) {
-          window.open(this.resource.resourceUrl, '_blank');
+          window.open(this.viewResource.resourceUrl, '_blank');
         }
       }
       if (action.id == 'publish') {
-        await approveResource(this.resource.id);
+        await approveResource(this.viewResource.id);
         this.$emit('updatedApproval', true);
       }
       if (action.id == 'unpublish') {
-        await unapproveResource(this.resource.id);
+        await unapproveResource(this.viewResource.id);
         this.$emit('updatedApproval', false);
+      }
+      if (action.id == 'addRelated') {
+        this.$emit('addRelated', this.viewResource);
       }
     },
 

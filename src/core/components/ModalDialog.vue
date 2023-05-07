@@ -2,7 +2,9 @@
   <div class="modal__mask" @click='$emit("close")'>
     <loading-symbol class="loader" v-show="isLoading"></loading-symbol>
     <div class="modal" v-if="!isLoading" :class="{ 'modal--fullscreen': fullscreen }" @click='preventClickPropogation'>
-      
+        <div v-if="showBackButton" class="backButton">
+          <base-icon @click="$emit('backButtonClick')">arrow_back_ios_new</base-icon>
+        </div>
         <div  class="modal__iconActions" >
           <template v-for="action in iconActions" :key="action.id">
             <base-icon v-if="action.show" @click="$emit('iconClick', action)">{{  action.iconName }}</base-icon>
@@ -61,7 +63,7 @@ import LoadingSymbol from "./LoadingSymbol.vue";
 
 export default defineComponent({
   name: "modal-dialog",
-  emits: ["close", "iconClick", "buttonClick"],
+  emits: ["close", "iconClick", "buttonClick", "backButtonClick"],
   components: { BaseButton, BaseIcon, LoadingSymbol },
 
   props: {
@@ -88,8 +90,11 @@ export default defineComponent({
     isLoading: {
       type: Boolean,
       default: false,
+    },
+    showBackButton: {
+      type: Boolean,
+      default: false,
     }
-
   },
 
   mounted() {
@@ -159,6 +164,11 @@ export default defineComponent({
   overflow: hidden;
 }
 
+.backButton {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
 .loader {
   align-items: center;
 }

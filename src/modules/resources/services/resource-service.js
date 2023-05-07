@@ -9,13 +9,14 @@ export {
   approveResource, 
   unapproveResource, 
   getResourcesFull, 
+  getRelatedResources,
   searchByResourceTypes, 
   searchByTag, 
   searchByText, 
   getResource, 
   updateResource, 
   addResource, 
-  deleteResource 
+  deleteResource,
 }
 
 const COLLECTION_KEY = "resources";
@@ -26,7 +27,8 @@ const COLLECTION_KEY = "resources";
  * @param {*} resultLimit 
  */
 const getResourcesFull = async function(type, resultLimit) {
-  var resources = await searchByResourceTypes([type], resultLimit);
+  // get all, including the un-approved
+  var resources = await searchByResourceTypes([type], resultLimit, false);
   var recommendations = await getAllRecommendations()
   for (var i = 0; i<resources.length; i++) {
     let resource = resources[i];
@@ -36,10 +38,33 @@ const getResourcesFull = async function(type, resultLimit) {
   return resources;
 }
 
-const searchByResourceTypes = async function(keys, resultLimit) {
+const getRelatedResources = async function(id) {
+  const q =query(collection(db, COLLECTION_KEY).withConverter(resourceConverter), 
+  where("parentResourceId", "==", id));
+  
+  const querySnapshot = await getDocs(q);
+  const result = [];
+  querySnapshot.forEach((doc) => {
+    result.push(new Resource(doc.data()));
+  });
+  return result
+}
+
+const searchByResourceTypes = async function(keys, resultLimit, approvedOnly) {
+  let _approvedOnly = approvedOnly ?? true;
   if (!resultLimit) { resultLimit = 50 }
-  const q = query(collection(db, COLLECTION_KEY).withConverter(resourceConverter), 
-    where("resourceType.key", "in", keys), limit(resultLimit));
+  var q;
+  if (_approvedOnly) {
+    q =query(collection(db, COLLECTION_KEY).withConverter(resourceConverter), 
+    where("resourceType.key", "in", keys), 
+    where("approved", "==", true),
+    limit(resultLimit));
+  } else {
+    q = query(collection(db, COLLECTION_KEY).withConverter(resourceConverter), 
+    where("resourceType.key", "in", keys), 
+    limit(resultLimit));
+  }
+  
   const querySnapshot = await getDocs(q);
   const result = [];
   querySnapshot.forEach((doc) => {

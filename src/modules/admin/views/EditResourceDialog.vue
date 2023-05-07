@@ -6,7 +6,12 @@
     @close="$emit('close')" 
     @buttonClick="handleButtonClick"
     :buttonActions="buttons">
-    <div class="content">        
+    <div class="content"> 
+
+      <div class="double-line" v-if="hasParent">
+        <div>{{ resource.parentResourceId }}</div>
+        <div>{{ resource.parentResourceName }}</div>
+      </div>
       <div class="double-line">
         <base-select
           v-model="editResource.resourceType"
@@ -15,7 +20,7 @@
             placeholder: 'Select Type'}"
         ></base-select>
         
-        <div></div>
+        <div>{{  editResource.id }}</div>
       </div>
 
       <base-input
@@ -107,10 +112,10 @@ export default {
     this.resourceTypes = lookup.keyValues;
 
     // take a copy we can edit
-    if (this.isNew) {
-      this.editResource = Resource.default();
-    } else {
-      this.editResource =  cloneDeep(this.resource);
+    this.editResource =  cloneDeep(this.resource);
+
+    // if we're editing, do a validation check to highlight incomplete fields
+    if (!this.isNew) {
       let result = validateObject(this.editResource, this.editResource.schema);
       if (result) {
         let failedProperties = Object.getOwnPropertyNames(result);
@@ -128,6 +133,9 @@ export default {
   computed: {
     isNew() {
       return this.resource.id == null || this.resource.id.trim().length == 0;
+    },
+    hasParent() {
+      return this.resource.parentResourceId != null;
     },
     buttons() {
       var actions = [];

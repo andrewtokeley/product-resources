@@ -28,7 +28,7 @@ const refreshTags = async function() {
     {key: 'discovery', value:'Discovery', groups: ['_General']},
     {key: 'innovation', value:'Innovation', groups: ['_General']},
     {key: 'growth', value:'Growth', groups: ['_General']},
-  ]});
+]});
   await addLookup(lookup)
   return lookup;
 }

@@ -9,6 +9,7 @@
       <div class="action-items" >
         <div class="label">Filter By:</div>
         <resource-type-select v-model="resourceType"></resource-type-select>
+        <span class="label">{{ this.resources.length }} {{ resourceType.value?.toLowerCase() }}s returned</span>
       </div>
       <div class="action-items">
         <base-button :disabled="isLoading" :isSecondary="true" @click="showExport = true">Export...</base-button>
@@ -50,9 +51,23 @@
       </tbody>
     </table>
     <loading-symbol class="loader" v-else></loading-symbol>
-    <edit-resource-dialog :resource="resource" v-if="showEdit" @added="handleAdded" @saved="handleSaved" @close="showEdit = false"></edit-resource-dialog>
-    <resource-detail v-if="showView" :resource="resource" @close="showView = false" @updatedApproval="handleApproval"></resource-detail>
-    <!-- <edit-resource-dialog v-if="showAdd" @close="showAdd = false"></edit-resource-dialog> -->
+    
+    <edit-resource-dialog 
+      :resource="resource" 
+      v-if="showEdit" 
+      @added="handleAdded" 
+      @saved="handleSaved" 
+      @close="showEdit = false">
+    </edit-resource-dialog>
+    
+    <resource-detail 
+      v-if="showView" 
+      :resource="resource" 
+      @close="showView = false" 
+      @updatedApproval="handleApproval"
+      @addRelated="handleAddRelated">
+    </resource-detail>
+    
     <confirmation-dialog 
       v-if="showDeleteConfirm"
       heading="Delete Resource" 
@@ -86,6 +101,7 @@ export default {
   data() {
     return {
       resource: Resource,
+      parentResource: Resource,
       resources: [],
       showEdit: false,
       showAdd: false,
@@ -94,19 +110,20 @@ export default {
       resourceType: {},
       isDeleting: false,
       isLoading: true,
-      sortedBy: String,
-      sortedByOrder: { displayName: 'desc' },
+      sortedBy: 'displayName',
+      sortedByOrder: {},
     }
   },
   mounted() {
-    this.resourceType = { key: 'books', value: "Books"}
+    this.resourceType = { key: 'books', value: "Book"}
   },
   watch: {
     resourceType(value) {
       this.isLoading = true;
       getResourcesFull(value.key).then( (resources) => {
         this.resources = resources;
-        this.sortBy('displayName');
+        // resort the column, but don't toggle direction
+        this.sortBy(this.sortedBy, false);
         this.isLoading = false;
       })
     } 
@@ -123,20 +140,41 @@ export default {
       classes.desc = this.sortedByOrder[propName] == 'desc';
       return classes;
     },
-    sortBy(propName) {
+
+    sortBy(propName, toggle) {
       this.sortedBy = propName;
-      if (this.sortedByOrder[propName] == 'desc') {
-        this.sortedByOrder[propName] = 'asc'
-      } else {
-        this.sortedByOrder[propName] = 'desc'
+      let _toggle = toggle ?? true;
+
+      var order = this.sortedByOrder[propName] ?? 'asc';
+      if (_toggle) {  
+        // reverse the order
+        if (this.sortedByOrder[propName] == 'desc') {
+          order = 'asc'
+        } else if (this.sortedByOrder[propName] == 'asc') {
+          order = 'desc'
+        }
       }
-      let order = this.sortedByOrder[propName]
+
+      // remember the order for next toggle
+      this.sortedByOrder[propName] = order;
+
       this.resources.sort( (a,b) => { 
         if(a[propName] < b[propName]) { return order == 'asc' ? -1 : 1; }
         if(a[propName] > b[propName]) { return order == 'desc' ? -1 : 1; }
         return 0;
       })
     },
+
+    handleAddRelated(parent) {
+      this.showView = false;
+      this.resource = Resource.default();
+      this.resource.authors = parent.authors;
+      this.resource.parentResourceId = parent.id;
+      this.resource.parentResourceName = parent.displayName;
+      this.resource.parentResourceImageUrl = parent.imageUrl;
+      this.showEdit = true;
+    },
+
     handleApproval(approved) {
       this.resource.approved = approved;
       this.showView = false;
@@ -200,9 +238,7 @@ export default {
 }
 .label {
   font-size: var(--prr-font-size-normal);
-  margin-bottom: 10px;
-  margin-right: 10px;
-  /* padding-right: 10px; */
+  margin: 0 10px 10px 10px;
 }
 .action-items {
   display: flex;

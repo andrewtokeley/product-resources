@@ -46,3 +46,8 @@ a:hover {
   cursor: pointer;
   color: var(--prr-green);
 }
+
+hr {
+  border: 0px;
+  border-bottom: 1px solid var(--prr-mediumgrey);
+}

@@ -32,7 +32,7 @@ export default {
   computed: {
     local: {
       get() {
-        return this.modelValue ? this.modelValue : {key: 'book', value: 'Books'};
+        return this.modelValue ? this.modelValue : {key: 'books', value: 'Book'};
       },
       set(value) {
         this.$emit('update:modelValue', value);

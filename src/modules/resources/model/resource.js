@@ -19,6 +19,7 @@ class Resource {
     this.tags = config.tags;
     this.parentResourceId = config.parentResourceId;
     this.parentResourceName = config.parentResourceName;
+    this.parentResourceImageUrl = config.parentResourceImageUrl;
     this.relatedResources = config.relatedResources;
     this.source = config.source;
     this.approved = config.approved;
@@ -135,10 +136,10 @@ var resourceConverter = {
     if (resource.authors != null) { result.authors = resource.authors.map( a => a.trim()) }
     if (resource.imageUrl != null) { result.imageUrl = resource.imageUrl }
     if (resource.tags != null) { result.tags = resource.tags }
+
     if (resource.parentResourceId != null) { result.parentResourceId = resource.parentResourceId }
     if (resource.parentResourceName != null) { result.parentResourceName = resource.parentResourceName }
-    if (resource.relatedResources != null) { result.relatedResources = resource.relatedResources }
-    if (resource.source != null) { result.source = resource.source }
+    if (resource.parentResourceImageUrl != null) { result.parentResourceImageUrl = resource.parentResourceImageUrl }
     return result;
   },
 
@@ -158,8 +159,7 @@ var resourceConverter = {
       tags: data.tags ?? [],
       parentResourceId: data.parentResourceId,
       parentResourceName: data.parentResourceName,
-      relatedResources: data.relatedResources,
-      source: data.source,
+      parentResourceImageUrl: data.parentResourceImageUrl,
       approved: data.approved ?? false,
     }
 

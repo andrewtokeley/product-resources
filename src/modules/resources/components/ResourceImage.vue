@@ -56,11 +56,12 @@ export default {
       }
     },
     url() {
-      if (this.resource.imageUrl && this.resource.imageUrl.length > 0) {
-        return this.resource.imageUrl;
-      } else {
-        return 'forceerror';
-      }
+      return this.resource.imageUrl ?? this.resource.parentResourceImageUrl ?? 'forecerror';
+      // if (this.resource.imageUrl && this.resource.imageUrl.length > 0) {
+      //   return this.resource.imageUrl;
+      // } else {
+      //   return 'forceerror';
+      // }
     },
   },
   methods: {
