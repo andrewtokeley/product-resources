@@ -22,6 +22,7 @@
           <th><a @click="sortBy('displayName')" class="sortHeading" :class="sortHeadingClasses('displayName')">Name</a></th>
           <th><a @click="sortBy('authorsList')" class="sortHeading" :class="sortHeadingClasses('authorsList')">Authors</a></th>
           <th ><a @click="sortBy('numberOfRecommendations')" class="sortHeading" :class="sortHeadingClasses('numberOfRecommendations')">Reviews</a></th>
+          <th ><a @click="sortBy('approved')" class="sortHeading" :class="sortHeadingClasses('approved')">Status</a></th>
           <th></th>
         </tr>
       </thead>
@@ -37,6 +38,7 @@
             <a v-if="resource.numberOfRecommendations > 0" @click.prevent="handleRecommendationsClick">{{resource.numberOfRecommendations}}</a>
             <span v-else>-</span>
           </td>
+          <td>{{ resource.statusDescription }}</td>
           <td>
             <div class="actions">
               <base-icon @click="handlePreviewClick(resource)" title="Preview">preview</base-icon>
@@ -49,7 +51,7 @@
     </table>
     <loading-symbol class="loader" v-else></loading-symbol>
     <edit-resource-dialog :resource="resource" v-if="showEdit" @added="handleAdded" @saved="handleSaved" @close="showEdit = false"></edit-resource-dialog>
-    <resource-detail v-if="showView" :resource="resource" mode="view" @close="showView = false"></resource-detail>
+    <resource-detail v-if="showView" :resource="resource" @close="showView = false" @updatedApproval="handleApproval"></resource-detail>
     <!-- <edit-resource-dialog v-if="showAdd" @close="showAdd = false"></edit-resource-dialog> -->
     <confirmation-dialog 
       v-if="showDeleteConfirm"
@@ -74,6 +76,7 @@ import BaseButton from '@/core/components/BaseButton.vue';
 import ConfirmationDialog from '@/core/components/ConfirmationDialog.vue';
 
 import { deleteResource, getResourcesFull } from '@/modules/resources/services/resource-service';
+import { cloneDeep } from 'lodash';
 import { Resource } from '@/modules/resources/model/resource';
 import LoadingSymbol from '@/core/components/LoadingSymbol.vue';
 
@@ -118,7 +121,6 @@ export default {
       classes.sorted = this.sortedBy == propName;
       classes.asc = this.sortedByOrder[propName] == 'asc';
       classes.desc = this.sortedByOrder[propName] == 'desc';
-      console.log(classes);
       return classes;
     },
     sortBy(propName) {
@@ -129,14 +131,16 @@ export default {
         this.sortedByOrder[propName] = 'desc'
       }
       let order = this.sortedByOrder[propName]
-      console.log('sort');
       this.resources.sort( (a,b) => { 
         if(a[propName] < b[propName]) { return order == 'asc' ? -1 : 1; }
         if(a[propName] > b[propName]) { return order == 'desc' ? -1 : 1; }
         return 0;
       })
     },
-
+    handleApproval(approved) {
+      this.resource.approved = approved;
+      this.showView = false;
+    },
     handleAddResource() {
       this.resource = Resource.default();
       this.showEdit = true;
@@ -155,10 +159,12 @@ export default {
       this.showEdit = false;
     },
     handleSaved(resource) {
-      // copy the saved object into the selected resource
-      this.resource.displayName =  resource.displayName;
-      this.resource.imageUrl =  resource.imageUrl;
-      this.resource.authors =  resource.authors;
+      // copy the saved object back into the table/selected element
+      this.resource = cloneDeep(resource);
+      let index = this.resources.findIndex( r => r.id == resource.id )
+      if (index >= 0) {
+        this.resources[index] = this.resource;
+      }
       this.showEdit = false;
     },
     handleDeleteClick(resource) {
@@ -170,13 +176,11 @@ export default {
         this.isDeleting = true;
         await deleteResource(this.resource.id);
         let index = this.resources.indexOf(this.resource);
-        console.log(index);
         if (index >= 0) {
           this.resources.splice(index,1);
         }
         this.resource == null;
       } catch (error) {
-        console.log(error);
         this.isDeleting = false;
       }
       this.isDeleting = false;

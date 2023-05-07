@@ -2,8 +2,9 @@
   <div class="base-input">
     <div class="base-input__input-block">
       <input type="text" 
+        ref="input"
         @input="handleInput" 
-        @blur="handleBlur"
+        @blur="$emit('blur')"
         @focus="$emit('focus')"
         v-model="value"
         :maxLength="_options.maximumLength"
@@ -42,7 +43,10 @@ export default defineComponent({
 
   props: {
     id: String,
-    errorMessage: String,
+    errorMessage: {
+      type: String,
+      default: ''
+    },
     // isMandatory: {
     //   type: Boolean,
     //   default: false,
@@ -67,6 +71,10 @@ export default defineComponent({
       type: Object,
       default: function () { return { onBlur: false, delay: 200, callback: () => { return Promise.resolve(true) }}},
     },
+    hasFocus: {
+      type: Boolean,
+      default: false
+    }
   },
 
   data() {
@@ -112,6 +120,12 @@ export default defineComponent({
     }
   },
 
+  mounted() {
+    if (this.hasFocus) {
+      setTimeout(() => { this.$refs.input.focus() }, 300)
+    }
+  },
+
   methods: {
     runValidation(value) {
       const vm = this;
@@ -140,20 +154,6 @@ export default defineComponent({
             // })
         }
       }, this.validation.delay);
-    },
-
-    handleBlur() {
-      // let newValue = event.target.value;
-      
-      // if (this.isMandatory && newValue.length == 0) {
-      //   this.$emit('error', this.id, 'Mandatory');
-      //   this.errorMessage = "You need to filll in this field.";
-      // } else if (this.validation.onBlur) {
-      //   this.runValidation(newValue);
-      // } else {
-      //   this.errorMessage = ""
-      // }
-      this.$emit('blur');
     },
 
     handleInput(event) {
@@ -237,13 +237,15 @@ export default defineComponent({
 }
 
 .base-input__input--has-error {
-  border-bottom-color: var(--prr-red);
-  border-width: 1px;
+  /* border-bottom-color: var(--prr-red);
+  border-width: 1px; */
+  border: 1px solid var(--prr-red);
 }
 
 .base-input__input--has-error:focus {
-  border-bottom-color: var(--prr-red);
-  border-width: 1px;
+  /* border-bottom-color: var(--prr-red);
+  border-width: 1px; */
+  border: 1px solid var(--prr-red);
 }
 
 .base-input__errorMessage {

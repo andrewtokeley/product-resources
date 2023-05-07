@@ -127,18 +127,6 @@ export default defineComponent({
       return {};
     },
 
-    // derivedOptions() {
-    //   if (this.options) {
-    //     return this.options;
-    //   } else {
-    //     return {
-
-    //     }
-        
-    //   }
-      
-    // },
-
     visibleMenuItems() {
       return this.menu.menuItems.filter( (m) => {
         if (m.show != undefined) {
@@ -190,7 +178,9 @@ export default defineComponent({
       });
 
       this.$refs.iconDiv.addEventListener("mouseleave", () => {
+        console.log('out')
         vm.isMouseOver = false;
+        // vm.showContextMenu = false;
         //vm.showContextMenu = false;
         if (vm._options.background) {
           // return to default state. A race condition existed when you closed the sidebar by pressing
@@ -258,7 +248,7 @@ path {
 
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.2s ease;
+  transition: opacity 0.0s ease;
 }
 
 .fade-enter-from,

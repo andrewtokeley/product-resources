@@ -1,6 +1,6 @@
 <template>
   <modal-dialog 
-    :title="editResource.displayName"
+    :title="modalTitle"
     :fullscreen="true" 
     :isLoading="isWorking"
     @close="$emit('close')" 
@@ -19,6 +19,9 @@
       </div>
 
       <base-input
+        :hasFocus="true"
+        @blur="setTitle"
+        :errorMessage="errorMessage['displayName']"
         v-model="editResource.displayName"
         :options="{   
           maximumLength: 300,
@@ -31,12 +34,14 @@
       </div>
 
       <div class="double-line">
-        <base-input v-model="editResource.imageUrl" :options="{ placeholder: 'Add Image URL'}"></base-input>        
-        <base-input v-model="editResource.resourceUrl" :options="{ placeholder: 'Add Resource URL'}"></base-input>
+        <base-input v-model="editResource.imageUrl" @blur="validate('imageUrl')" :errorMessage="errorMessage['imageUrl']" :options="{ placeholder: 'Add Image URL'}"></base-input>        
+        <base-input v-model="editResource.resourceUrl" @blur="validate('resourceUrl')" :errorMessage="errorMessage['resourceUrl']" :options="{ placeholder: 'Add Resource URL'}"></base-input>
       </div>
 
       <base-multiline-text
         v-model="editResource.description"
+        :errorMessage="errorMessage['description']"
+        @blur="validate('description')"
         :options="{ 
           placeholder: 'Add Description',
           numberOfLines: 10,
@@ -68,6 +73,7 @@ import { cloneDeep } from 'lodash';
 import { getResourceTypes } from '@/modules/resources/services/lookup-service';
 import ModalDialog from '@/core/components/ModalDialog.vue';
 import { addResource, getResource, updateResource } from '@/modules/resources/services/resource-service';
+import { validateObject, validateProperty } from '@/core/model/validation';
 
 export default {
   components: { 
@@ -86,6 +92,8 @@ export default {
       editResource: Resource,
       resourceTypes: [],
       isWorking: true,
+      modalTitle: 'New Resource',
+      errorMessage: [],
     }
   },
 
@@ -103,6 +111,16 @@ export default {
       this.editResource = Resource.default();
     } else {
       this.editResource =  cloneDeep(this.resource);
+      let result = validateObject(this.editResource, this.editResource.schema);
+      if (result) {
+        let failedProperties = Object.getOwnPropertyNames(result);
+        if (failedProperties.length > 0) {
+          failedProperties.forEach( p => {
+            this.errorMessage[p] = result[p].errorMessage;
+            console.log(result[p].errorMessage)
+          })  
+        }
+      }
     }
     this.isWorking = false;
   },
@@ -126,7 +144,7 @@ export default {
       });
       actions.push( {
         id: 'add',
-        title: "Add",
+        title: "Add as Draft",
         isPrimary: true,
         show: this.isNew
       });
@@ -135,6 +153,20 @@ export default {
   },
 
   methods: {
+    validate(prop) {
+      let result = validateProperty(this.editResource, this.editResource.schema, prop);
+      this.errorMessage[prop] = result.errorMessage;
+      if (result.data) {
+        this.editResource[prop] = result.data;
+      }
+    },
+    setTitle() {
+      if (this.editResource.displayName?.length > 0) {
+        this.modalTitle = this.editResource.displayName
+      } else {
+        this.modalTitle = "New Resource"
+      }
+    },
     async handleButtonClick(button) {
       if (button.id == 'add') {
         let id = await addResource(this.editResource);

@@ -1,7 +1,7 @@
 import { Timestamp } from "firebase/firestore";
 const { DateTime } = require("luxon");
 import Result from "@/core/model/Result";
-
+import { isObjectValid, validateProperty, validateObject, validateUrl } from "@/core/model/validation";
 export { Recommendation, recommendationConverter };
 
 class Recommendation {
@@ -19,6 +19,7 @@ class Recommendation {
     this.allowPublishName = config.allowPublishName;
     this.name = config.name;
     this.website = config.website;
+    this.approved = config.approved;
   }
 
   static default() {
@@ -27,29 +28,12 @@ class Recommendation {
       resourceType: {key:'books', value:'Book'},
       allowPublishReason: true,
       allowPublishName: false,
+      approved: false,
     });
   }
 
-  addhttp(url) {
-    if (!/^(?:f|ht)tps?:\/\//.test(url)) {
-        url = "http://" + url;
-    }
-    return url;
-  }
-
-  validateUrl(url) {
-    let tryUrl = this.addhttp(url);
-    try {
-      let url = new URL(tryUrl);
-      // mark as successful and send the modified URL back
-      return Result.success(url.href);
-    } catch (error) {
-      return Result.failure("That URL doesn't look quite right.");
-    }
-  }
-
   /**
-   * Validation routines for each property
+   * Validation schema for use in isObjectValid(object, schema)
    */
   get schema() {
     return {
@@ -58,7 +42,13 @@ class Recommendation {
         if (!value || value.length == 0) {
           return Result.failure("Must enter url.");
         }
-        return this.validateUrl(value);        
+        return validateUrl(value);        
+      },
+      reason: (value) => {
+        if (!value || value.length == 0) {
+          return Result.failure("People will want to know why you love this resource!");
+        }
+        return Result.success();
       },
       name: (value) => {
         if (this.reason && (!value || value.length == 0)) {
@@ -70,34 +60,9 @@ class Recommendation {
         if (!value || value.length == 0) {
           return Result.success();
         }
-        return this.validateUrl(value);  
+        return validateUrl(value);  
       }
 
-    }
-  }
-
-  /**
-   * 
-   * @returns whether all the properties are valid.
-   */
-  isValid() {
-    var valid = true;
-    let props = Object.getOwnPropertyNames(this);
-    for (const i in props) {
-      if (!this.errorStateFor(props[i]).result) {
-        valid = false;
-        break;
-      }
-    }
-    return valid;
-  }
-
-  errorStateFor(propertyName) {
-    let validation = this.schema[propertyName];
-    if (validation) {
-      return validation(this[propertyName])
-    } else {
-      return Result.success();
     }
   }
 
@@ -108,6 +73,17 @@ class Recommendation {
     return null;
   }
 
+  get isValid() {
+    return isObjectValid(this, this.schema);
+  }
+
+  validate() {
+    return validateObject(this, this.schema);
+  }
+
+  validateProperty(propertyName) {
+    return validateProperty(this, this.schema, propertyName);  
+  }
 }
 
 /**
@@ -118,6 +94,7 @@ var recommendationConverter = {
     const result = {};
     console.log('rec')
     if (recommendation.uid != null) result.uid = recommendation.uid;
+    if (recommendation.approved != null) result.approved = recommendation.approved;
     if (recommendation.dateCreated != null && recommendation.dateCreated.isValid) { 
       result.dateCreated = Timestamp.fromDate(recommendation.dateCreated.toJSDate()); 
     } else {
@@ -156,6 +133,7 @@ var recommendationConverter = {
       allowPublishName: data.allowPublishName,
       name: data.name,
       website: data.website,
+      approved: data.approved ?? false,
     }
 
     return new Recommendation(config);

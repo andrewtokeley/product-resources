@@ -82,14 +82,6 @@ export default {
       this.showResourceUrl = false;
     }
   },  
-  // computed: {
-  //   buttonActions() {
-  //     return [
-  //       { id: 'cancel', title: "Cancel", isSecondary: true },
-  //       { id: 'add', disabled: !this.recommendation.isValid(), title: "Recommend", isPrimary: true },  
-  //     ]
-  //   },
-  // },
 
   methods: {
     handleButtonClick(action) {
@@ -99,20 +91,6 @@ export default {
         this.handleAdd();
       }
     },
-
-    // handleError(id, error) {
-    //   console.log(`${id} - ${error}`)
-    // },
-
-    // handleAdd() {
-    //   if (!this.recommendation.reason) {
-    //     this.recommendation.resourceUrl = "a";
-    //   } else {
-    //     // good to save
-    //     addRecommendation(this.recommendation);
-    //     this.$emit('close');
-    //   }
-    // },
 
     validate(prop) {
       console.log('val');

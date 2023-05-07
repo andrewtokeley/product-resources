@@ -1,8 +1,8 @@
 <template>
   <div class="modal__mask" @click='$emit("close")'>
-    <div class="modal" :class="{ 'modal--fullscreen': fullscreen }" @click='preventClickPropogation'>
-      <loading-symbol class="loader" v-if="isLoading"></loading-symbol>
-      <template v-else>
+    <loading-symbol class="loader" v-show="isLoading"></loading-symbol>
+    <div class="modal" v-if="!isLoading" :class="{ 'modal--fullscreen': fullscreen }" @click='preventClickPropogation'>
+      
         <div  class="modal__iconActions" >
           <template v-for="action in iconActions" :key="action.id">
             <base-icon v-if="action.show" @click="$emit('iconClick', action)">{{  action.iconName }}</base-icon>
@@ -18,20 +18,36 @@
         </div>
         
         <div v-if="buttonActions" class="modal__footer">
-          <template v-for="action in buttonActions" :key="action.id">
-            <base-button
-              v-if="action.show ?? true"
-              :disabled="action.disabled"
-              :isPrimary="action.isPrimary"
-              :isSecondary="action.isSecondary"
-              :isDestructive="action.isDestructive"
-              :showSpinner="action.showSpinner"
-              @click="$emit('buttonClick', action)"
-              >{{ action.title }}</base-button
-            >
-          </template>
+          <div>
+            <template v-for="action in buttonActions" :key="action.id">
+              <base-button v-if="action.align == 'left' && (action.show ?? true)"
+                :class="action.align"
+                :disabled="action.disabled"
+                :isPrimary="action.isPrimary"
+                :isSecondary="action.isSecondary"
+                :isDestructive="action.isDestructive"
+                :showSpinner="action.showSpinner"
+                @click="$emit('buttonClick', action)"
+                >{{ action.title }}</base-button
+              >
+            </template>
+          </div>
+          <div>
+            <template v-for="action in buttonActions" :key="action.id">
+              <base-button v-if="action.align != 'left' && (action.show ?? true)"
+                :class="action.align"
+                :disabled="action.disabled"
+                :isPrimary="action.isPrimary"
+                :isSecondary="action.isSecondary"
+                :isDestructive="action.isDestructive"
+                :showSpinner="action.showSpinner"
+                @click="$emit('buttonClick', action)"
+                >{{ action.title }}</base-button
+              >
+            </template>
+          </div>
         </div>
-      </template>
+      
     </div>
   </div>
 </template>
@@ -71,7 +87,7 @@ export default defineComponent({
     },
     isLoading: {
       type: Boolean,
-      default: true,
+      default: false,
     }
 
   },
@@ -207,15 +223,10 @@ export default defineComponent({
   bottom: 0px;
   height: 40px;
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
   /* box-sizing: border-box; */
   margin: 10px 20px 20px 20px;
-}
-
-::-webkit-scrollbar {
-  -webkit-appearance: none;
-  width: 10px;
 }
 
 ::-webkit-scrollbar-thumb {

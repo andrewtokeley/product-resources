@@ -15,7 +15,7 @@
         v-model="recommendation.resourceUrl" 
         @blur="validate('resourceUrl')"
         :errorMessage="errorMessage['resourceUrl']"
-        :options="{ placeholder: 'Link to Resource', readOnly: isSaving, inlineErrors: true }">
+        :options="{ placeholder: 'Link to Resource', readOnly: isSaving, inlineErrors: false }">
       </base-input>
       
       <div class="label" v-if="!resourceExists">If you'd like to leave a public review...</div>
@@ -26,18 +26,21 @@
             :errorMessage="errorMessage['name']"
             :options="{ placeholder: 'Your Name (optional)', readOnly: isSaving}">
           </base-input>
-
+          
         <base-input v-model="recommendation.website" 
           @blur="validate('website')"
           :errorMessage="errorMessage['website']"
           :options="{ placeholder: 'Your LinkedIn/Website (optional)', inlineErrors: true, readOnly: isSaving}">
         </base-input>
       </div>
-
+      
       <base-multiline-text 
         v-model="recommendation.reason"
+        @blur="validate('reason')"
+        :errorMessage="errorMessage['reason']"
         :options="{ numberOfLines: 5, 
           maximumLength: 1000, 
+          inlineErrors: false,
           showCharacterCount: true, 
           placeholder: 'Why do you like it?', 
           readOnly: isSaving}">
@@ -59,6 +62,7 @@ import { Recommendation } from '../model/recommendation'
 import { Resource } from '@/modules/resources/model/resource'
 
 import { addRecommendation } from '@/modules/recommendations/services/recommendation-service'
+import { validateObject, validateProperty } from '@/core/model/validation'
 
 export default {
 name: "recommend-dialog",
@@ -98,7 +102,7 @@ computed: {
   buttonActions() {
     return [
       { id: 'cancel', disabled: this.isSaving, title: "Cancel", isSecondary: true },
-      { id: 'add', showSpinner: this.isSaving, disabled: !this.recommendation.isValid(), title: "Recommend", isPrimary: true },  
+      { id: 'add', showSpinner: this.isSaving, disabled: !this.recommendation.isValid, title: "Recommend", isPrimary: true },  
     ]
   },
 },
@@ -114,7 +118,8 @@ methods: {
 
   async handleAdd() {
     const _this = this;
-    if (this.recommendation.isValid) {
+    let validate = validateObject(this.recommendation, this.recommendation.schema);
+    if (validate.success) {
       this.isSaving = true;
       await addRecommendation(this.recommendation);
       setTimeout(function () {
@@ -124,10 +129,9 @@ methods: {
   },
 
   validate(prop) {
-    let result = this.recommendation.errorStateFor(prop);
+    let result = validateProperty(this.recommendation, this.recommendation.schema, prop);
     this.errorMessage[prop] = result.errorMessage;
     if (result.data) {
-      console.log('dd')
       this.recommendation[prop] = result.data;
     }
   }

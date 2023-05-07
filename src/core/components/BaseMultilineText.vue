@@ -2,7 +2,8 @@
   <div class="base-multiline-text">
     <textarea
       :disabled="disabled"
-      @input="validate"
+      @input="$emit('update:modelValue', $event.target.value)"
+      @blur="$emit('blur')"
       v-model="value"
       :maxLength="_options.maximumLength"
       :rows="_options.numberOfLines"
@@ -10,7 +11,7 @@
       :placeholder="_options.placeholder"
       class="base-multiline-text__textarea"
       :class="{
-        'base-multiline-text__textarea--has-error': errorMessage.length > 0,
+        'base-multiline-text__textarea--has-error': errorMessage?.length > 0,
         'base-multiline-text__textarea--disabled': disabled,
       }"
     />
@@ -22,7 +23,7 @@
     >
       {{ characterCount }}
     </div>
-    <div class="base-multiline-text__errorMessage">{{ errorMessage }}</div>
+    <div v-if="_options.inlineErrors" class="base-multiline-text__errorMessage">{{ errorMessage }}</div>
   </div>
 </template>
 
@@ -31,12 +32,15 @@
 export default {
   name: "base-multiline-text",
 
-  emits: ["update:modelValue"],
+  emits: ["update:modelValue", "blur"],
 
   props: {
     // The bound value of the input, set by clients using the v-model property
     modelValue: String,
-
+    errorMessage: {
+      type: String,
+      default: ''
+    },
     disabled: {
       type: Boolean,
       default: false,
@@ -81,7 +85,7 @@ export default {
       validationDelayTimer: Object,
       validationMessage: "",
       lastValue: null,
-      errorMessage: "",
+      // errorMessage: "",
     };
   },
 
@@ -93,6 +97,7 @@ export default {
         numberOfLines: this.options.numberOfLines ?? 4,
         placeholder: this.options.placeholder ?? "",
         readOnly: this.options.readOnly ?? false,
+        inlineErrors: this.options.inlineErrors ?? false,
       }
     },
     characterCount() {
@@ -118,30 +123,30 @@ export default {
 
   methods: {
     validate(event) {
-      const vm = this;
+      // const vm = this;
       const newValue = event.target.value;
 
       // set a timer to delay the check - this allows a number of keys to be pressed before we call validation callback
       if (this.validation) {
         clearTimeout(this.validationDelayTimer);
 
-        this.validationDelayTimer = setTimeout(function () {
-          // only bother validating if the value is different.
-          if (newValue != vm.lastValue) {
-            vm.validation
-              .callback(newValue)
-              .then(() => {
-                vm.lastValue = newValue;
-                vm.errorMessage = "";
-                vm.$emit("update:modelValue", newValue);
-              })
-              .catch((error) => {
-                vm.errorMessage = error;
-              });
-          } else {
-            console.log("nothing");
-          }
-        }, this.validation.delay);
+        // this.validationDelayTimer = setTimeout(function () {
+        //   // only bother validating if the value is different.
+        //   if (newValue != vm.lastValue) {
+        //     vm.validation
+        //       .callback(newValue)
+        //       .then(() => {
+        //         vm.lastValue = newValue;
+        //         vm.errorMessage = "";
+        //         vm.$emit("update:modelValue", newValue);
+        //       })
+        //       .catch((error) => {
+        //         vm.errorMessage = error;
+        //       });
+        //   } else {
+        //     console.log("nothing");
+        //   }
+        // }, this.validation.delay);
       } else {
         this.$emit("update:modelValue", newValue);
       }
@@ -203,11 +208,11 @@ export default {
 }
 
 .base-multiline-text__textarea--has-error {
-  border-bottom-color: var(--prr-red);
+  border: 1px solid var(--prr-red);
 }
 
 .base-multiline-text__textarea--has-error:focus {
-  border-bottom-color: var(--prr-red);
+  border: 1px solid var(--prr-red);
 }
 
 .base-multiline-text__errorMessage {

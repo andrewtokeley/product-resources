@@ -1,11 +1,22 @@
 
 import { Resource, resourceConverter } from '../model/resource'
 import { app } from "@/core/services/firebaseInit"
-import { getFirestore, query, collection, doc, getDocs, getDoc, where, addDoc, setDoc, deleteDoc, limit } from "firebase/firestore"; 
+import { getFirestore, query, collection, doc, getDocs, getDoc, where, addDoc, setDoc, deleteDoc, limit, updateDoc } from "firebase/firestore"; 
 import { getAllRecommendations } from '@/modules/recommendations/services/recommendation-service';
 const db = getFirestore(app);
 
-export {  getResourcesFull, searchByResourceTypes, searchByTag, searchByText, getResource, updateResource, addResource, deleteResource }
+export {  
+  approveResource, 
+  unapproveResource, 
+  getResourcesFull, 
+  searchByResourceTypes, 
+  searchByTag, 
+  searchByText, 
+  getResource, 
+  updateResource, 
+  addResource, 
+  deleteResource 
+}
 
 const COLLECTION_KEY = "resources";
 
@@ -98,4 +109,22 @@ const addResource = async function(resource) {
 const deleteResource = async function(id) {
   const ref = doc(db, COLLECTION_KEY, id).withConverter(resourceConverter);
   return await deleteDoc(ref);
+}
+
+const approveResource = async function(id) {
+  if (id) {    
+    const ref = doc(db, COLLECTION_KEY, id).withConverter(resourceConverter);
+    return await updateDoc(ref, { approved: true });
+  } else {
+    return null;
+  }
+}
+
+const unapproveResource = async function(id) {
+  if (id) {    
+    const ref = doc(db, COLLECTION_KEY, id).withConverter(resourceConverter);
+    return await updateDoc(ref, { approved: false });
+  } else {
+    return null;
+  }
 }

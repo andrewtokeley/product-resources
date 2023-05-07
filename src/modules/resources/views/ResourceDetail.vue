@@ -1,178 +1,95 @@
 <template>
   <modal-dialog 
-    :title="title" 
-    :subTitle="subTitle"
-    :iconActions="iconActions"
+    :title="resource.displayName" 
+    :subTitle="resource.authorsList"
     :buttonActions="buttonActions"
     :fullscreen="true"
-    :isLoading="isWorking"
+    :isLoading="false"
     @close="handleClose" 
-    @iconClick="handleIconClick"
     @buttonClick="handleButtonClick"
   >
-    
-    <div v-if="mode == MODE_EDIT_RESOURCE || mode == MODE_ADD_RESOURCE">
-      <edit-resource v-model="editResource"></edit-resource>
+    <div>
+      <view-resource :resource="resource"></view-resource>
     </div>
-
-    <div v-if="mode == MODE_VIEW_RESOURCE">
-      <view-resource :resource="editResource"></view-resource>
-    </div>
-  
   </modal-dialog>  
 </template>
 
 <script>
 import ModalDialog from '@/core/components/ModalDialog.vue'
-import EditResource from "@/modules/resources/views/EditResource"
 import ViewResource from './ViewResource.vue';
 
-import { cloneDeep } from 'lodash';
-import { Resource } from '@/modules/resources/model/resource'
-import { getResource, updateResource, addResource, deleteResource } from '../services/resource-service';
 import { useUserStore } from '@/core/state/userStore'
+import { approveResource, unapproveResource } from '../services/resource-service';
 
 export default {
   name: 'resource-modal',
   components: {
     ModalDialog,
-    EditResource,
     ViewResource,
   },
-  data() {
-    return {
-      MODE_VIEW_RESOURCE: "view",
-      MODE_EDIT_RESOURCE: "edit",
-      MODE_ADD_RESOURCE: "add",
-      mode: 'view',
-      isWorking: true,
-      editResource: {
-        type: Resource,
-        default: Resource.default()
-      },
-    }
-  },
-
   props: {
     resource: {
-      type: String,
+      type: Object,
       default: null
-    },
-    displayMode: {
-      type: String,
-      default: 'view'
     }
   },
 
-  emits: ["close"],
+  emits: ["close", "updatedApproval"],
   
-  async mounted() {
-    this.isWorking = true;
-    this.mode = this.displayMode;
-    if (this.mode == this.MODE_VIEW_RESOURCE) {
-      this.editResource = cloneDeep(this.resource);
-    } else {
-      if (this.mode == this.MODE_ADD_RESOURCE) {
-        this.editResource = Resource.default();
-      }
-    }
-    this.isWorking = false;
-  },
-
   computed: { 
+    approvalError() {
+      let validation = this.resource.validate();
+      if (validation) {
+        // validation[propName].errorMessage exists, but may change to array for this to be easier 
+        return "error"
+      }
+      return null;
+    },
     useUserStore() {
       return useUserStore()
     },
-    title() {
-      if (this.mode == this.MODE_ADD_RESOURCE) return "New Resource";      
-      else return this.editResource.displayName;
-      // if (this.mode == this.MODE_EDIT_RESOURCE) return this.editResource.displayName;
-      // if (this.mode == this.MODE_VIEW_RESOURCE) return this.resource.displayName;
-      // return "";
-
-    },
-    subTitle() {
-      if (this.mode == this.MODE_VIEW_RESOURCE) return this.editResource.authorsList;
-      return null;
-    },
-    iconActions() {
-      var actions = [];
-      actions.push( {
-          id: 'edit',
-          iconName: "edit",
-          show: this.mode == this.MODE_VIEW_RESOURCE && this.useUserStore.isAdmin}
-          );
-      return actions;
-    },
     buttonActions() {
-      var actions = [];
-      if (this.mode == this.MODE_EDIT_RESOURCE || this.mode == this.MODE_ADD_RESOURCE) {
-        actions.push( {
-          id: 'cancel',
-          title: "Cancel",
+      return [
+        {
+          id: 'publish',
+          title: "Approve",
+          align: 'left',
+          disabled: this.approvalError?.length > 0,
+          show: !this.resource.approved && this.useUserStore.isAdmin,
+        },
+        {
+          id: 'unpublish',
+          title: "Un-Approve",
+          align: 'left',
           isSecondary: true,
-        });
-        actions.push( {
-          id: 'save',
-          title: "Save",
-          isPrimary: true,
-        });
-        
-      } 
-      if (this.mode == this.MODE_VIEW_RESOURCE) {
-        actions.push( {
-          id: 'delete',
-          title: "Delete...",
-          isDestructive: true,
-          show: this.editResource && this.useUserStore.isAdmin,
-        });
-        actions.push( {
+          show: this.resource.approved && this.useUserStore.isAdmin,
+        },
+        {
           id: 'view',
-          title: this.editResource.actionText,
+          title: this.resource.actionText,
           isPrimary: true,
-          show: this.editResource.resourceUrl
-        });
-      }
-      return actions;
+          show: this.resource.resourceUrl != null && this.resource.resourceUrl.length > 0
+        },
+      ]
     }
-  },
-
+  },      
+  
   methods: {
     
-    async handleIconClick(action) {
-      if (action.id == 'edit') {
-        // take a copy of the resource
-        //this.editResource = cloneDeep(this.resource)
-        // this.isEditing = true;
-        this.mode = this.MODE_EDIT_RESOURCE;
-      }
-    },
-
     async handleButtonClick(action) {
-      if (action.id == 'cancel') {
-        if (this.mode == this.MODE_ADD_RESOURCE) {
-          this.$router.push('/');
-        } else {
-          this.mode = this.MODE_VIEW_RESOURCE;
-        }
-      } else if (action.id == 'save') {
-        if (this.mode == this.MODE_EDIT_RESOURCE) {
-          await updateResource(this.editResource);
-          // this.editResource = cloneDeep(this.editResource);
-        } else if (this.mode == this.MODE_ADD_RESOURCE) {
-          const id = await addResource(this.editResource);
-          this.editResource = await getResource(id);
-        }
-        this.mode = this.MODE_VIEW_RESOURCE;
-      } else if (action.id == 'view') {
-        if (this.editResource.resourceUrl) {
+      console.log('ggg')
+      if (action.id == 'view') {
+        if (this.resource.resourceUrl) {
           window.open(this.resource.resourceUrl, '_blank');
         }
-      } else if (action.id == 'delete') {
-        if (this.editResource.id) {
-          await deleteResource(this.editResource.id);
-          this.$router.push('/');
-        }
+      }
+      if (action.id == 'publish') {
+        await approveResource(this.resource.id);
+        this.$emit('updatedApproval', true);
+      }
+      if (action.id == 'unpublish') {
+        await unapproveResource(this.resource.id);
+        this.$emit('updatedApproval', false);
       }
     },
 
@@ -183,10 +100,7 @@ export default {
         null,
         this.$route.path
       );
-
-      // if we were editing/adding a resource force the search page to refresh the search results.
-      let reload = (this.mode == this.MODE_EDIT_RESOURCE || this.mode == this.MODE_ADD_RESOURCE)
-      this.$emit('close', reload);
+      this.$emit('close');
     }
   }
 

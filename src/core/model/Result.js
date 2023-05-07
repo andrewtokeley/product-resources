@@ -12,8 +12,8 @@ export default class Result {
     return new Result(false, reason);
   }
 
-  constructor(result, message, data) {
-    this.result = result;
+  constructor(success, message, data) {
+    this.success = success;
     this.errorMessage = message;
     this.data = data;
   }
