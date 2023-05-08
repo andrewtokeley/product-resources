@@ -4,7 +4,7 @@
         <span class="icon__text material-symbols-outlined">add_circle</span>
       </div>
       <template v-else>
-        <div class="missing-image-mask" v-if="showMissingImageMask">Missing {{ `${resource?.resourceType.value}` }} Preview</div>  
+        <div class="missing-image-mask" v-if="showMissingImageMask">Resource Image</div>  
         <img 
           v-if="!showMissingImageMask"
           :src="url"

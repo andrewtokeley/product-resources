@@ -28,6 +28,7 @@ const refreshTags = async function() {
     {key: 'discovery', value:'Discovery', groups: ['_General']},
     {key: 'innovation', value:'Innovation', groups: ['_General']},
     {key: 'growth', value:'Growth', groups: ['_General']},
+    {key: 'b2b', value:'B2B', groups: ['_General']},
 ]});
   await addLookup(lookup)
   return lookup;
@@ -36,11 +37,12 @@ const refreshTags = async function() {
 const refreshResourceTypes = async function() {
   await deleteLookup(RESOURCE_TYPES_ID);
   const lookup = new Lookup({id:RESOURCE_TYPES_ID, items:[
-    {key:'books', value:'Book'},
-    {key:'podcasts', value:'Podcast'},
-    {key:'episodes', value:'Podcast Episode'},
-    {key:'posts', value:'Post'},
-    {key:'websites', value:'Website'},
+    {key:'books', value:'Books'},
+    {key:'podcasts', value:'Podcasts'},
+    {key:'episodes', value:'Episodes'},
+    {key:'posts', value:'Posts'},
+    {key:'websites', value:'Websites'},
+    {key:'people', value:'People'},
   ]})
   await addLookup(lookup)
   return lookup;

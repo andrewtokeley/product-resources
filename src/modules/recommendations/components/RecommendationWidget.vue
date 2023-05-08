@@ -45,7 +45,7 @@ export default {
   font-size: var(--prr-font-size-medium);
   display: -webkit-box;
   max-width: 450px;
-  -webkit-line-clamp: 10;
+  -webkit-line-clamp: 12;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }

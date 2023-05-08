@@ -1,17 +1,14 @@
 <template>
   <modal-dialog 
     :title="modalTitle"
+    :subTitle="editResource.statusDescription"
     :fullscreen="true" 
     :isLoading="isWorking"
     @close="$emit('close')" 
     @buttonClick="handleButtonClick"
     :buttonActions="buttons">
     <div class="content"> 
-
-      <div class="double-line" v-if="hasParent">
-        <div>{{ resource.parentResourceId }}</div>
-        <div>{{ resource.parentResourceName }}</div>
-      </div>
+      
       <div class="double-line">
         <base-select
           v-model="editResource.resourceType"
@@ -19,8 +16,7 @@
           :options="{ 
             placeholder: 'Select Type'}"
         ></base-select>
-        
-        <div>{{  editResource.id }}</div>
+        <div></div>
       </div>
 
       <base-input
@@ -53,14 +49,42 @@
           maximumLength: 1000, 
           showCharacterCount: true}"
       ></base-multiline-text>
-      
+      <br/><br/>
+      <hr class="divider"/>
+      <h2>Tags</h2>
+      <p>Select which tags apply to this resource.</p>
       <div v-if="editResource.tags" class="line">
-        <p>Select which tags apply to this resource.</p>
         <tag-selector 
           v-model="editResource.tags"
         ></tag-selector>
       </div> 
 
+      <hr class="divider"/>
+      <h2>Advanced</h2>
+      <!-- <div class="label">ADVANCED</div> -->
+      <div class="label">Resource ID</div>
+      <base-input
+          v-model="editResource.id"
+          :options="{ 
+            readOnly: true}"
+        ></base-input>
+      <div class="label">Parent ID</div>
+      <base-input
+        :errorMessage="errorMessage['displayName']"
+        v-model="editResource.parentResourceId"
+        :options="{   
+          maximumLength: 100,
+          placeholder: 'Add Parent Id (optional)'}"
+      ></base-input>
+      <div class="label">Parent Name</div>
+      <base-input
+        :errorMessage="errorMessage['displayName']"
+        v-model="editResource.parentResourceName"
+        :options="{   
+          maximumLength: 100,
+          placeholder: 'Add Parent Name (optional)'}"
+      ></base-input>
+      
     </div>
   </modal-dialog>
 </template>
@@ -169,8 +193,9 @@ export default {
       }
     },
     setTitle() {
+      
       if (this.editResource.displayName?.length > 0) {
-        this.modalTitle = this.editResource.displayName
+        this.modalTitle = this.editResource.displayName 
       } else {
         this.modalTitle = "New Resource"
       }
@@ -198,6 +223,7 @@ export default {
 .double-line{
 display: flex;
 flex-direction: row;
+align-items: center;
 justify-content: space-around;
 gap:20px;
 /* not sure why I need to set this? */

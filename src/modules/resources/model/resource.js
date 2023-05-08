@@ -84,18 +84,28 @@ class Resource {
 
   get schema() {
     return {
+      // Unless you're a child, you must have an image
       imageUrl: (value) => {
-        if (!value || value?.length == 0) { return Result.failure("Must enter an image url.");}
-        return validateUrl(value);        
+        if (this.parentResourceId == null) {
+          if (!value || value?.length == 0) { 
+            return Result.failure("Must enter an image url.");
+          } else {
+            return validateUrl(value);        
+          }
+        }
+        return Result.success();
       },
+      // Mandatory
       resourceUrl: (value) => {
         if (!value || value?.length == 0) { return Result.failure("Must enter resource url.");}
         return validateUrl(value);        
       },
+      // Mandatory
       displayName: (value) => {
         if (!value || value?.length == 0) { return Result.failure("Must enter display name");}
         return Result.success();
       },
+      // Mandatory
       description: (value) => {
         if (!value || value?.length == 0) { return Result.failure("Must enter a description");}
         return Result.success();

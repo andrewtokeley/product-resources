@@ -23,7 +23,7 @@
           v-model="recommendation.reason"
           @blur="validate('reason')"
           :errorMessage="errorMessage['reason']"
-          :options="{ numberOfLines: 5, 
+          :options="{ numberOfLines: 10, 
             maximumLength: 500, 
             inlineErrors: false,
             showCharacterCount: true, 
@@ -50,12 +50,14 @@
         <div v-else class="label">We'll publish your review shortly.</div>
       </div>
       
-      <div class="right" >
+      <div class="right" v-if="resourceExists" >
         <!-- <resource-image v-if="showImage" :resource="resource" :hideActions="true"></resource-image> -->
-        <resource-image :resource="resource"></resource-image>
-        <div class="recommendation-preview" >
-          <p v-if="!recommendation.reason">- Preview -</p>
-          <recommendation-widget v-if="recommendation.reason" :recommendation="recommendation"></recommendation-widget>
+        <div class="right-inner">
+          <resource-image :resource="resource" :hideActions="true"></resource-image>
+          <div class="recommendation-preview" >
+            <p v-if="!recommendation.reason">- Preview -</p>
+            <recommendation-widget v-if="recommendation.reason" :recommendation="recommendation"></recommendation-widget>
+          </div>
         </div>
       </div>      
     </div>
@@ -66,7 +68,7 @@
 import BaseInput from '@/core/components/BaseInput.vue'
 import BaseMultilineText from '@/core/components/BaseMultilineText.vue'
 import ModalDialog from '@/core/components/ModalDialog.vue'
-import ResourceImage from '@/modules/resources/components/ResourceImage.vue'
+// import ResourceImage from '@/modules/resources/components/ResourceImage.vue'
 import RecommendationWidget from '@/modules/recommendations/components/RecommendationWidget.vue'
 
 import { Recommendation } from '@/modules/recommendations/model/recommendation'
@@ -82,7 +84,6 @@ components: {
   BaseMultilineText, 
   ModalDialog, 
   RecommendationWidget,
-  ResourceImage
 },  
 emits: ['close','save'],
 props: {
@@ -91,6 +92,11 @@ props: {
     default: null
   }
 },
+beforeCreate() {
+      // Not sure why this worked and importing Icon didn't. Something to do with the fact that
+      // Icon contains ContextMenu which contains Icon...
+      this.$options.components.ResourceImage = require("@/modules/resources/components/ResourceImage.vue").default;
+  },
 data() {
   return {
     isSaving: false,
@@ -171,30 +177,50 @@ methods: {
   display:flex;
   align-items: stretch;
   justify-items: center;
+  min-width: 450px;
   /* justify-content: center; */
 }
+
+.left :nth-child(1) {
+  margin-top: 0px;
+}
 .left {
-  width: 400px;
+  width: 300px;
+  flex-grow: 1;
 }
 .right {
-  display:flex;
-  flex-direction: column;;
-  align-items: center;
-  justify-content: flex-start;
+  position: relative;
   margin-left: 30px;
-  padding: 20px 10px;
+  overflow: hidden;
   width: 300px;
-  min-height: 500px;
+  min-height: 400px;
   background: var(--prr-extralightgrey);
   border-radius: 15px;
 }
-.right .recommendation-preview {
+
+.right-inner {
+  position: absolute;
+  top: 20px;
+  left: 0px;
+  right: 0px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  transform-origin: top center;
+  scale: 0.70;
+  display:flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  /* scale: 0.4; */
+}
+.recommendation-preview {
   background: white;
   border-radius: 15px;
-  min-width: 80%;
-  max-width: 80%;
+  width: 100%;
   min-height: 100px;
-  padding:15px;
+  padding:5px;
 }
 .right p {
   width: 100%;

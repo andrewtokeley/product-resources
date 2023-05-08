@@ -26,12 +26,12 @@
       </recommendation-widget>
     </div>
     <template v-if="relatedResources?.length > 0">
-      <h2>Related</h2>
+      <h2>Popular {{ childDescription }}</h2>
       <div v-for="resource in relatedResources" :key="resource.id" 
         class="related"
         @click="$emit('changeResource', resource)">
         <h3>{{ resource.displayName }}</h3>
-        <p>{{resource.description}}</p>
+        <p class="child-description">{{resource.description}}</p>
       </div>
     </template>
 
@@ -70,6 +70,12 @@ export default {
   },
 
   computed: {
+    childDescription() {
+      if (this.relatedResources) {
+        return this.relatedResources[0].resourceType.value + 's';
+      }
+      return null;
+    },
     isBook() {
         if (this.resource.resourceType) {
           return this.resource.resourceType.key == 'books'
@@ -153,5 +159,12 @@ export default {
   padding: 10px;
   margin-bottom: 15px;
   cursor: pointer;
+}
+
+.child-description {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 </style>

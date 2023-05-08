@@ -81,9 +81,9 @@ export default {
       }
       if (typeKey == 'websites') {
         typeKeys.push('posts');
+        typeKeys.push('videos');
       }
       this.searchResults = await searchByResourceTypes(typeKeys);
-      
     },
 
     async loadResourcesByTag(tagKey) {

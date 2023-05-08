@@ -40,7 +40,9 @@ const getResourcesFull = async function(type, resultLimit) {
 
 const getRelatedResources = async function(id) {
   const q =query(collection(db, COLLECTION_KEY).withConverter(resourceConverter), 
-  where("parentResourceId", "==", id));
+  where("parentResourceId", "==", id),
+  where("approved", "==", true),
+  );
   
   const querySnapshot = await getDocs(q);
   const result = [];
@@ -51,11 +53,11 @@ const getRelatedResources = async function(id) {
 }
 
 const searchByResourceTypes = async function(keys, resultLimit, approvedOnly) {
-  let _approvedOnly = approvedOnly ?? true;
+  let _approvedOnly = (approvedOnly == null) ? true : approvedOnly;
   if (!resultLimit) { resultLimit = 50 }
   var q;
   if (_approvedOnly) {
-    q =query(collection(db, COLLECTION_KEY).withConverter(resourceConverter), 
+    q = query(collection(db, COLLECTION_KEY).withConverter(resourceConverter), 
     where("resourceType.key", "in", keys), 
     where("approved", "==", true),
     limit(resultLimit));

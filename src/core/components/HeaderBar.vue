@@ -100,7 +100,8 @@ export default {
       {id: 'books', path:'/type/books', title:'BOOKS'},
       {id: 'podcasts', path:'/type/podcasts', title:'PODCASTS'},
       {id: 'websites', path:'/type/websites', title:'WEB'},
-      {id: 'video', path:'/type/video', title:'VIDEO'}
+      {id: 'people', path:'/type/people', title:'PEOPLE'},
+      // {id: 'video', path:'/type/video', title:'VIDEO'}
     ]
     this.tagGroups = await getTagItemsByGroup();
     

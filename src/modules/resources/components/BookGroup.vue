@@ -101,7 +101,7 @@ h1 {
   display: flex;
   flex-wrap: wrap;
   align-content: center;
-  justify-content: flex-start;
+  justify-content: space-between;
   overflow: scroll;
   gap: 10px;
 }
