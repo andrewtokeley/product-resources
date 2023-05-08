@@ -1,8 +1,8 @@
 <template>
   <div class="resource">
     <figure>
-      <resource-image :resource="resource" @info="$emit('click', resource)" @recommend="$emit('recommend', resource)"></resource-image>
-      <figcaption v-if="showTitle" >
+      <resource-image :resource="resource" :showAddPlaceholder="showAddPlaceholder" @info="$emit('click', resource)" @recommend="$emit('recommend', resource)"></resource-image>
+      <figcaption v-if="showTitle && !showAddPlaceholder" >
         <h1 :title="resource.displayName">{{ resource.displayName }}</h1>
         <h2>{{ authorsDisplay }}</h2>
       </figcaption>
@@ -33,7 +33,11 @@ export default {
     showDescription: {
       type: Boolean,
       default: false
-    }
+    },
+    showAddPlaceholder: {
+      type: Boolean,
+      default: false
+    },
   },
 
   methods: {

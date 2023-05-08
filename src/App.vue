@@ -30,10 +30,9 @@ body,
   flex-direction: column;
   align-items: center;
    */
-  margin: 0 auto;
-  height: 100%;
-  width: 100%;
+  max-width: 2000px;
   min-height: 100%;
+  margin: 0 auto;
 }
 
 .page {

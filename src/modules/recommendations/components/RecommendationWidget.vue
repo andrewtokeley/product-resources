@@ -1,7 +1,7 @@
 <template>
   <div class="recommendation">
-    <div v-if="recommendation.reason" class="quote">"{{ recommendation.reason }}"</div>
-    <div v-else class="quote noreason">Recommended By</div>
+    <p v-if="recommendation.reason" class="quote">"{{ recommendation.reason }}"</p>
+    <p v-else class="quote no-reason">Recommended By</p>
     <div class="by">
       <a v-if="recommendation.website" @click="openUrl(recommendation.website)">{{ recommendation.name }}</a>
       <span v-else>{{ recommendation.name }}</span>
@@ -39,11 +39,17 @@ export default {
 }
 
 .quote {
+  font-style: italic;
+  white-space: pre-wrap;
   color: var(--prr-darkgrey);
   font-size: var(--prr-font-size-medium);
-  font-style: italic;
+  display: -webkit-box;
+  max-width: 450px;
+  -webkit-line-clamp: 10;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
-.quote.noreason {
+.quote.no-reason {
   font-size: var(--prr-font-size-medium);
   font-style:normal;
 }

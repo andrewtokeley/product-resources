@@ -24,14 +24,14 @@
           @blur="validate('reason')"
           :errorMessage="errorMessage['reason']"
           :options="{ numberOfLines: 5, 
-            maximumLength: 1000, 
+            maximumLength: 500, 
             inlineErrors: false,
             showCharacterCount: true, 
             placeholder: 'Reason for recommending', 
             readOnly: isSaving}">
         </base-multiline-text>
 
-        <div class="label" v-if="!resourceExists">Personalise your review (optional)</div>
+        <div class="label">Personalise your review (optional)</div>
 
         <div class="double-line">
           <base-input v-model="recommendation.name" 
@@ -51,12 +51,13 @@
       </div>
       
       <div class="right" >
-        <p v-if="!recommendation.reason">- Preview -</p>
-        <recommendation-widget v-if="recommendation.reason" :recommendation="recommendation"></recommendation-widget>
-      </div>
-      
-      
-      
+        <!-- <resource-image v-if="showImage" :resource="resource" :hideActions="true"></resource-image> -->
+        <resource-image :resource="resource"></resource-image>
+        <div class="recommendation-preview" >
+          <p v-if="!recommendation.reason">- Preview -</p>
+          <recommendation-widget v-if="recommendation.reason" :recommendation="recommendation"></recommendation-widget>
+        </div>
+      </div>      
     </div>
   </modal-dialog>
 </template>
@@ -65,17 +66,24 @@
 import BaseInput from '@/core/components/BaseInput.vue'
 import BaseMultilineText from '@/core/components/BaseMultilineText.vue'
 import ModalDialog from '@/core/components/ModalDialog.vue'
+import ResourceImage from '@/modules/resources/components/ResourceImage.vue'
+import RecommendationWidget from '@/modules/recommendations/components/RecommendationWidget.vue'
 
-import { Recommendation } from '../model/recommendation'
+import { Recommendation } from '@/modules/recommendations/model/recommendation'
 import { Resource } from '@/modules/resources/model/resource'
 
 import { addRecommendation } from '@/modules/recommendations/services/recommendation-service'
 import { isObjectValid, validateProperty } from '@/core/model/validation'
-import RecommendationWidget from '../components/RecommendationWidget.vue'
 
 export default {
 name: "recommend-dialog",
-components: { BaseInput, BaseMultilineText, ModalDialog, RecommendationWidget },  
+components: { 
+  BaseInput, 
+  BaseMultilineText, 
+  ModalDialog, 
+  RecommendationWidget,
+  ResourceImage
+},  
 emits: ['close','save'],
 props: {
   resource: {
@@ -92,18 +100,26 @@ data() {
   }
 },
 mounted() {
-  if (this.resource) {
-    this.recommendation.resourceUrl = this.resource.resourceUrl;
-    this.recommendation.resourceId = this.resource.id;
-    this.recommendation.resourceType = this.resource.resourceType;
-    this.resourceExists = true;
+  if (this.resource){
+    if (this.resource.id) {
+      this.recommendation.resourceUrl = this.resource.resourceUrl;
+      this.recommendation.resourceId = this.resource.id;
+      this.recommendation.resourceType = this.resource.resourceType;
+      this.resourceExists = true;
+    } else if (this.resource.resourceType) {
+      this.recommendation.resourceType = this.resource.resourceType;
+      this.resourceExists = false;
+    } 
   } else {
-    this.resourceExists = false;
+    this.resourceExists = false;  
   }
 },  
 computed: {
+  showImage() {
+    return this.resource != null && this.resource.imageUrl != null;
+  },
   subTitle() {
-    if (this.resource) {
+    if (this.resourceExists) {
       return this.resource.displayName;
     }
     return null;
@@ -153,7 +169,7 @@ methods: {
 
 .content {
   display:flex;
-  align-items: center;
+  align-items: stretch;
   justify-items: center;
   /* justify-content: center; */
 }
@@ -161,10 +177,24 @@ methods: {
   width: 400px;
 }
 .right {
+  display:flex;
+  flex-direction: column;;
+  align-items: center;
+  justify-content: flex-start;
   margin-left: 30px;
+  padding: 20px 10px;
   width: 300px;
-  /* background: var(--prr-extralightgrey);
-  border-radius: 15px; */
+  min-height: 500px;
+  background: var(--prr-extralightgrey);
+  border-radius: 15px;
+}
+.right .recommendation-preview {
+  background: white;
+  border-radius: 15px;
+  min-width: 80%;
+  max-width: 80%;
+  min-height: 100px;
+  padding:15px;
 }
 .right p {
   width: 100%;

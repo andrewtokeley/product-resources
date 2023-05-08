@@ -25,13 +25,14 @@ class Resource {
     this.approved = config.approved;
   }
 
-  static default() {
+  static default(type) {
     // returns a default instance where all the fields, and their child properties are available.
+    if (!type) { type = {key:'books', value:'Book'} }
     return new Resource({ 
       id: null,
       approved: false,
       displayName: 'New Resource', 
-      resourceType: {key:'books', value:'Book'},
+      resourceType: type,
       authors: [], 
       tags: [] });
       

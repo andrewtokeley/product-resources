@@ -13,7 +13,7 @@ const db = getFirestore(app);
 const refreshTags = async function() {
   await deleteLookup(TAG_ID);
   const lookup = new Lookup({id:TAG_ID, items:[
-    {key:'strategy', value:'Strategy', groups: ['_General'], description: "This is a strategy description" },
+    {key:'strategy', value:'Strategy', groups: ['_General'], description: "If the opposite of your strategic choice sounds stupid, it might be a good idea, but it's not strategy" },
     {key:'marty-cagan', value:'Marty Cagan', groups: ['Popular Voices']},
     {key:'teresa-torres', value:'Teresa Torres', groups: ['Popular Voices']},
     {key:'rich-mirinov', value:'Rich Mirinov', groups: ['Popular Voices']},

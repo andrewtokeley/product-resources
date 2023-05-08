@@ -9,11 +9,8 @@
         @recommend="$emit('recommend', resource)" 
         @click="$emit('click', resource)">
       </book-card>
-      <div v-if="showAddRecommendation" class="add-resource-card">
-        
-          <base-icon @click="handleAddRecommendation"
-            :options="{ size: '40px' }">add_circle</base-icon>
-        
+      <div v-if="showAddRecommendation" >
+        <book-card :resource="blankResource" :showAddPlaceholder="true"></book-card>
       </div>
     </div>
   </div>
@@ -22,14 +19,13 @@
 <script>
 import BookCard from "@/modules/resources/components/BookCard.vue"
 import RowHeader from '@/modules/resources/components/RowHeader.vue';
-import BaseIcon from "@/core/components/BaseIcon.vue";
+import { Resource } from '@/modules/resources/model/resource'
 
 export default {
   name: "book-group",
   components: { 
     BookCard,
     RowHeader,
-    BaseIcon,
   },
 
   emits: ['click', 'recommend'],
@@ -54,7 +50,16 @@ export default {
       default: false,
     }
   },
+
   computed: {
+    blankResource() {
+      if (this.resources.length > 0) {
+        let type = this.resources[0].resourceType
+        return Resource.default(type);
+      } else {
+        return Resource.default({ key: 'books', value: 'Book'});
+      }
+    },
     _heading() {
       var heading = this.heading;
       if (this.includeItemCount) {

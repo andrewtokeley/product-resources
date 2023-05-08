@@ -14,7 +14,7 @@
         <li class="nav-with-submenu">
           <a>CATEGORIES</a>    
           <div ref="submenuDiv" class="submenu">
-            <div v-for="tagGroup in tagGroups" :key="tagGroup.groupName">
+            <div v-for="tagGroup in tagGroups" :key="tagGroup.groupName" class="submenu-group">
               <h2 v-if="showCategoryHeading(tagGroup)">{{ tagGroup.groupName.toUpperCase() }}</h2>
               <ul>
                 <li v-for="tag in tagGroup.tags" :key="tag.key" >
@@ -233,8 +233,7 @@ export default {
   align-items: center;
 }
 .left-nav .nav-with-submenu a {
-  padding-top: 20px;
-  padding-bottom: 40px;
+  padding: 20px 60px 40px 0;
   font-weight: var(--prr-font-weight);
 }
 .nav-with-submenu:hover .submenu {
@@ -254,6 +253,11 @@ export default {
   box-shadow: 0 4px 4px rgba(0, 0, 0, 0.3);
   background: white;
   z-index: 1000;
+}
+
+.submenu-group {
+  max-width: 900px;
+  margin: 0 auto;
 }
 
 .submenu h2 {

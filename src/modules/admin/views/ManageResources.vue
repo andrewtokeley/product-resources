@@ -89,11 +89,11 @@ import ResourceDetail from '@/modules/resources/views/ResourceDetail.vue';
 import ResourceTypeSelect from '@/modules/resources/components/ResourceTypeSelect.vue';
 import BaseButton from '@/core/components/BaseButton.vue';
 import ConfirmationDialog from '@/core/components/ConfirmationDialog.vue';
+import LoadingSymbol from '@/core/components/LoadingSymbol.vue';
 
 import { deleteResource, getResourcesFull } from '@/modules/resources/services/resource-service';
 import { cloneDeep } from 'lodash';
 import { Resource } from '@/modules/resources/model/resource';
-import LoadingSymbol from '@/core/components/LoadingSymbol.vue';
 
 export default {
   name: 'manage-resources',

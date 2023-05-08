@@ -157,7 +157,7 @@ export default {
 }
 
 h1 {
-  font-size: var(--prr-font-size-large);
+  font-size: var(--prr-font-size-huge);
   margin-top: 20px;
   margin-bottom: 5px;
 }
