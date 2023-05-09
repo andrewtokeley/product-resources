@@ -37,14 +37,18 @@ const refreshTags = async function() {
 const refreshResourceTypes = async function() {
   await deleteLookup(RESOURCE_TYPES_ID);
   const lookup = new Lookup({id:RESOURCE_TYPES_ID, items:[
-    {key:'books', value:'Books'},
+    {key:'books', value:'Books',description: 'Who doesn\'t like a great product book!'},
     {key:'podcasts', value:'Podcasts'},
     {key:'episodes', value:'Episodes'},
     {key:'posts', value:'Posts'},
     {key:'websites', value:'Websites'},
-    {key:'people', value:'People'},
+    {key:'videos', value:'Videos'},
+    {key:'people', value:'People', description: 'Some of the best voices on product in the world!'},
   ]})
   await addLookup(lookup)
+
+  // update all resource.resourceType.value entries too
+
   return lookup;
 }
 
@@ -72,7 +76,6 @@ const getTags = async function() {
  * full lookup item of the tags in the group 
  */
 const getTagItemsByGroup = async function() {
-console.log('stop')
   const lookup = await getTags();
 
   let g = lookup.items.map ( t => t.groups);

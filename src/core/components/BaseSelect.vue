@@ -40,7 +40,7 @@ export default defineComponent({
     /**
      * Bound object that represents one of the items in the selectOptions array, or null, if nothing is selected
      */
-    modelValue: Object,
+    modelValue: String,
 
     /**
      * Array containing the available items to select from. 
@@ -48,7 +48,7 @@ export default defineComponent({
      */
     selectOptions: Array,
 
-    nullOption: Object,
+    nullOption: String,
 
     /**
      * Optional object literal to control how the input is displayed. Properties include;
@@ -82,7 +82,7 @@ computed: {
     selectedKey: {
       get() {
         if (this.modelValue) {
-          return this.modelValue.key ?? null;
+          return this.modelValue ?? null;
         }
         return null;
       },
@@ -113,14 +113,10 @@ computed: {
       // let the parent know which selected item has changed
 
       // check if the null option was selected
-      console.log('sseell')
       if (newKey == '') {
         this.$emit("update:modelValue", this.nullOption);
       } else {
-        let selectedItem = this.selectOptions.find( s => s.key == newKey);
-        if (selectedItem) {
-          this.$emit("update:modelValue", selectedItem);
-        }
+          this.$emit("update:modelValue", newKey);
       }
     },
     

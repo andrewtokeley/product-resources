@@ -8,8 +8,7 @@
     <div class="action-strip">
       <div class="action-items" >
         <div class="label">Filter By:</div>
-        <resource-type-select v-model="resourceType"></resource-type-select>
-        <span class="label">{{ this.resources.length }} {{ resourceType.value?.toLowerCase() }}s returned</span>
+        <resource-type-select v-model="selectedResourceType"></resource-type-select>
       </div>
       <div class="action-items">
         <base-button :disabled="isLoading" :isSecondary="true" @click="showExport = true">Export...</base-button>
@@ -31,7 +30,7 @@
       <tbody>
         <tr v-for="resource in resources" :key="resource.id" @click="handlePreviewClick(resource)">
           <td>
-            <resource-image :hideActions="true" :preview="true" :resource="resource"></resource-image>
+            <resource-image :hideActions="false" :preview="true" :resource="resource"></resource-image>
           </td>
           <td>{{ resource.displayName }}</td>
           <td>{{ resource.authorsList }}</td>
@@ -107,7 +106,7 @@ export default {
       showAdd: false,
       showView: false,
       showDeleteConfirm: false,
-      resourceType: {},
+      selectedResourceType: 'podcasts',
       isDeleting: false,
       isLoading: true,
       sortedBy: 'displayName',
@@ -115,12 +114,13 @@ export default {
     }
   },
   mounted() {
-    this.resourceType = { key: 'books', value: "Book"}
+    // trigger watch
+    this.selectedResourceType = 'books';
   },
   watch: {
-    resourceType(value) {
+    selectedResourceType(value) {
       this.isLoading = true;
-      getResourcesFull(value.key).then( (resources) => {
+      getResourcesFull(value).then( (resources) => {
         this.resources = resources;
         // resort the column, but don't toggle direction
         this.sortBy(this.sortedBy, false);

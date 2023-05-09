@@ -1,5 +1,5 @@
 <template>
-  <div class="resource-image" :class="{square: isSquare, preview: preview }" >
+  <div class="resource-image" :class="{landscape: isLandscape, square: isSquare, preview: preview }" >
       <div class="placeholder" v-if="showAddPlaceholder" @click="handleShowRecommend">
         <span class="icon__text material-symbols-outlined">add_circle</span>
       </div>
@@ -61,12 +61,19 @@ export default {
   computed: {
     isSquare(){
       if (!this.resource) { return false }
-      switch (this.resource.resourceType.key.toLowerCase()) {
+      switch (this.resource.resourceType.toLowerCase()) {
         case 'podcasts': 
         case 'episode':
           return true;
           default: return false;
       }
+    },
+    isLandscape(){
+      
+      if (!this.resource) { return false }
+      console.log(this.resource.resourceType)
+      let type = this.resource.resourceType.toLowerCase();
+      return type == 'videos' || type == 'posts';
     },
     url() {
       if (!this.resource) {
@@ -101,8 +108,8 @@ export default {
 
 .resource-image {
   position: relative;
-  height:215px;
-  width: 140px;
+  height:200px;
+  width: 130px;
   margin-bottom: 5px;
   overflow: hidden;
   border: 1px solid var(--prr-lightgrey);
@@ -110,9 +117,20 @@ export default {
 }
 
 .resource-image.preview {
-  height:80px;
-  width: 55px;
+  height:100px;
+  width: 65px;
   margin-bottom: 0px;
+}
+
+.resource-image.landscape {
+  height:130px;
+  width: 200px;
+}
+.resource-image.landscape.preview {
+  height:65px;
+  width: 100px;
+  margin: 0px;
+  padding: 0px;
 }
 
 .square {
@@ -130,14 +148,11 @@ export default {
   visibility: visible;
 }
 .resource-image img {
-  max-width: 100%;
   max-height: 100%;
-  /* border-radius: 5px; */
   object-fit: cover;
   margin-right: 20px;
   scale: 1.05;
   cursor: pointer;
-  /* box-sizing: border-box; */
 }
 .resource-image.preview img {
   margin-right: 20px;

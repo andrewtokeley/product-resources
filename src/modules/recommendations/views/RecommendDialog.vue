@@ -93,10 +93,9 @@ props: {
   }
 },
 beforeCreate() {
-      // Not sure why this worked and importing Icon didn't. Something to do with the fact that
-      // Icon contains ContextMenu which contains Icon...
-      this.$options.components.ResourceImage = require("@/modules/resources/components/ResourceImage.vue").default;
-  },
+  // this is needed to avoid circular references - the recommend dialog contains the resource image which contains the dialog
+  this.$options.components.ResourceImage = require("@/modules/resources/components/ResourceImage.vue").default;
+},
 data() {
   return {
     isSaving: false,

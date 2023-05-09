@@ -1,8 +1,10 @@
 
 import { Resource, resourceConverter } from '../model/resource'
 import { app } from "@/core/services/firebaseInit"
-import { getFirestore, query, collection, doc, getDocs, getDoc, where, addDoc, setDoc, deleteDoc, limit, updateDoc } from "firebase/firestore"; 
+import { getFirestore, orderBy, query, collection, doc, getDocs, getDoc, where, addDoc, setDoc, deleteDoc, limit, updateDoc } from "firebase/firestore"; 
 import { getAllRecommendations } from '@/modules/recommendations/services/recommendation-service';
+const { DateTime } = require('luxon');
+
 const db = getFirestore(app);
 
 export {  
@@ -10,13 +12,14 @@ export {
   unapproveResource, 
   getResourcesFull, 
   getRelatedResources,
-  searchByResourceTypes, 
-  searchByTag, 
+  searchByResourceTypes,
+  searchByTagKey, 
   searchByText, 
   getResource, 
   updateResource, 
   addResource, 
   deleteResource,
+  getRecentlyAdded,
 }
 
 const COLLECTION_KEY = "resources";
@@ -36,6 +39,20 @@ const getResourcesFull = async function(type, resultLimit) {
     resource.numberOfRecommendations = resource.recommendations.length;
   }
   return resources;
+}
+
+const getRecentlyAdded = async function(resultLimit) {
+  const q =query(collection(db, COLLECTION_KEY).withConverter(resourceConverter), 
+  orderBy("createdDate", "asc"),
+  limit(resultLimit)
+  );
+  
+  const querySnapshot = await getDocs(q);
+  const result = [];
+  querySnapshot.forEach((doc) => {
+    result.push(new Resource(doc.data()));
+  });
+  return result
 }
 
 const getRelatedResources = async function(id) {
@@ -75,9 +92,9 @@ const searchByResourceTypes = async function(keys, resultLimit, approvedOnly) {
   return result
 };
 
-const searchByTag = async function(tagKeyValue) {
+const searchByTagKey = async function(tagKey) {
   const q = query(collection(db, COLLECTION_KEY)
-    .withConverter(resourceConverter), where("tags", "array-contains", tagKeyValue));
+    .withConverter(resourceConverter), where("tags", "array-contains", tagKey));
   const querySnapshot = await getDocs(q);
   const result = [];
   querySnapshot.forEach((doc) => {
@@ -85,6 +102,17 @@ const searchByTag = async function(tagKeyValue) {
   });
   return result
 };
+
+// const searchByTag = async function(tagKeyValue) {
+//   const q = query(collection(db, COLLECTION_KEY)
+//     .withConverter(resourceConverter), where("tags", "array-contains", tagKeyValue));
+//   const querySnapshot = await getDocs(q);
+//   const result = [];
+//   querySnapshot.forEach((doc) => {
+//     result.push(new Resource(doc.data()));
+//   });
+//   return result
+// };
 
 const searchByText = async function(text) {
 
@@ -129,6 +157,7 @@ const updateResource = async function(resource) {
 }
 
 const addResource = async function(resource) {
+  resource.createdDate = DateTime.now();
   let doc = await addDoc(collection(db, COLLECTION_KEY).withConverter(resourceConverter), resource);
   return doc.id;
 }

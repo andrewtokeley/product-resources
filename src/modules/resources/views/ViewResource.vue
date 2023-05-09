@@ -11,11 +11,12 @@
       </div>
       <div v-if="resource.tags && resource.tags.length > 0" class="tagGroup">
         <span class="label">Categories: </span>
-        <a v-for="tag in resource.tags" :key="tag.key" :href="`/tag/${tag.key}`">{{ tag.value }}</a>
+        <a v-for="tag in resource.tags" :key="tag.key" :href="`/tag/${tag}`">{{ tagDescription(tag) }}</a>
       </div>
     </div>
     <div class="topblock" :class="{ rectangle: isBook, square : !isBook }" >
-      <img class="image" :src="resource.imageUrl ?? resource.parentResourceImageUrl" />
+      <!-- <img class="image" :src="resource.imageUrl ?? resource.parentResourceImageUrl" /> -->
+      <resource-image class="image" :resource="resource" :hideActions="true"></resource-image>
       <p>{{resource.description}}</p>
     </div>  
     <div class="recommendations">
@@ -30,6 +31,7 @@
       <div v-for="resource in relatedResources" :key="resource.id" 
         class="related"
         @click="$emit('changeResource', resource)">
+        <resource-image class="image" :preview="true" :resource="resource" :hideActions="true"></resource-image>
         <h3>{{ resource.displayName }}</h3>
         <p class="child-description">{{resource.description}}</p>
       </div>
@@ -41,8 +43,10 @@
 <script>
 import { Resource } from "@/modules/resources/model/resource";
 import RecommendationWidget from '@/modules/recommendations/components/RecommendationWidget.vue';
+// import ResourceImage from '@/modules/resources/components/ResourceImage.vue'
 import { getRecommendations } from "@/modules/recommendations/services/recommendation-service";
 import { getRelatedResources } from '../services/resource-service';
+import { getTags } from '../services/lookup-service';
 
 export default {
   components: { RecommendationWidget },
@@ -54,11 +58,15 @@ export default {
       default: Resource.default()
     },
   },
-
+  beforeCreate() {
+  // this is needed to avoid circular references - the recommend dialog contains the resource image which contains the dialog
+  this.$options.components.ResourceImage = require("@/modules/resources/components/ResourceImage.vue").default;
+},
   data() {
     return {
       recommendations: [],
       relatedResources: [],
+      tags: [],
     }
   },
 
@@ -66,9 +74,15 @@ export default {
     async resource() {
       this.recommendations = await getRecommendations(this.resource.id);
       this.relatedResources = await getRelatedResources(this.resource.id);    
+      const lookup = await getTags();
+      this.tags = lookup.keyValues;
     }
   },
-
+  methods: {
+    tagDescription(key) {
+      return this.tags.find( t => t.key == key )?.value;
+    }
+  },
   computed: {
     childDescription() {
       if (this.relatedResources) {
@@ -78,7 +92,7 @@ export default {
     },
     isBook() {
         if (this.resource.resourceType) {
-          return this.resource.resourceType.key == 'books'
+          return this.resource.resourceType == 'books'
         }
         return false;
       }
@@ -100,6 +114,7 @@ export default {
   float: left;
   /* margin-right: 25px; */
   margin-bottom: 5px;
+  margin-right: 15px;
 }
 
 .topblock img {

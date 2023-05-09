@@ -11,7 +11,9 @@
         <book-group v-if="books" :showAddRecommendation="true" heading="Books" :resources="books"></book-group>
         <book-group v-if="web" :showAddRecommendation="true" heading="Websites" :resources="web"></book-group>
         <book-group v-if="posts" :showAddRecommendation="true" heading="Posts" :resources="posts"></book-group>
+        <book-group v-if="videos" :showAddRecommendation="true" heading="Videos" :resources="videos"></book-group>
         <book-group v-if="podcasts" :showAddRecommendation="true" heading="Podcasts" :resources="podcasts"></book-group>
+        <book-group v-if="people" :showAddRecommendation="true" :resources="people"></book-group>
         <podcast-episode-group v-if="episodes" :showAddRecommendation="true" heading="Podcast Episodes" :resources="episodes"></podcast-episode-group>
       </div>
       <div v-if="searchResults.length == 0 && !isLoading" class="noresults">
@@ -28,8 +30,8 @@ import BookGroup from '../components/BookGroup.vue'
 import PodcastEpisodeGroup from '../components/PodcastEpisodeGroup.vue'
 // import RecommendDialog from '@/modules/recommendations/views/RecommendDialog.vue';
 
-import { searchByResourceTypes, searchByTag, searchByText } from '../services/resource-service.js'
-import { getTags } from '../services/lookup-service';
+import { searchByResourceTypes, searchByTagKey, searchByText } from '../services/resource-service.js'
+import { getResourceTypes, getTags } from '../services/lookup-service';
 
 export default {
   
@@ -49,6 +51,7 @@ export default {
       searchTerm: null,
       searchResults: [],
       isLoading: true,
+      resourceTypes: [],
       bookResources: {
         type: Array,
         default: [{}]
@@ -57,6 +60,8 @@ export default {
   },
 
   async mounted() {
+    this.tagsLookup = await getTags();
+    this.resourceTypes = await getResourceTypes();
     await this.loadSearchResults()
   },
 
@@ -83,18 +88,24 @@ export default {
         typeKeys.push('posts');
         typeKeys.push('videos');
       }
+      let item = this.resourceTypes.items.find( r => r.key == typeKey );
+      if (item) {
+        console.log(item.value);
+        this.title = item.value.toUpperCase();
+        this.summary = item.description;
+      }
       this.searchResults = await searchByResourceTypes(typeKeys);
     },
 
     async loadResourcesByTag(tagKey) {
-      const lookup = await getTags();
-      let item = lookup.items.find( k => k.key == tagKey);
-      let tagKeyValue = { key: item.key, value: item.value };
-      if (tagKeyValue) {
-        this.searchResults = await searchByTag(tagKeyValue);
+      // let item = this.tagsLookup.items.find( k => k.key == tagKey);
+      // let tagKeyValue = { key: item.key, value: item.value };
+      // if (tagKeyValue) {
+        this.searchResults = await searchByTagKey(tagKey);
+
+        let item = this.tags.find( t => t.key == tagKey);
         this.title = item.value.toUpperCase();
         this.summary = item.description;
-      }
     },
     
     async loadResourcesByTextSearch(term) {
@@ -102,7 +113,7 @@ export default {
     },
 
     resourcesByType(key) {
-      const results = this.searchResults.filter ( resource => resource.resourceType.key == key )
+      const results = this.searchResults.filter ( resource => resource.resourceType == key )
       if (results) {
         return results;
       }
@@ -137,6 +148,14 @@ export default {
       const results = this.resourcesByType('posts')
       return results.length>0 ? results : null
     },
+    people() {
+      const results = this.resourcesByType('people')
+      return results.length>0 ? results : null
+    },
+    videos() {
+      const results = this.resourcesByType('videos')
+      return results.length>0 ? results : null
+    }
     
   }
 }

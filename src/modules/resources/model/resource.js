@@ -11,6 +11,7 @@ class Resource {
     this.displayName = config.displayName;
     this.resourceUrl = config.resourceUrl;
     this.description = config.description;
+    this.createdDate = config.createdDate;
     this.publishedDate = config.publishedDate;
     this.audioLengthInSeconds = config.audioLengthInSeconds;
     this.imageUrl = config.imageUrl;
@@ -33,6 +34,7 @@ class Resource {
       approved: false,
       displayName: 'New Resource', 
       resourceType: type,
+      createdDate: DateTime.now(),
       authors: [], 
       tags: [] });
       
@@ -74,7 +76,7 @@ class Resource {
   }
 
   get actionText() {
-    switch (this.resourceType.key) {
+    switch (this.resourceType) {
       case 'books': return "Buy..."
       case 'podcasts': return "Listen..."
       case 'episodes': return "Listen..."
@@ -138,6 +140,11 @@ var resourceConverter = {
     if (resource.resourceType != null) { result.resourceType = resource.resourceType }
     if (resource.resourceUrl != null) { result.resourceUrl = resource.resourceUrl }
     if (resource.displayName != null) { result.displayName = resource.displayName }
+    if (resource.createDate != null && resource.createDate.isValid) { 
+      result.createdDate = Timestamp.fromDate(resource.createdDate.toJSDate()); 
+    } else {
+      result.createdDate = null;
+    }
     if (resource.publishedDate != null && resource.publishedDate.isValid) { 
       result.publishedDate = Timestamp.fromDate(resource.publishedDate.toJSDate()); 
     } else {
@@ -157,6 +164,18 @@ var resourceConverter = {
   fromFirestore: function (snapshot, options) {
     const data = snapshot.data(options);
 
+    // tags: convert from the old { key:value} array to just array of string (key).
+    if (data.tags && data.tags.length > 0) {
+      if (data.tags[0].key) {
+        data.tags = data.tags.map ( t => t.key )    
+      }
+    }
+    
+    // resourceType: convert from the old { key:value} object to just string (key)
+    if (data.resourceType && data.resourceType.key) {
+      data.resourceType = data.resourceType.key;
+    }
+
     const config = {
       id: snapshot.id,
       displayName: data.displayName,
@@ -165,6 +184,7 @@ var resourceConverter = {
       publishedDate: data.publishedDate ? DateTime.fromJSDate(data.publishedDate.toDate()) : null,
       audioLengthInSeconds: data.audioLengthInSeconds,
       imageUrl: data.imageUrl,
+      createdDate: data.createdDate ? DateTime.fromJSDate(data.createdDate.toDate()) : null,
       authors: data.authors,
       resourceType: data.resourceType,
       tags: data.tags ?? [],
@@ -173,7 +193,6 @@ var resourceConverter = {
       parentResourceImageUrl: data.parentResourceImageUrl,
       approved: data.approved ?? false,
     }
-
     return new Resource(config);
   }
 };

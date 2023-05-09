@@ -13,6 +13,10 @@
       </section>
       
       <section class="featured">
+        <book-group heading="Recently Added" headingLink="/type/books" :resources="recentlyAdded" :includeItemCount="false" :singleRow="true"></book-group>
+      </section>
+
+      <section class="featured">
         <book-group heading="Popular Books" headingLink="/type/books" :resources="topBooks" :includeItemCount="false" :singleRow="true"></book-group>
       </section>
       
@@ -26,7 +30,7 @@
 <script>
 import FeaturedCard from "@/modules/home/components/FeaturedCard.vue";
 import { getFeaturedRecommendations } from '@/modules/recommendations/services/recommendation-service';
-import { searchByResourceTypes } from '@/modules/resources/services/resource-service';
+import { searchByResourceTypes, getRecentlyAdded } from '@/modules/resources/services/resource-service';
 import BookGroup from '@/modules/resources/components/BookGroup.vue';
 import LoadingSymbol from '@/core/components/LoadingSymbol.vue';
 
@@ -38,6 +42,7 @@ export default {
       featured: [],
       topBooks: [],
       topPodcasts: [],
+      recentlyAdded: [],
       isLoading: true,
     }
   },
@@ -47,6 +52,7 @@ export default {
     this.featured = await getFeaturedRecommendations(2);
     this.topBooks = await searchByResourceTypes(['books'], 5);
     this.topPodcasts = await searchByResourceTypes(['podcasts'], 5);
+    this.recentlyAdded = await getRecentlyAdded(5);
     this.isLoading = false;
   }
 }

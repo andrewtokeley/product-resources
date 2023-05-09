@@ -2,7 +2,7 @@
   <div class="tag-selector">
       <ul>
         <li v-for="tag in tags" :key="tag.key" >
-          <tag-button :enableHoverEffect="false" :selected="isSelected(tag)" @click="toggleSelection(tag)">{{tag.value}}</tag-button>
+          <tag-button :enableHoverEffect="false" :selected="isSelected(tag.key)" @click="toggleSelection(tag.key)">{{tag.value}}</tag-button>
         </li>
       </ul>
   </div>
@@ -22,7 +22,7 @@ export default {
   data() {
     return {
       tags: [],
-      selectedTags: [],
+      selectedTagKeys: [],
     }
   },
 
@@ -38,24 +38,23 @@ export default {
   async mounted() {
     let lookup = await getTags();
     this.tags = lookup.keyValues;
-    this.selectedTags = this.modelValue;
+    this.selectedTagKeys = this.modelValue;
   },
 
   methods: {
-    toggleSelection(tag) {
-      var index = this.selectedTags.map(s=>s.key).indexOf(tag.key);
+    toggleSelection(key) {
+      console.log('tog')
+      var index = this.selectedTagKeys.indexOf(key);
       if (index > -1) {
-        this.selectedTags.splice(index, 1);
-        console.log('off')
+        this.selectedTagKeys.splice(index, 1);
       } else {
-        this.selectedTags.push(tag);
-        console.log('on')
+        this.selectedTagKeys.push(key);
       }
-      this.$emit('update:modelValue', this.selectedTags);
+      this.$emit('update:modelValue', this.selectedTagKeys);
     },
 
-    isSelected(tag) {
-      return this.selectedTags.map(t => t.key).includes(tag.key);
+    isSelected(key) {
+      return this.selectedTagKeys.includes(key);
     }
   }
 }

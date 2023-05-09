@@ -1,5 +1,6 @@
 import Login from './modules/login/views/LoginView'
-import Search from './modules/resources/views/ResourcesSearch'
+import Search from './modules/search/views/SearchResults'
+import ResourceTypes from './modules/resources/views/ResourcesSearch'
 import UpdateResource from './modules/resources/views/UpdateResource'
 import ManageResources from './modules/admin/views/ManageResources'
 import ManageRecommendations from './modules/admin/views/ManageRecommendations'
@@ -20,7 +21,7 @@ export default [
   {path: '/tag/:tagId', component:Search, meta: { clearSearch: true }},
   
   // show all resources of a type 
-  {path: '/type/:typeId/', component:Search},
+  {path: '/type/:typeId/', component:ResourceTypes},
 
   // approve recommendations
   {path: '/approve', component:Approve},

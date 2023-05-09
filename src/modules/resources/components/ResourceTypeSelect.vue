@@ -16,7 +16,7 @@ export default {
   name: "resource-type-select",
   components: { BaseSelect },
   props: {
-    modelValue: Object,
+    modelValue: String,
   },
   data() {
     return {
@@ -32,7 +32,7 @@ export default {
   computed: {
     local: {
       get() {
-        return this.modelValue ? this.modelValue : {key: 'books', value: 'Book'};
+        return this.modelValue ? this.modelValue : 'books';
       },
       set(value) {
         this.$emit('update:modelValue', value);
@@ -40,11 +40,11 @@ export default {
     }
   },
   
-  methods: {
-    update(event) {
-      var newValue = event.target.value;
-      this.$emit('update:modelValue', newValue);
-    }
-  }
+  // methods: {
+  //   update(event) {
+  //     var newValue = event.target.value;
+  //     this.$emit('update:modelValue', newValue);
+  //   }
+  // }
 }
 </script>

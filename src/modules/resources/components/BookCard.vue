@@ -7,18 +7,20 @@
         <h2>{{ authorsDisplay }}</h2>
       </figcaption>
     </figure>
-    <div v-if="showDescription" class="description">
+    <div v-if="showDescription" class="description" @click="showDetails = true">
       <p class="description">{{ resource.description }}</p>
     </div>
+    <resource-detail v-if="showDetails" :resource="resource" @close="showDetails = false"></resource-detail>
   </div>
 </template>
 
 <script>
 import { Resource } from '@/modules/resources/model/resource'
 import ResourceImage from '@/modules/resources/components/ResourceImage.vue';
+import ResourceDetail from '@/modules/resources/views/ResourceDetail.vue';
 
 export default {
-  components: { ResourceImage },
+  components: { ResourceImage, ResourceDetail },
   name: 'ResourceCard',
   emits: ['recommend', 'click'],
   props: {
@@ -39,16 +41,12 @@ export default {
       default: false
     },
   },
-
-  methods: {
-    // openResource(url) {
-    //   window.open(url, '_blank');
-    // }
+  data() {
+    return {
+      showDetails: false,
+    }
   },
   computed: {
-    squareImage() {
-      return this.resource.resourceType.value.toLowerCase().includes('podcast');
-    },
     authorsDisplay() {
       if (this.resource.authors) {
         return this.resource.authors.join(", ")
@@ -73,13 +71,8 @@ export default {
 figure {
   display: table;
   margin: 0px;
+  margin-right: 15px;
   height: fit-content;
-  /* margin-right: 10px; */
-  /* display:flex;
-  flex-direction: column;
-  align-items: left; */
-  /* max-width: 100%; */
-  /* width: 140px; */
 }
 
 figcaption {
@@ -107,6 +100,7 @@ h2 {
 }
 
 .description {
+  cursor: pointer;
   overflow: hidden;
    display: -webkit-box;
    -webkit-line-clamp: 5; /* number of lines to show */

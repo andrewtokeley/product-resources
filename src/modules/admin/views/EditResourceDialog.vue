@@ -8,7 +8,7 @@
     @buttonClick="handleButtonClick"
     :buttonActions="buttons">
     <div class="content"> 
-      
+      {{editResource.resourceType}}
       <div class="double-line">
         <base-select
           v-model="editResource.resourceType"
@@ -131,6 +131,7 @@ export default {
   },
 
   async mounted() {
+    console.log('moutned')
     this.isWorking = true;
     const lookup = await getResourceTypes();
     this.resourceTypes = lookup.keyValues;
