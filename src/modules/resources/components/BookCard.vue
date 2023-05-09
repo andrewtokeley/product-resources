@@ -8,6 +8,8 @@
       </figcaption>
     </figure>
     <div v-if="showDescription" class="description" @click="showDetails = true">
+      <h1 :title="resource.displayName">{{ resource.displayName }}</h1>
+      <h2>{{ authorsDisplay }}</h2>
       <p class="description">{{ resource.description }}</p>
     </div>
     <resource-detail v-if="showDetails" :resource="resource" @close="showDetails = false"></resource-detail>
@@ -94,6 +96,25 @@ h1 {
 
 h2 {
   font-size: var(--prr-font-size-small);
+  margin: 5px 0px 5px 0px;
+  font-weight: 400;
+  color: var(--prr-mediumgrey)
+}
+
+.description h1 {
+  font-size: var(--prr-font-size-normal);
+  font-weight: 600;
+  margin: 0px 0px 5px 0px;
+  padding-bottom: 0px;
+  overflow: hidden;
+   display: -webkit-box;
+   -webkit-line-clamp: 2; /* number of lines to show */
+           line-clamp: 2; 
+   -webkit-box-orient: vertical;
+}
+
+.description h2 {
+  font-size: var(--prr-font-size-normal);
   margin: 5px 0px 5px 0px;
   font-weight: 400;
   color: var(--prr-mediumgrey)

@@ -1,12 +1,13 @@
 <template>
   <div class="book-group">
-    <template v-for="type in uniqueTypes" :key="type.key">
-      <row-header :heading="type.value" :headingLink="typeLink(type.key)"></row-header>    
+    <template v-for="group in groups" :key="group.key" >
+      <row-header :headingIcon="group.icon" :heading="group.heading" :headingLink="group.link"></row-header>
       <div class="row" :class="{ singleRow: singleRow }">
         <book-card 
-          v-for="resource in resourcesByType(type.key)"
+          v-for="resource in group.resources"
           :key="resource.id"
           :showDescription="showDescription"
+          :showTitle="!showDescription"
           :resource="resource" 
           @recommend="$emit('recommend', resource)" 
           @click="$emit('click', resource)">
@@ -15,7 +16,7 @@
           <book-card :resource="blankResource" :showAddPlaceholder="true"></book-card>
         </div>
       </div>
-      <hr class="divider"/>
+      <hr v-if="isGrouped" class="divider"/>
     </template>
   </div>
 </template>
@@ -36,6 +37,11 @@ export default {
   emits: ['click', 'recommend'],
 
   props: {
+    isGrouped: {
+      type: Boolean,
+      default: true
+    },
+    headingIcon: String,
     heading: String,
     headingLink: String,
     singleRow: {
@@ -69,18 +75,34 @@ export default {
     this.resourceTypes = lookup.items;
   },
   computed: {
-    uniqueTypes() {
-      const uniqueTypeKeys = [...new Set(this.resources.map(r => r.resourceType))];
-      
-      // get the values for each unique key
-      return this.resourceTypes.filter( t => uniqueTypeKeys.includes(t.key));
+    groups() {
+      if (this.isGrouped) {
+        const uniqueTypeKeys = [...new Set(this.resources.map(r => r.resourceType))];
+        console.log(uniqueTypeKeys)
+        return this.resourceTypes.filter( t => uniqueTypeKeys.includes(t.key)).map( u => {
+          var result = u;
+          u.link = this.typeLink(u.key);
+          u.heading = u.value ?? this._heading;
+          u.resources = this.resourcesByType(u.key)
+          console.log(u);
+          return result;
+          });
+      } else {
+        // var icon = null;
+        // let type = this.resourceTypes.find( r => r.key == this.resources[0].resourceType);
+        // if (type && this._heading) {
+        //   icon = type.icon;
+        // }
+        const singleType = [{ key: 'all', heading: this._heading, link: this.headingLink, resources: this.resources, icon: this.headingIcon}];
+        return singleType;
+      }
     },
     blankResource() {
       if (this.resources.length > 0) {
         let type = this.resources[0].resourceType
         return Resource.default(type);
       } else {
-        return Resource.default({ key: 'books', value: 'Book'});
+        return Resource.default('books');
       }
     },
     _heading() {
@@ -102,7 +124,11 @@ export default {
       return `/type/${key}`;
     },
     resourcesByType(key) {
-      return this.resources.filter( r => r.resourceType == key);
+      if (key != 'all'){
+        return this.resources.filter( r => r.resourceType == key);
+      } else {
+        return this.resources;
+      }
     },
     handleAddRecommendation() {
       console.log('gg')

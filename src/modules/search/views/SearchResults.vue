@@ -4,11 +4,12 @@
       <loading-symbol></loading-symbol>
     </div>
     <div v-else class="search-results">
-      <div><h1 v-if="title">{{ title }}</h1></div>
-      <div><p v-if="summary">{{ summary }}</p></div>
-
+      <div class="introduction">
+        <div><h1 v-if="title">{{ title }}</h1></div>
+        <div><p v-if="summary">{{ summary }}</p></div>
+      </div>
       <div v-if="searchResults.length > 0 && !isLoading" >
-        <book-group v-if="searchResults" :showDescription="true" :showAddRecommendation="false" heading="Results" :resources="searchResults"></book-group>
+        <book-group v-if="searchResults" :showDescription="true" :includeItemCount="false" :showAddRecommendation="false" heading="Results" :resources="searchResults"></book-group>
       </div>
       <div v-if="searchResults.length == 0 && !isLoading" class="noresults">
         We couldn't find anything matching, <i>{{ searchTerm }}</i>
@@ -123,7 +124,11 @@ export default {
 </script>
 
 <style scoped>
-
+.introduction {
+  background: var(--prr-lightgrey);
+  border-radius: 15px;
+  padding: 15px 15px 25px 15px;
+}
 .resources-search {
   width: 100%;
   display: flex;

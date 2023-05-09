@@ -28,7 +28,7 @@ class Resource {
 
   static default(type) {
     // returns a default instance where all the fields, and their child properties are available.
-    if (!type) { type = {key:'books', value:'Book'} }
+    if (!type) { type = 'books'}
     return new Resource({ 
       id: null,
       approved: false,

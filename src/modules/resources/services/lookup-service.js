@@ -37,13 +37,13 @@ const refreshTags = async function() {
 const refreshResourceTypes = async function() {
   await deleteLookup(RESOURCE_TYPES_ID);
   const lookup = new Lookup({id:RESOURCE_TYPES_ID, items:[
-    {key:'books', value:'Books',description: 'Who doesn\'t like a great product book!'},
-    {key:'podcasts', value:'Podcasts'},
-    {key:'episodes', value:'Episodes'},
-    {key:'posts', value:'Posts'},
-    {key:'websites', value:'Websites'},
-    {key:'videos', value:'Videos'},
-    {key:'people', value:'People', description: 'Some of the best voices on product in the world!'},
+    {key:'books', value:'Books', description: 'Who doesn\'t like a great product book!', icon: "import_contacts"},
+    {key:'podcasts', value:'Podcasts', icon: "podcasts", description: "On your commute or on the run, podcasts are a great way to catch up on what's new."},
+    {key:'episodes', value:'Episodes', icon: "podcasts"},
+    {key:'posts', value:'Posts', icon: "feed"},
+    {key:'websites', value:'Websites', icon: "language", description: "A collection of hand-picked blog posts, articles and videos."},
+    {key:'videos', value:'Videos', icon: "videocam"},
+    {key:'people', value:'People', description: 'A few people stand out as having something to say and not being afraid to share it!', icon: "person"},
   ]})
   await addLookup(lookup)
 

@@ -13,11 +13,11 @@
       </section>
       
       <section class="featured">
-        <book-group heading="Recently Added" headingLink="/type/books" :resources="recentlyAdded" :includeItemCount="false" :singleRow="true"></book-group>
+        <book-group heading="Recently Added" headingIcon="new_releases" :isGrouped="false" :resources="recentlyAdded" :includeItemCount="false" :singleRow="true"></book-group>
       </section>
 
       <section class="featured">
-        <book-group heading="Popular Books" headingLink="/type/books" :resources="topBooks" :includeItemCount="false" :singleRow="true"></book-group>
+        <book-group heading="Popular Books" headingIcon="import_contacts" headingLink="/type/books" :resources="topBooks" :includeItemCount="false" :singleRow="true"></book-group>
       </section>
       
       <section class="featured">

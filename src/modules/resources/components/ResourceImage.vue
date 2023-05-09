@@ -63,7 +63,7 @@ export default {
       if (!this.resource) { return false }
       switch (this.resource.resourceType.toLowerCase()) {
         case 'podcasts': 
-        case 'episode':
+        case 'episodes':
           return true;
           default: return false;
       }

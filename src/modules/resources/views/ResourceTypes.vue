@@ -4,17 +4,19 @@
       <loading-symbol></loading-symbol>
     </div>
     <div v-else class="search-results">
-      <div><h1 v-if="title">{{ title }}</h1></div>
-      <div><p v-if="summary">{{ summary }}</p></div>
-
+      <div class="introduction">
+        <div><h1 v-if="title">{{ title }}</h1></div>
+        <div><p v-if="summary">{{ summary }}</p></div>
+      </div>
       <div v-if="searchResults.length > 0 && !isLoading" >
-        <book-group v-if="books" :showAddRecommendation="true" heading="Books" :resources="books"></book-group>
-        <book-group v-if="web" :showAddRecommendation="true" heading="Websites" :resources="web"></book-group>
+        <book-group v-if="books" :showAddRecommendation="true" :isGrouped="false" :resources="books"></book-group>
+        <book-group v-if="people" :showAddRecommendation="true" :isGrouped="false" :resources="people"></book-group>
+        <book-group v-if="web" :showAddRecommendation="true" heading="Web" :resources="web"></book-group>
+        <book-group v-if="podcasts" :showAddRecommendation="true" :isGrouped="false" :resources="podcasts"></book-group>
         <book-group v-if="posts" :showAddRecommendation="true" heading="Posts" :resources="posts"></book-group>
         <book-group v-if="videos" :showAddRecommendation="true" heading="Videos" :resources="videos"></book-group>
-        <book-group v-if="podcasts" :showAddRecommendation="true" heading="Podcasts" :resources="podcasts"></book-group>
-        <book-group v-if="people" :showAddRecommendation="true" :resources="people"></book-group>
-        <podcast-episode-group v-if="episodes" :showAddRecommendation="true" heading="Podcast Episodes" :resources="episodes"></podcast-episode-group>
+        <book-group v-if="episodes" :showAddRecommendation="true" :showDescription="true" :isGrouped="false" heading="Top Episodes" :resources="episodes"></book-group>
+        
       </div>
       <div v-if="searchResults.length == 0 && !isLoading" class="noresults">
         We couldn't find anything matching, <i>{{ searchTerm }}</i>
@@ -24,11 +26,9 @@
 </template>
 
 <script>
-// import ResourceDetail from './ResourceDetail.vue'
+
 import LoadingSymbol from "@/core/components/LoadingSymbol.vue";
 import BookGroup from '../components/BookGroup.vue'
-import PodcastEpisodeGroup from '../components/PodcastEpisodeGroup.vue'
-// import RecommendDialog from '@/modules/recommendations/views/RecommendDialog.vue';
 
 import { searchByResourceTypes, searchByTagKey, searchByText } from '../services/resource-service.js'
 import { getResourceTypes, getTags } from '../services/lookup-service';
@@ -40,7 +40,6 @@ export default {
   components: {
     LoadingSymbol,
     BookGroup,
-    PodcastEpisodeGroup,
   },
 
   data() {
@@ -80,17 +79,20 @@ export default {
 
     async loadResourcesByType(typeKey) {
       var typeKeys = [typeKey];
+
       // always load episodes with podcast series
       if (typeKey == 'podcasts') {
         typeKeys.push('episodes');
       }
+      // and broaden web too
       if (typeKey == 'websites') {
         typeKeys.push('posts');
         typeKeys.push('videos');
       }
+
+      // get the description for the selected type
       let item = this.resourceTypes.items.find( r => r.key == typeKey );
       if (item) {
-        console.log(item.value);
         this.title = item.value.toUpperCase();
         this.summary = item.description;
       }
@@ -163,7 +165,11 @@ export default {
 </script>
 
 <style scoped>
-
+.introduction {
+  background: var(--prr-lightgrey);
+  border-radius: 15px;
+  padding: 15px 15px 25px 15px;
+}
 .resources-search {
   width: 100%;
   display: flex;

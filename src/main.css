@@ -32,6 +32,7 @@ body {
   color: var(--prr-darkgrey);
   box-sizing: border-box;
   overscroll-behavior-y: contain;
+  line-height: 1.5;
 }
 
 body.modal-open {

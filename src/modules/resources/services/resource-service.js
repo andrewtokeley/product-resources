@@ -75,12 +75,12 @@ const searchByResourceTypes = async function(keys, resultLimit, approvedOnly) {
   var q;
   if (_approvedOnly) {
     q = query(collection(db, COLLECTION_KEY).withConverter(resourceConverter), 
-    where("resourceType.key", "in", keys), 
+    where("resourceType", "in", keys), 
     where("approved", "==", true),
     limit(resultLimit));
   } else {
     q = query(collection(db, COLLECTION_KEY).withConverter(resourceConverter), 
-    where("resourceType.key", "in", keys), 
+    where("resourceType", "in", keys), 
     limit(resultLimit));
   }
   
