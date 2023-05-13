@@ -3,10 +3,12 @@ import Search from './modules/search/views/SearchResults'
 import ResourceTypes from './modules/resources/views/ResourceTypes'
 import UpdateResource from './modules/resources/views/UpdateResource'
 import ManageResources from './modules/admin/views/ManageResources'
+import ManageLookups from './modules/admin/views/ManageLookups'
 import ManageRecommendations from './modules/admin/views/ManageRecommendations'
 import Approve from './modules/recommendations/views/ApproveRecommendations'
 import About from './modules/about/views/AboutView'
 import Home from './modules/home/views/ResourcesHome'
+import RecommendView from './modules/recommendations/views/RecommendView'
 
 export default [
   {path: '/login', component:Login, meta: { hideHeader: true }},
@@ -23,6 +25,8 @@ export default [
   // show all resources of a type 
   {path: '/type/:typeId/', component:ResourceTypes},
 
+  {path: '/recommend/:typeId', component: RecommendView},
+  
   // approve recommendations
   {path: '/approve', component:Approve},
   
@@ -32,6 +36,9 @@ export default [
 
   {path: '/admin/recommendations', component:ManageRecommendations },
 
+  {path: '/admin/tags', component:ManageLookups },
+
   {path: '/update/:id', component:UpdateResource},
+  
   {path: '/add', component:UpdateResource},
 ]

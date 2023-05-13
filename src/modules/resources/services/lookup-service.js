@@ -1,42 +1,58 @@
 import { app } from "@/core/services/firebaseInit"
-import { getFirestore, doc, getDoc, setDoc, deleteDoc } from "firebase/firestore"; 
+import { getFirestore, doc, getDoc, setDoc, deleteDoc, updateDoc, arrayRemove, arrayUnion, writeBatch } from "firebase/firestore"; 
 
 import { Lookup, lookupConverter } from '@/modules/resources/model/lookup'
 
-export { refreshTags, refreshResourceTypes, getTags, getResourceTypes, getTagItemsByGroup }
+export { 
+  refreshTags, 
+  refreshResourceTypes, 
+  getLookup,
+  getTags, 
+  updateLookup, 
+  getResourceTypes, 
+  groupTags,
+  updateLookupItem,
+  addLookupItem,
+  deleteLookupItem,
+}
 
 const COLLECTION_KEY = "lookups";
-const RESOURCE_TYPES_ID = "resource-types"
-const TAG_ID = "tags"
+// const RESOURCE_TYPES_ID = "resource-types"
+// const TAG_ID = "tags"
 const db = getFirestore(app);
 
+export const LookUpKey = {
+  resourceTypes: 'resource-types',
+  tags: 'tags',
+};
+
 const refreshTags = async function() {
-  await deleteLookup(TAG_ID);
-  const lookup = new Lookup({id:TAG_ID, items:[
-    {key:'strategy', value:'Strategy', groups: ['_General'], description: "If the opposite of your strategic choice sounds stupid, it might be a good idea, but it's not strategy" },
-    {key:'marty-cagan', value:'Marty Cagan', groups: ['Popular Voices']},
-    {key:'teresa-torres', value:'Teresa Torres', groups: ['Popular Voices']},
-    {key:'rich-mirinov', value:'Rich Mirinov', groups: ['Popular Voices']},
-    {key:'andrew-tokeley', value:'Andrew Tokeley', groups: ['Popular Voices']},
-    {key: 'leadership', value:'Leadership', groups: ['_General']},
-    {key: 'teaming', value:'Teaming', groups: ['_General']},
-    {key: 'stakeholder', value:'Stakeholder Management', groups: ['_General']},
-    {key: 'analytics', value:'Analytics', groups: ['_General']},
-    {key: 'okr', value:'OKRs', groups: ['_General']},
-    {key: 'decision', value:'Decision Making', groups: ['_General']},
-    {key: 'fundamentals', value:'Fundamentals', groups: ['_General']},
-    {key: 'discovery', value:'Discovery', groups: ['_General']},
-    {key: 'innovation', value:'Innovation', groups: ['_General']},
-    {key: 'growth', value:'Growth', groups: ['_General']},
-    {key: 'b2b', value:'B2B', groups: ['_General']},
+  await deleteLookup(LookUpKey.tags);
+  const lookup = new Lookup({id:LookUpKey.tags, items:[
+    {key:'strategy', value:'Strategy', meta: { groups: ['_General'], description: "If the opposite of your strategic choice sounds stupid, it might be a good idea, but it's not strategy" }},
+    {key:'marty-cagan', value:'Marty Cagan', meta: { groups: ['Popular Voices']}},
+    {key:'teresa-torres', value:'Teresa Torres', meta: { groups: ['Popular Voices']}},
+    {key:'rich-mirinov', value:'Rich Mirinov', meta: { groups: ['Popular Voices']}},
+    {key:'andrew-tokeley', value:'Andrew Tokeley', meta: { groups: ['Popular Voices']}},
+    {key: 'leadership', value:'Leadership', meta: { groups: ['_General']}},
+    {key: 'teaming', value:'Teaming', meta: { groups: ['_General']}},
+    {key: 'stakeholder', value:'Stakeholder Management', meta: { groups: ['_General']}},
+    {key: 'analytics', value:'Analytics', meta: { groups: ['_General']}},
+    {key: 'okr', value:'OKRs', meta: { groups: ['_General']}},
+    {key: 'decision', value:'Decision Making', meta: { groups: ['_General']}},
+    {key: 'fundamentals', value:'Fundamentals', meta: { groups: ['_General']}},
+    {key: 'discovery', value:'Discovery', meta: { groups: ['_General']}},
+    {key: 'innovation', value:'Innovation', meta: { groups: ['_General']}},
+    {key: 'growth', value:'Growth', meta: { groups: ['_General']}},
+    {key: 'b2b', value:'B2B', meta: { groups: ['_General']}},
 ]});
   await addLookup(lookup)
   return lookup;
 }
 
 const refreshResourceTypes = async function() {
-  await deleteLookup(RESOURCE_TYPES_ID);
-  const lookup = new Lookup({id:RESOURCE_TYPES_ID, items:[
+  await deleteLookup(LookUpKey.resourceTypes);
+  const lookup = new Lookup({id:LookUpKey.resourceTypes, items:[
     {key:'books', value:'Books', description: 'Who doesn\'t like a great product book!', icon: "import_contacts"},
     {key:'podcasts', value:'Podcasts', icon: "podcasts", description: "On your commute or on the run, podcasts are a great way to catch up on what's new."},
     {key:'episodes', value:'Episodes', icon: "podcasts"},
@@ -62,12 +78,43 @@ const deleteLookup = async function(lookupId) {
   return await deleteDoc(ref)
 }
 
+const updateLookup = async function(lookup) {
+  if (lookup.id) {    
+    const ref = doc(db, COLLECTION_KEY, lookup.id).withConverter(lookupConverter);
+    return await setDoc(ref, lookup, {merge: true})
+  } else {
+    return null;
+  }
+}
+
+const deleteLookupItem = async function(lookupId, item) {
+  const ref = doc(db, COLLECTION_KEY, lookupId);
+  await updateDoc(ref, {
+    items: arrayRemove(item)
+  })
+}
+
+const addLookupItem = async function(lookupId, item) {
+  const ref = doc(db, COLLECTION_KEY, lookupId);
+  await updateDoc(ref, {
+    items: arrayUnion(item)
+  })
+}
+
+const updateLookupItem = async function(lookupId, originalItem, newItem) {
+  const ref = doc(db, COLLECTION_KEY, lookupId);
+  const batch = writeBatch(db);
+  batch.update(ref, { items: arrayRemove(originalItem) })
+  batch.update(ref, { items: arrayUnion(newItem) })
+  await batch.commit();
+}
+
 /**
  * 
  * @returns lookup instance, with properties items and keyValues.
  */
 const getTags = async function() {
-  return await getLookup(TAG_ID);
+  return await getLookup(LookUpKey.tags);
 }
 
 /**
@@ -75,16 +122,25 @@ const getTags = async function() {
  * @returns array containing objects with properties groupName and tags, where tags is the 
  * full lookup item of the tags in the group 
  */
-const getTagItemsByGroup = async function() {
-  const lookup = await getTags();
-
-  let g = lookup.items.map ( t => t.groups);
-  let groups = new Set(g.flat())
+const groupTags = async function(tags) {
+  let allGroups = tags.map ( t => {
+    if (t.groups) {
+      return t.groups.split(',')
+    }
+    return '_General';
+  });
+  let groups = new Set(allGroups.flat())
   var result = [];
   groups.forEach( g => {
-    var tags = lookup.items.filter(t => t.groups.includes(g));
-    result.push({groupName: g, tags: tags });
+    var tagsInGroup = [];
+    if (g == '_General') {
+      tagsInGroup = tags.filter(t => !(t.groups));
+    } else {
+      tagsInGroup = tags.filter(t => t.groups?.includes(g) ?? false);
+    }
+    result.push({groupName: g, tags: tagsInGroup });
   });
+  
   return result;
 }
 
@@ -93,9 +149,14 @@ const getTagItemsByGroup = async function() {
  * @returns lookup instance, with properties items and keyValues.
  */
 const getResourceTypes = async function() {
-  return await getLookup(RESOURCE_TYPES_ID);
+  return await getLookup(LookUpKey.resourceTypes);
 }
 
+/**
+ * 
+ * @param {*} lookupId 
+ * @returns {Lookup} lookup instance for the given id i.e. tags or resourceTypes
+ */
 const getLookup = async function(lookupId) {
   const ref = doc(db, COLLECTION_KEY, lookupId).withConverter(lookupConverter);
   const docSnap = await getDoc(ref)

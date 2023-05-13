@@ -5,7 +5,8 @@ import { createRouter, createWebHistory } from "vue-router"
 import App from './App.vue'
 import { createPinia } from "pinia";
 import { auth } from '@/core/services/firebaseInit'
-import { useUserStore } from "./core/state/userStore"
+import { useUserStore } from "@/core/state/userStore"
+import { useLookupStore } from "@/core/state/lookupStore"
 
 const pinia = createPinia();
 
@@ -15,17 +16,17 @@ let router = createRouter({
 })
 
 // Create the app
-let app = createApp(App)
+let app = createApp(App);
 app.use(router);
 app.use(pinia);
 
-const userStore = useUserStore()
-app.use(userStore);
-
-app.mount('#app')
+let store = useLookupStore();
+store.fetchLookups().then ( () => {
+  app.mount('#app');
+})
 
 auth.onAuthStateChanged(async (user) => { 
-  const store = useUserStore()
+  const store = useUserStore();
   await store.login(user);
 });
 

@@ -168,7 +168,7 @@ export default defineComponent({
 
       vm.$refs.iconDiv.addEventListener("mouseenter", () => {
         vm.isMouseOver = true;
-        vm.showContextMenu = vm.menu ? true : false;
+        //vm.showContextMenu = vm.menu ? true : false;
         
         // change the background colour based on options
         if (vm._options.hover) {

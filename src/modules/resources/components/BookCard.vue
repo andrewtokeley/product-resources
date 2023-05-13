@@ -1,30 +1,36 @@
 <template>
   <div class="resource">
     <figure>
-      <resource-image :resource="resource" :showAddPlaceholder="showAddPlaceholder" @info="$emit('click', resource)" @recommend="$emit('recommend', resource)"></resource-image>
+      <resource-image 
+        :preview="showDescription" 
+        :resource="resource" 
+        :showAddPlaceholder="showAddPlaceholder" 
+        @click="$emit('click', resource)"
+        @addRecommend="$emit('addRecommend', resource)">
+      </resource-image>
       <figcaption v-if="showTitle && !showAddPlaceholder" >
         <h1 :title="resource.displayName">{{ resource.displayName }}</h1>
         <h2>{{ authorsDisplay }}</h2>
       </figcaption>
     </figure>
-    <div v-if="showDescription" class="description" @click="showDetails = true">
+    <div v-if="showDescription" class="description" @click="$emit('click', resource)">
       <h1 :title="resource.displayName">{{ resource.displayName }}</h1>
       <h2>{{ authorsDisplay }}</h2>
-      <p class="description">{{ resource.description }}</p>
+      <p class="description">{{ summary }}</p>
     </div>
-    <resource-detail v-if="showDetails" :resource="resource" @close="showDetails = false"></resource-detail>
+    <!-- <resource-detail v-if="showDetails" :resource="resource" @close="showDetails = false"></resource-detail> -->
   </div>
 </template>
 
 <script>
 import { Resource } from '@/modules/resources/model/resource'
 import ResourceImage from '@/modules/resources/components/ResourceImage.vue';
-import ResourceDetail from '@/modules/resources/views/ResourceDetail.vue';
+// import ResourceDetail from '@/modules/resources/views/ResourceDetail.vue';
 
 export default {
-  components: { ResourceImage, ResourceDetail },
+  components: { ResourceImage },
   name: 'ResourceCard',
-  emits: ['recommend', 'click'],
+  emits: ['click', 'addRecommend'],
   props: {
     resource: {
       type: Resource,
@@ -43,12 +49,19 @@ export default {
       default: false
     },
   },
-  data() {
-    return {
-      showDetails: false,
-    }
-  },
+  
   computed: {
+    summary() {
+      const MAX = 200;
+      var summary = this.resource.description;
+      if (summary.length > MAX) {
+        summary = summary.slice(0,MAX) + "...";
+      }
+      return summary;
+    },
+    tileView() {
+      return (!this.showDescription);
+    },
     authorsDisplay() {
       if (this.resource.authors) {
         return this.resource.authors.join(", ")

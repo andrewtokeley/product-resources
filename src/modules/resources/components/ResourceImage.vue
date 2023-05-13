@@ -1,41 +1,27 @@
 <template>
   <div class="resource-image" :class="{landscape: isLandscape, square: isSquare, preview: preview }" >
-      <div class="placeholder" v-if="showAddPlaceholder" @click="handleShowRecommend">
-        <span class="icon__text material-symbols-outlined">add_circle</span>
+      <div class="placeholder" v-if="showAddPlaceholder" @click="$emit('addRecommend', resource)" >
+        <div>Recommend...</div>
       </div>
       <template v-else>
         <div class="missing-image-mask" v-if="showMissingImageMask">Resource Image</div>  
         <img 
           v-if="!showMissingImageMask"
           :src="url"
-          alt="Missing Image"  
+          :alt="resource.displayName"  
           @error="showMissingImageMask = true"
-          @click="openResource(resource.resourceUrl)"
+          @click="$emit('click', resource)"
         />
-        
-        <div v-if="!showMissingImageMask && !hideActions &&!showAddPlaceholder" class="action-strip" >
-          <base-icon title="More information" :options="{ hover: { colour: 'var(--prr-green)' }, colour: 'white' }" @click="handleShowInfo">info</base-icon>
-          <base-icon title="Write a review" :options="{ hover: { colour: 'var(--prr-green)' }, colour: 'white' }" @click="showRecommend = true">thumb_up</base-icon>
-        </div>
       </template>
-      <resource-detail v-if="showInfo" :resource="resource" @close="showInfo = false"></resource-detail>
-      <recommend-dialog v-if="showRecommend" :resource="resource" @close="showRecommend = false"></recommend-dialog>
   </div>
 </template>
 
 <script>
 import { Resource } from "@/modules/resources/model/resource";
-import BaseIcon from "@/core/components/BaseIcon.vue";
-import ResourceDetail from '@/modules/resources/views/ResourceDetail.vue';
-import RecommendDialog from '@/modules/recommendations/views/RecommendDialog.vue';
 
 export default {
   name: "resource-image",
-  components: { 
-    BaseIcon, 
-    RecommendDialog, 
-    ResourceDetail 
-  },
+  emits: ['click','addRecommend'],
   props: { 
     resource: Resource, 
     showAddPlaceholder: {
@@ -46,61 +32,23 @@ export default {
       type: Boolean,
       default: false,
     },
-    hideActions: {
-      type: Boolean,
-      default: false,
-    }
   },
   data() {
     return {
       showMissingImageMask: false,
-      showRecommend: false, 
-      showInfo: false
     }
   },
   computed: {
     isSquare(){
-      if (!this.resource) { return false }
-      switch (this.resource.resourceType.toLowerCase()) {
-        case 'podcasts': 
-        case 'episodes':
-          return true;
-          default: return false;
-      }
+      return this.resource.imageShape == 'square';
     },
     isLandscape(){
-      
-      if (!this.resource) { return false }
-      console.log(this.resource.resourceType)
-      let type = this.resource.resourceType.toLowerCase();
-      return type == 'videos' || type == 'posts';
+      return this.resource.imageShape == 'landscape';
     },
     url() {
-      if (!this.resource) {
-        return 'forceerror';
-      } else {
-        return this.resource.imageUrl ?? this.resource.parentResourceImageUrl ?? 'forecerror';
-      }
+      return this.resource.imageUrl ?? this.resource.parentResourceImageUrl ?? 'forecerror';
     },
   },
-  methods: {
-    openResource(url) {
-      if (!this.hideActions) {
-        window.open(url, '_blank');
-      }
-    },
-    handleShowRecommend() {
-      this.showRecommend = true
-    },
-    handleShowInfo() {
-      this.showInfo = true;
-      history.pushState(
-        {},
-        null,
-        this.$route.path + '?r=' + encodeURIComponent(this.resource.id)
-      )
-    }
-  }
 }
 </script>
 
@@ -108,8 +56,8 @@ export default {
 
 .resource-image {
   position: relative;
-  height:200px;
-  width: 130px;
+  height:185px;
+  width: 124px;
   margin-bottom: 5px;
   overflow: hidden;
   border: 1px solid var(--prr-lightgrey);
@@ -117,29 +65,29 @@ export default {
 }
 
 .resource-image.preview {
-  height:100px;
-  width: 65px;
+  height:110px;
+  width: 75px;
   margin-bottom: 0px;
 }
 
 .resource-image.landscape {
-  height:130px;
-  width: 200px;
+  height:124px;
+  width: 185px;
 }
 .resource-image.landscape.preview {
-  height:65px;
-  width: 100px;
+  height:75px;
+  width: 110px;
   margin: 0px;
   padding: 0px;
 }
 
 .square {
-  height:114px;
-  width: 114px;
+  height:124px;
+  width: 124px;
 }
 .resource-image.square.preview {
-  height:60px;
-  width: 60px;
+  height:75px;
+  width: 75px;
   margin: 0px;
   padding: 0px;
 }
@@ -202,5 +150,11 @@ export default {
   border-radius: 15px;
   background: var(--prr-extralightgrey);
   cursor: pointer;
+  text-align: center;
+}
+
+.placeholder:hover {
+  background: var(--prr-green);
+  color: var(--prr-blue);
 }
 </style>

@@ -9,7 +9,10 @@
       'base-button--transparent': isTransparent,
       }"
   >
-    <span class="base-button__text"><slot></slot></span>
+      <span class="base-button__text">
+        <slot></slot>
+        <span v-show="iconName" class="material-symbols-outlined">{{ iconName }}</span>
+      </span>
     </button>
 </template>
 
@@ -37,6 +40,10 @@ export default {
     showSpinner: {
       type: Boolean,
       default: false
+    },
+    iconName: {
+      type:String,
+      default: null,
     }
   },
 
@@ -59,7 +66,7 @@ export default {
   border: none;
   background: var(--prr-green);
   color: var(--prr-blue);
-  height: 35px;
+  height: 40px;
   font-weight: 600;
   min-width: 120px;
   transition: background 400ms;
@@ -122,7 +129,17 @@ export default {
     animation: button-loading-spinner 1s ease infinite;
 }
 
-.base-button--spinning .base-button__text {
+.base-button__text {
+  display:flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.material-symbols-outlined {
+  margin-left: 10px;
+}
+.base-button--spinning {
   visibility: hidden;
   opacity: 0;
 }

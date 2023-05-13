@@ -2,8 +2,9 @@
   <div class="modal__mask" @click='$emit("close")'>
     <loading-symbol class="loader" v-show="isLoading"></loading-symbol>
     <div class="modal" v-if="!isLoading" :class="{ 'modal--fullscreen': fullscreen }" @click='preventClickPropogation'>
-        <div v-if="showBackButton" class="backButton">
+        <div v-if="showBackButton" class="backButton" @click="$emit('backButtonClick')">
           <base-icon @click="$emit('backButtonClick')">arrow_back_ios_new</base-icon>
+          <span>BACK</span>
         </div>
         <div  class="modal__iconActions" >
           <template v-for="action in iconActions" :key="action.id">
@@ -12,8 +13,15 @@
           <base-icon @click='$emit("close")'>close</base-icon>
         </div>
 
-        <div v-if="title"><h1 :title="title">{{ title }}</h1></div>
-        <div v-if="subTitle"><h2 :title="subTitle">{{ subTitle }}</h2></div>
+        <div class="titleBlock">
+          <div class="title" v-if="title">
+            <h1 :title="title">
+              <span v-if="titleIcon" class="material-symbols-outlined">{{ titleIcon }}</span>
+              {{ title }}
+            </h1>
+          </div>
+          <div v-if="subTitle"><h2 :title="subTitle">{{ subTitle }}</h2></div>
+        </div>
 
         <div class="modal__content">
           <slot></slot>
@@ -29,6 +37,7 @@
                 :isSecondary="action.isSecondary"
                 :isDestructive="action.isDestructive"
                 :showSpinner="action.showSpinner"
+                :iconName="action.iconName"
                 @click="$emit('buttonClick', action)"
                 >{{ action.title }}</base-button
               >
@@ -43,6 +52,7 @@
                 :isSecondary="action.isSecondary"
                 :isDestructive="action.isDestructive"
                 :showSpinner="action.showSpinner"
+                :iconName="action.iconName"
                 @click="$emit('buttonClick', action)"
                 >{{ action.title }}</base-button
               >
@@ -67,6 +77,10 @@ export default defineComponent({
   components: { BaseButton, BaseIcon, LoadingSymbol },
 
   props: {
+    titleIcon: {
+      type: String,
+      default: null,
+    },
     title: {
       type: String,
       default: "",
@@ -166,8 +180,12 @@ export default defineComponent({
 
 .backButton {
   position: absolute;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
   top: 10px;
   left: 10px;
+  cursor: pointer;
 }
 .loader {
   align-items: center;
@@ -183,19 +201,34 @@ export default defineComponent({
   border-radius: 10px;
 }
 
-.modal h1 {
+.titleBlock {
+  margin:5px 5px 5px 30px;
+}
+
+.titleBlock .material-symbols-outlined {
+  margin-right: 10px;
+}
+.titleBlock .title {
+  display:flex;
+  flex-direction: row;
+  align-items: top;
+}
+.titleBlock h1 {
   overflow-x: hidden;
   line-height:normal;
-  /* white-space: nowrap; */
   text-overflow: ellipsis;
-  margin:5px 30px;
+  margin: 0px;
+  margin-bottom: 10px;
+  padding: 0px;
 }
-.modal h2 {
+.titleBlock h2 {
   overflow-x: hidden;
   line-height:normal;
   white-space: nowrap;
   text-overflow: ellipsis;
-  margin: 5px 30px 20px 30px;
+  margin: 0px;
+  margin-left:0px;
+  margin-bottom: 20px;
   color: var(--prr-mediumgrey);
 }
 .modal__iconActions {

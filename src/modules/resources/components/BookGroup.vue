@@ -9,11 +9,13 @@
           :showDescription="showDescription"
           :showTitle="!showDescription"
           :resource="resource" 
-          @recommend="$emit('recommend', resource)" 
           @click="$emit('click', resource)">
         </book-card>
         <div v-if="showAddRecommendation" >
-          <book-card :resource="blankResource" :showAddPlaceholder="true"></book-card>
+          <book-card 
+            :resource="blankResource" 
+            :showAddPlaceholder="true"
+            @addRecommend="handleAddRecommendation(group.key)"></book-card>
         </div>
       </div>
       <hr v-if="isGrouped" class="divider"/>
@@ -25,7 +27,8 @@
 import BookCard from "@/modules/resources/components/BookCard.vue"
 import RowHeader from '@/modules/resources/components/RowHeader.vue';
 import { Resource } from '@/modules/resources/model/resource'
-import { getResourceTypes } from '../services/lookup-service';
+import { ref } from 'vue';
+import { useLookupStore } from "@/core/state/lookupStore";
 
 export default {
   name: "book-group",
@@ -33,9 +36,14 @@ export default {
     BookCard,
     RowHeader,
   },
-
   emits: ['click', 'recommend'],
-
+  setup() {
+    const lookupStore = ref(null);
+    lookupStore.value = useLookupStore();
+    return {
+      lookupStore
+    }
+  },
   props: {
     isGrouped: {
       type: Boolean,
@@ -65,38 +73,31 @@ export default {
       default: false,
     }
   },
-  data() {
-    return {
-      resourceTypes: [],
-    }
-  },
-  async mounted() {
-    let lookup = await getResourceTypes();
-    this.resourceTypes = lookup.items;
-  },
   computed: {
+
     groups() {
       if (this.isGrouped) {
-        const uniqueTypeKeys = [...new Set(this.resources.map(r => r.resourceType))];
-        console.log(uniqueTypeKeys)
-        return this.resourceTypes.filter( t => uniqueTypeKeys.includes(t.key)).map( u => {
-          var result = u;
-          u.link = this.typeLink(u.key);
-          u.heading = u.value ?? this._heading;
-          u.resources = this.resourcesByType(u.key)
-          console.log(u);
-          return result;
+        // group by resource type
+        var groups = [...new Set(this.resources.map(r => r.resourceType))];
+
+        // get the full resourcetype lookup and order by order
+        let resourceTypes = this.lookupStore.resourceTypes.filter ( r => groups.includes(r.key));
+        resourceTypes.sort((a,b) => { return a.order <= b.order ? -1 : 1});
+        
+        return resourceTypes.map( type => {
+          // each group is an augmented resourcetype object.
+          var group = type;
+          group.link = this.typeLink(type.key);
+          group.heading = type.value ?? this._heading;
+          group.resources = this.resourcesByType(type.key)
+          return group;
           });
       } else {
-        // var icon = null;
-        // let type = this.resourceTypes.find( r => r.key == this.resources[0].resourceType);
-        // if (type && this._heading) {
-        //   icon = type.icon;
-        // }
         const singleType = [{ key: 'all', heading: this._heading, link: this.headingLink, resources: this.resources, icon: this.headingIcon}];
         return singleType;
       }
     },
+
     blankResource() {
       if (this.resources.length > 0) {
         let type = this.resources[0].resourceType
@@ -130,10 +131,8 @@ export default {
         return this.resources;
       }
     },
-    handleAddRecommendation() {
-      console.log('gg')
-      this.$router.replace({ query: { r: 'new'}});
-      this.$forceUpdate();
+    handleAddRecommendation(typeKey) {
+      this.$router.push(`/recommend/${typeKey}`);
     }
   }
 
@@ -159,7 +158,7 @@ h1 {
   display: flex;
   flex-wrap: wrap;
   align-content: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   overflow: scroll;
   gap: 10px;
 }

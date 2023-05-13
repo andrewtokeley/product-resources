@@ -1,3 +1,4 @@
+
 export { Lookup, lookupConverter };
 
 /**
@@ -11,17 +12,39 @@ class Lookup {
     /**
      * This array contains the key/value pairings but also extra meta data
      */
-    this.items = config.items.sort((a,b) => a.value > b.value ? 1 : -1);
-
+    if (config.items) {
+      this.items = config.items.sort((a,b) => a.value > b.value ? 1 : -1);
+    } else {
+      this.items = [];
+    }
+    
     /**
      * This array contains only the key/value pairings
      */
-    this.keyValues = this.items.map ( item => {
-      return { key: item.key, value: item.value }
-    });
-
+    this.keyValues = this.items.map ( i => { return { key: i.key, value: i.value }} );
+    
   }
 }
+
+// class LookupItem {
+//   constructor(config){
+//     this.key = config.key
+//     this.value = config.value
+//     this.order = config.order
+//     this.meta = config.meta
+//   }
+
+//   static default() {
+//     return new LookupItem( {})
+//   }
+
+//   /**
+//    * May not need this anymore?
+//    */
+//   get keyValue() {
+//     return { key: this.key, value: this.value }
+//   }
+// }
 
 /**
  * FirestoreDataConverter implementation for User instances
@@ -36,7 +59,6 @@ var lookupConverter = {
 
   fromFirestore: function (snapshot, options) {
     const data = snapshot.data(options);
-    console.log('fire')
     const config = {
       id: snapshot.id,
       items: data.items,

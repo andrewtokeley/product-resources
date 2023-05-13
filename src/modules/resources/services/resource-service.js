@@ -114,10 +114,15 @@ const searchByTagKey = async function(tagKey) {
 //   return result
 // };
 
+/**
+ * Searches only description, tagid, authors
+ * @param {} text 
+ * @returns 
+ */
 const searchByText = async function(text) {
 
   const q = query(collection(db, COLLECTION_KEY)
-    .withConverter(resourceConverter))
+    .withConverter(resourceConverter));
   const querySnapshot = await getDocs(q);
   const result = [];
   querySnapshot.forEach((doc) => {
@@ -132,6 +137,7 @@ const searchByText = async function(text) {
 };
 
 /**
+ * Returns a full resource record
  * 
  * @param {String} id the id of the resource
  * @returns a new Resource instance 
@@ -140,7 +146,6 @@ const getResource = async function(id) {
   const ref = doc(db, COLLECTION_KEY, id).withConverter(resourceConverter);
   const docSnap = await getDoc(ref);
   if (docSnap.exists()) {
-    console.log('stop');
     return docSnap.data();
   } else {
     return null;

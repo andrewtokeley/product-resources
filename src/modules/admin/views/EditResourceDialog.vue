@@ -8,17 +8,21 @@
     @buttonClick="handleButtonClick"
     :buttonActions="buttons">
     <div class="content"> 
-      {{editResource.resourceType}}
+      <h2>General</h2>
       <div class="double-line">
-        <base-select
-          v-model="editResource.resourceType"
-          :selectOptions="resourceTypes"
-          :options="{ 
-            placeholder: 'Select Type'}"
-        ></base-select>
+        <div>
+          <div class="label tight">Resource Type</div>
+          <base-select
+            v-model="editResource.resourceType"
+            :selectOptions="resourceTypes"
+            :options="{ 
+              placeholder: 'Select Type'}"
+          ></base-select>
+        </div>
         <div></div>
       </div>
 
+      <div class="label tight">Display</div>
       <base-input
         :hasFocus="true"
         @blur="setTitle"
@@ -30,22 +34,39 @@
       ></base-input>
 
       <div class="double-line">
-        <authors-list v-model="editResource.authors"></authors-list>
-        <date-picker v-model="editResource.publishedDate" :options="{ placeholder: 'Published Date' }"></date-picker>
+        <div>
+          <div class="label tight">Authors</div>
+          <authors-list v-model="editResource.authors"></authors-list>
+        </div>
+        <div>
+          <div class="label tight">Published Date</div>
+          <date-picker v-model="editResource.publishedDate" :options="{ placeholder: 'Published Date' }"></date-picker>
+        </div>
       </div>
 
       <div class="double-line">
-        <base-input v-model="editResource.imageUrl" @blur="validate('imageUrl')" :errorMessage="errorMessage['imageUrl']" :options="{ placeholder: 'Add Image URL'}"></base-input>        
-        <base-input v-model="editResource.resourceUrl" @blur="validate('resourceUrl')" :errorMessage="errorMessage['resourceUrl']" :options="{ placeholder: 'Add Resource URL'}"></base-input>
+        <div>
+          <div class="label tight">Image Url</div>
+          <base-input v-model="editResource.imageUrl" @blur="validate('imageUrl')" :errorMessage="errorMessage['imageUrl']" :options="{ placeholder: 'Add Image URL'}"></base-input>        
+        </div>
+        <div>
+          <div class="label tight">Firebase Store Name</div>
+          <base-input v-model="editResource.imageStorageName" @blur="setImageUrl" :errorMessage="errorMessage['imageStorageName']" :options="{ placeholder: 'Add Firebase Image Name'}"></base-input>
+        </div>
       </div>
+      
+      <div class="label tight">Resourse Url</div>
+      <base-input v-model="editResource.resourceUrl" @blur="validate('resourceUrl')" :errorMessage="errorMessage['resourceUrl']" :options="{ placeholder: 'Add Resource URL'}"></base-input>
 
+      
+      <div class="label tight">Description</div>
       <base-multiline-text
         v-model="editResource.description"
         :errorMessage="errorMessage['description']"
         @blur="validate('description')"
         :options="{ 
           placeholder: 'Add Description',
-          numberOfLines: 10,
+          numberOfLines: 8,
           maximumLength: 1000, 
           showCharacterCount: true}"
       ></base-multiline-text>
@@ -103,6 +124,7 @@ import { getResourceTypes } from '@/modules/resources/services/lookup-service';
 import ModalDialog from '@/core/components/ModalDialog.vue';
 import { addResource, getResource, updateResource } from '@/modules/resources/services/resource-service';
 import { validateObject, validateProperty } from '@/core/model/validation';
+import { getPersistentLink } from '@/core/services/imageStorageService'
 
 export default {
   components: { 
@@ -131,13 +153,15 @@ export default {
   },
 
   async mounted() {
-    console.log('moutned')
     this.isWorking = true;
+    
     const lookup = await getResourceTypes();
+    
     this.resourceTypes = lookup.keyValues;
 
     // take a copy we can edit
     this.editResource =  cloneDeep(this.resource);
+    this.setTitle();
 
     // if we're editing, do a validation check to highlight incomplete fields
     if (!this.isNew) {
@@ -186,6 +210,19 @@ export default {
   },
 
   methods: {
+    async setImageUrl() {
+        if (this.editResource.imageStorageName) {
+          try {
+            const url = await getPersistentLink(this.editResource.imageStorageName);
+            this.editResource.imageUrl = url;
+          } catch {
+            // don't change whatever's in the url
+          }
+
+        } else {
+          this.editResource.imageUrl;
+        }
+    },
     validate(prop) {
       let result = validateProperty(this.editResource, this.editResource.schema, prop);
       this.errorMessage[prop] = result.errorMessage;
@@ -194,7 +231,6 @@ export default {
       }
     },
     setTitle() {
-      
       if (this.editResource.displayName?.length > 0) {
         this.modalTitle = this.editResource.displayName 
       } else {
@@ -228,15 +264,19 @@ align-items: center;
 justify-content: space-around;
 gap:20px;
 /* not sure why I need to set this? */
-height: 50px;
+/* height: 50px; */
 }
 .double-line :nth-child(2), .double-line :nth-child(1) {
   width:100%;
 }
 .label {
-color: var(--prr-darkgrey);
-margin-top: 20px;
+  font-weight: bold;
+  color: var(--prr-darkgrey);
+  margin-top: 20px;
 margin-bottom: 5px;
+}
+.label::after {
+  content: ':';
 }
 
 .label.tight {

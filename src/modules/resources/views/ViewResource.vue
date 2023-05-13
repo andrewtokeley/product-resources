@@ -14,9 +14,8 @@
         <a v-for="tag in resource.tags" :key="tag.key" :href="`/tag/${tag}`">{{ tagDescription(tag) }}</a>
       </div>
     </div>
-    <div class="topblock" :class="{ rectangle: isBook, square : !isBook }" >
-      <!-- <img class="image" :src="resource.imageUrl ?? resource.parentResourceImageUrl" /> -->
-      <resource-image class="image" :resource="resource" :hideActions="true"></resource-image>
+    <div class="topblock" :class="{ tall: isImageTall, short : !isImageTall }" >
+      <resource-image class="image" @click="handleOpenResource(resource)" :resource="resource" :hideActions="true"></resource-image>
       <p>{{resource.description}}</p>
     </div>  
     <div class="recommendations">
@@ -26,16 +25,13 @@
         :recommendation="recommendation">
       </recommendation-widget>
     </div>
-    <template v-if="relatedResources?.length > 0">
-      <h2>Popular {{ childDescription }}</h2>
-      <div v-for="resource in relatedResources" :key="resource.id" 
-        class="related"
-        @click="$emit('changeResource', resource)">
-        <resource-image class="image" :preview="true" :resource="resource" :hideActions="true"></resource-image>
-        <h3>{{ resource.displayName }}</h3>
-        <p class="child-description">{{resource.description}}</p>
+    <div class="related" v-if="relatedResources?.length > 0">
+      <hr class="divider" />
+      <h2>Recommended {{ childDescription }}</h2>
+      <div v-for="resource in relatedResources" :key="resource.id" @click="$emit('changeResource',resource)">
+        <book-card :resource="resource" :preview="true" :showTitle="false" :showDescription="true"></book-card>  
       </div>
-    </template>
+    </div>
 
   </div>
 </template>
@@ -43,7 +39,8 @@
 <script>
 import { Resource } from "@/modules/resources/model/resource";
 import RecommendationWidget from '@/modules/recommendations/components/RecommendationWidget.vue';
-// import ResourceImage from '@/modules/resources/components/ResourceImage.vue'
+// import BookCard from '@/modules/resources/components/BookCard.vue';
+
 import { getRecommendations } from "@/modules/recommendations/services/recommendation-service";
 import { getRelatedResources } from '../services/resource-service';
 import { getTags } from '../services/lookup-service';
@@ -61,6 +58,7 @@ export default {
   beforeCreate() {
   // this is needed to avoid circular references - the recommend dialog contains the resource image which contains the dialog
   this.$options.components.ResourceImage = require("@/modules/resources/components/ResourceImage.vue").default;
+  this.$options.components.BookCard = require("@/modules/resources/components/BookCard.vue").default;
 },
   data() {
     return {
@@ -81,18 +79,23 @@ export default {
   methods: {
     tagDescription(key) {
       return this.tags.find( t => t.key == key )?.value;
+    },
+    handleOpenResource(resource) {
+      if (resource.resourceUrl) {
+        window.open(resource.resourceUrl, '_blank');
+      }
     }
   },
   computed: {
     childDescription() {
       if (this.relatedResources) {
-        return this.relatedResources[0].resourceType.value + 's';
+        return this.relatedResources[0].resourceType;
       }
       return null;
     },
-    isBook() {
-        if (this.resource.resourceType) {
-          return this.resource.resourceType == 'books'
+    isImageTall() {
+        if (this.resource.imageShape == 'portrait') {
+          return true;
         }
         return false;
       }
@@ -102,11 +105,11 @@ export default {
 </script>
 
 <style scoped>
-.topblock.square {
+.topblock.short {
   min-height: 150px;
   margin-bottom: 20px;
 }
-.topblock.rectangle {
+.topblock.tall {
   min-height: 240px;
   margin-bottom: 20px;
 }
@@ -124,12 +127,12 @@ export default {
   border: 1px solid black;
 }
 
-.topblock.square img {
+.topblock.short img {
   height:150px;
   width:150px;
 }
 
-.topblock.rectangle img {
+.topblock.tall img {
   width:150px;
   height:240px;
 }
@@ -168,12 +171,16 @@ export default {
   width:50%;
   margin: 20px 0px 40px 0px;
 } */
-.related {
+/* .related {
   background: var(--prr-extralightgrey);
   border-radius: 15px;
   padding: 10px;
   margin-bottom: 15px;
   cursor: pointer;
+} */
+
+.related h2{
+  text-transform:capitalize;
 }
 
 .child-description {

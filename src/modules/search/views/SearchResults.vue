@@ -9,23 +9,38 @@
         <div><p v-if="summary">{{ summary }}</p></div>
       </div>
       <div v-if="searchResults.length > 0 && !isLoading" >
-        <book-group v-if="searchResults" :showDescription="true" :includeItemCount="false" :showAddRecommendation="false" heading="Results" :resources="searchResults"></book-group>
+        <book-group 
+          v-if="searchResults" 
+          heading="Results" 
+          :resources="searchResults"
+          :showDescription="true" 
+          :includeItemCount="false" 
+          :showAddRecommendation="false"
+          @click="handleShowDetail">
+        </book-group>
       </div>
       <div v-if="searchResults.length == 0 && !isLoading" class="noresults">
         We couldn't find anything matching, <i>{{ searchTerm }}</i>
       </div>
     </div>
+    <resource-detail 
+      v-if="showDetail" 
+      :resource="clickedResource"
+      @close="showDetail = false"></resource-detail>
   </div>
 </template>
 
 <script>
 import LoadingSymbol from "@/core/components/LoadingSymbol.vue";
-import BookGroup from '@/modules/resources/components/BookGroup.vue'
+import BookGroup from '@/modules/resources/components/BookGroup.vue';
+import ResourceDetail from '@/modules/resources/views/ResourceDetail.vue';
+
 import { searchByTagKey, searchByText } from '@/modules/resources/services/resource-service.js'
 import { getTags } from '@/modules/resources/services/lookup-service.js'
+
 export default {
   name: 'search-results',
-  components: { LoadingSymbol, BookGroup,},
+  components: { LoadingSymbol, BookGroup, ResourceDetail},
   data() {
     return {
       title: null,
@@ -35,6 +50,8 @@ export default {
       searchResults: [],
       tags: [],
       isLoading: true,
+      showDetail: false,
+      clickedResource: null,
     }
   },
 
@@ -48,6 +65,10 @@ export default {
   },
 
   methods: {
+    handleShowDetail(resource) {
+      this.clickedResource = resource;
+      this.showDetail = true;
+    },
     async loadSearchResults() {
       this.isLoading = true;
       if (this.searchTag) {

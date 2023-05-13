@@ -59,9 +59,12 @@ import ResourceDetail from '@/modules/resources/views/ResourceDetail.vue'
 
 import { auth } from '@/core/services/firebaseInit'
 import { useUserStore } from '@/core/state/userStore'
-import { refreshTags, refreshResourceTypes, getTagItemsByGroup } from '@/modules/resources/services/lookup-service'
+import { groupTags } from '@/modules/resources/services/lookup-service'
 import { Resource } from '@/modules/resources/model/resource'
 import { getResource } from '@/modules/resources/services/resource-service'
+
+import { ref } from 'vue';
+import { useLookupStore } from '@/core/state/lookupStore';
 
 export default {
   name: 'HeaderBar',
@@ -73,7 +76,13 @@ export default {
     RecommendDialog,
     ResourceDetail,
   },
-
+  setup() {
+    const lookupStore = ref(null);
+    lookupStore.value = useLookupStore();
+    return {
+      lookupStore
+    }
+  },
   props: {
     clearSearch: Boolean,
   },
@@ -84,8 +93,8 @@ export default {
     return {
       searchTerm: "",
       navLinks: [],
-      tags: [],
-      types: [],
+      // tags: [],
+      // types: [],
       showRecommendDialog: false,
       showResourceDialog: false,
       tagGroups: [],
@@ -101,13 +110,12 @@ export default {
       {id: 'podcasts', path:'/type/podcasts', title:'PODCASTS'},
       {id: 'websites', path:'/type/websites', title:'WEB'},
       {id: 'people', path:'/type/people', title:'PEOPLE'},
-      // {id: 'video', path:'/type/video', title:'VIDEO'}
-    ]
-    this.tagGroups = await getTagItemsByGroup();
-    
+    ];
+
+    console.log("accessing store");
+    this.tagGroups = await groupTags(this.lookupStore.tags);
     const resourceId = this.$route.query.r   
-  
-    if (resourceId) {
+  if (resourceId) {
       if (resourceId.toLowerCase() == 'new') {
         this.showRecommendDialog = true;
       } else {
@@ -162,20 +170,20 @@ export default {
             }
           },
           {
-            name: "Reccommendations...",
+            name: "Lookups...",
+            show: this.useUserStore.isAdmin,
+            action: () => {
+              vm.$router.push('/admin/tags');
+            }
+          },
+          {
+            name: "Recommendations...",
             show: this.useUserStore.isAdmin,
             action: () => {
               vm.$router.push('/admin/recommendations');
             }
           },
-          {
-            name: "Refresh Lookups",
-            show: this.useUserStore.isAdmin,
-            action: () => {
-              refreshTags().then ( tags => this.tags = tags );
-              refreshResourceTypes();
-            }
-          },
+          
           {
             isDivider: true,
             show: this.useUserStore.isAdmin,

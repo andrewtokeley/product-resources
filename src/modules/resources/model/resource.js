@@ -14,6 +14,7 @@ class Resource {
     this.createdDate = config.createdDate;
     this.publishedDate = config.publishedDate;
     this.audioLengthInSeconds = config.audioLengthInSeconds;
+    this.imageStorageName = config.imageStorageName;
     this.imageUrl = config.imageUrl;
     this.authors = config.authors;
     this.resourceType = config.resourceType;
@@ -81,6 +82,19 @@ class Resource {
       case 'podcasts': return "Listen..."
       case 'episodes': return "Listen..."
       default: return "Read..."
+    }
+  }
+
+  get imageShape() {
+    switch (this.resourceType) {
+      case 'podcasts':
+      case 'episodes':
+        return 'square';
+      case 'videos':
+      case 'posts':
+        return 'landscape';
+      default:
+        return 'portrait';
     }
   }
 
@@ -152,6 +166,7 @@ var resourceConverter = {
     }
     if (resource.audioLengthInSeconds != null) { result.audioLengthInSeconds = resource.audioLengthInSeconds }
     if (resource.authors != null) { result.authors = resource.authors.map( a => a.trim()) }
+    if (resource.imageStorageName != null) { result.imageStorageName = resource.imageStorageName }
     if (resource.imageUrl != null) { result.imageUrl = resource.imageUrl }
     if (resource.tags != null) { result.tags = resource.tags }
 
@@ -184,6 +199,7 @@ var resourceConverter = {
       publishedDate: data.publishedDate ? DateTime.fromJSDate(data.publishedDate.toDate()) : null,
       audioLengthInSeconds: data.audioLengthInSeconds,
       imageUrl: data.imageUrl,
+      imageStorageName: data.imageStorageName,
       createdDate: data.createdDate ? DateTime.fromJSDate(data.createdDate.toDate()) : null,
       authors: data.authors,
       resourceType: data.resourceType,

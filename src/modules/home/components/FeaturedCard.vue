@@ -1,5 +1,5 @@
 <template>
-  <div class="featured-card">
+  <div class="featured-card" @click="$emit('click', resource)">
     <resource-image class="image" :resource="resource"></resource-image>
     <recommendation-widget class="quote" :recommendation="recommendation"></recommendation-widget>
   </div>
@@ -54,7 +54,8 @@ export default {
   min-width: 300px;
   flex: 1 1 0px;
   border-radius: 10px;
-  background: var(--prr-extralightgrey);
+  /* background: var(--prr-extralightgrey); */
+  cursor: pointer;
 }
 .quote {
   margin-left: 20px;

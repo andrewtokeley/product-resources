@@ -1,5 +1,4 @@
 <template>
-  
     <div class="content">
       <p>Thank you so much for taking the time to share a resource with other product people. You Rock!</p>
       

@@ -28,7 +28,7 @@
       </thead>
       
       <tbody>
-        <tr v-for="resource in resources" :key="resource.id" @click="handlePreviewClick(resource)">
+        <tr v-for="resource in resources" :key="resource.id" @click="handleEditClick(resource)">
           <td>
             <resource-image :hideActions="false" :preview="true" :resource="resource"></resource-image>
           </td>
@@ -41,9 +41,7 @@
           <td>{{ resource.statusDescription }}</td>
           <td>
             <div class="actions">
-              <base-icon @click="handlePreviewClick(resource)" title="Preview">preview</base-icon>
-              <base-icon @click="handleEditClick(resource)" title="Edit Resource">edit</base-icon>
-              <base-icon @click="handleDeleteClick(resource)" title="Delete Resource">delete</base-icon>
+              <base-icon :menu="menuItems(resource)">more_vert</base-icon>
             </div>
           </td>
         </tr>
@@ -67,6 +65,7 @@
       @addRelated="handleAddRelated">
     </resource-detail>
     
+    <recommend-dialog v-if="showRecommend" :resource="resource" @close="showRecommend=false"></recommend-dialog>
     <confirmation-dialog 
       v-if="showDeleteConfirm"
       heading="Delete Resource" 
@@ -90,13 +89,14 @@ import BaseButton from '@/core/components/BaseButton.vue';
 import ConfirmationDialog from '@/core/components/ConfirmationDialog.vue';
 import LoadingSymbol from '@/core/components/LoadingSymbol.vue';
 
-import { deleteResource, getResourcesFull } from '@/modules/resources/services/resource-service';
+import { deleteResource, getResourcesFull, updateResource } from '@/modules/resources/services/resource-service';
 import { cloneDeep } from 'lodash';
 import { Resource } from '@/modules/resources/model/resource';
+import RecommendDialog from '@/modules/recommendations/views/RecommendDialog.vue';
 
 export default {
   name: 'manage-resources',
-  components: { ResourceImage, BaseIcon, EditResourceDialog, BaseButton, ResourceTypeSelect, ConfirmationDialog, LoadingSymbol, ResourceDetail },
+  components: { ResourceImage, BaseIcon, EditResourceDialog, BaseButton, ResourceTypeSelect, ConfirmationDialog, LoadingSymbol, ResourceDetail, RecommendDialog },
   data() {
     return {
       resource: Resource,
@@ -105,6 +105,7 @@ export default {
       showEdit: false,
       showAdd: false,
       showView: false,
+      showRecommend: false,
       showDeleteConfirm: false,
       selectedResourceType: 'podcasts',
       isDeleting: false,
@@ -129,6 +130,55 @@ export default {
     } 
   },
   methods: {
+    menuItems(resource) {
+      return {
+        menuItems: [
+          {
+            name: "Preview...",
+            iconName: "preview",
+            action: () => {
+              this.handlePreviewClick(resource);
+            }
+          },
+          { 
+            isDivider: true,
+          },
+          {
+            name: "Add Recommendation...",
+            iconName: "thumb_up",
+            action: () => {
+              this.handleRecommendClick(resource);
+            }
+          },
+          { 
+            isDivider: true,
+          },
+          {
+            name: "Delete...",
+            iconName: 'delete',
+            action: () => {
+              this.handleDeleteClick(resource);
+            }
+          },
+          { 
+            isDivider: true,
+          },
+          {
+            name: "Approve",
+            show: !resource.approved,
+            action: () => {
+              this.setApproval(resource, true);
+            }
+          },
+          {
+            name: "Un-Approve",
+            show: resource.approved,
+            action: () => {
+              this.setApproval(resource, false);
+            }
+          }]
+        }
+      },
     sortHeadingClasses(propName) {
       var classes = {
         sorted: false,
@@ -175,6 +225,10 @@ export default {
       this.showEdit = true;
     },
 
+    handleRecommendClick(resource){
+      this.resource = resource;
+      this.showRecommend = true;
+    },
     handleApproval(approved) {
       this.resource.approved = approved;
       this.showView = false;
@@ -195,6 +249,10 @@ export default {
       this.resource = resource;
       this.resources.unshift(resource);
       this.showEdit = false;
+    },
+    setApproval(resource, approved) {
+      resource.approved = approved;
+      updateResource(resource);
     },
     handleSaved(resource) {
       // copy the saved object back into the table/selected element

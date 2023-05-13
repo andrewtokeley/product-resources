@@ -10,6 +10,7 @@
 <script>
 import { defineComponent } from "vue";
 import HeaderBar from "./core/components/HeaderBar.vue";
+import { useLookupStore } from "@/core/state/lookupStore"
 
 export default defineComponent({
   components: { HeaderBar },
@@ -19,6 +20,12 @@ export default defineComponent({
       hideHeader: true,
     }
   },
+  async mounted() {
+    // load up some data into the state stores
+    let store = useLookupStore();
+    await store.fetchLookups();
+    console.log("store loaded")
+  }
 });
 </script>
 

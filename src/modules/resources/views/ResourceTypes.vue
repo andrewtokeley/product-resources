@@ -8,38 +8,44 @@
         <div><h1 v-if="title">{{ title }}</h1></div>
         <div><p v-if="summary">{{ summary }}</p></div>
       </div>
-      <div v-if="searchResults.length > 0 && !isLoading" >
-        <book-group v-if="books" :showAddRecommendation="true" :isGrouped="false" :resources="books"></book-group>
-        <book-group v-if="people" :showAddRecommendation="true" :isGrouped="false" :resources="people"></book-group>
-        <book-group v-if="web" :showAddRecommendation="true" heading="Web" :resources="web"></book-group>
-        <book-group v-if="podcasts" :showAddRecommendation="true" :isGrouped="false" :resources="podcasts"></book-group>
-        <book-group v-if="posts" :showAddRecommendation="true" heading="Posts" :resources="posts"></book-group>
-        <book-group v-if="videos" :showAddRecommendation="true" heading="Videos" :resources="videos"></book-group>
-        <book-group v-if="episodes" :showAddRecommendation="true" :showDescription="true" :isGrouped="false" heading="Top Episodes" :resources="episodes"></book-group>
-        
-      </div>
+      <template v-if="searchResults.length > 0 && !isLoading" >
+        <book-group @click="handleOpenPreview" :showAddRecommendation="true" :isGrouped="true" :resources="searchResults"></book-group>
+      </template>
       <div v-if="searchResults.length == 0 && !isLoading" class="noresults">
         We couldn't find anything matching, <i>{{ searchTerm }}</i>
       </div>
     </div>
+    <resource-detail 
+      v-if="showDetail" 
+      :resource="clickedResource"
+      @close="showDetail = false"></resource-detail>
   </div>
 </template>
 
 <script>
-
+import ResourceDetail from "@/modules/resources/views/ResourceDetail.vue";
 import LoadingSymbol from "@/core/components/LoadingSymbol.vue";
-import BookGroup from '../components/BookGroup.vue'
+import BookGroup from '@/modules/resources/components/BookGroup.vue';
 
 import { searchByResourceTypes, searchByTagKey, searchByText } from '../services/resource-service.js'
-import { getResourceTypes, getTags } from '../services/lookup-service';
+import { useLookupStore } from '@/core/state/lookupStore';
+import { ref } from 'vue'
 
 export default {
-  
   name: 'ResourcesSearch',
 
   components: {
     LoadingSymbol,
     BookGroup,
+    ResourceDetail,
+  },
+
+  setup() {
+    const lookupStore = ref(null);
+    lookupStore.value = useLookupStore();
+    return {
+      lookupStore
+    }
   },
 
   data() {
@@ -50,7 +56,9 @@ export default {
       searchTerm: null,
       searchResults: [],
       isLoading: true,
-      resourceTypes: [],
+      showDetail: false,
+      clickedResource: null,
+      // resourceTypes: [],
       bookResources: {
         type: Array,
         default: [{}]
@@ -59,12 +67,16 @@ export default {
   },
 
   async mounted() {
-    this.tagsLookup = await getTags();
-    this.resourceTypes = await getResourceTypes();
+    // this.tagsLookup = await getTags();
+    // this.resourceTypes = await getResourceTypes();
     await this.loadSearchResults()
   },
 
   methods: {
+    handleOpenPreview(resource) {
+      this.clickedResource = resource;
+      this.showDetail = true; 
+    },
     async loadSearchResults() {
       this.isLoading = true;
       if (this.$route.params.typeId) {
@@ -91,7 +103,7 @@ export default {
       }
 
       // get the description for the selected type
-      let item = this.resourceTypes.items.find( r => r.key == typeKey );
+      let item = this.lookupStore.resourceTypes.find( r => r.key == typeKey );
       if (item) {
         this.title = item.value.toUpperCase();
         this.summary = item.description;
