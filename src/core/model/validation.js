@@ -81,7 +81,7 @@ const validateObject = function(object, schema) {
  * @returns {Boolean}
  */
 const isObjectValid = function(object, schema) {
-  return validateObject(object, schema) == null
+  return validateObject(object, schema).length == 0;
 }
 
 /**

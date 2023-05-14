@@ -8,13 +8,16 @@ export default class Result {
     return new Result(true, null, data);
   }
 
-  static failure(reason) {
-    return new Result(false, reason);
+  static failure(reason, propertyName) {
+    let result = new Result(false, reason);
+    result.propertyName = propertyName;
+    return result;
   }
 
   constructor(success, message, data) {
     this.success = success;
     this.errorMessage = message;
     this.data = data;
+    this.propertyName = null;
   }
 }

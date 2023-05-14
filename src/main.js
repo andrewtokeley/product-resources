@@ -15,6 +15,24 @@ let router = createRouter({
   routes: routes,
 })
 
+router.beforeEach((to) => {
+  // analytics.logEvent('page_view', {
+  //   page_location: to.fullPath,
+  //   page_path: to.path,
+  //   page_title: to.meta.page_title
+  // });
+  const store = useUserStore();
+  if (to.meta.requiresAuth) {
+     if ((!store.isLoggedIn) || (to.meta.requiresAdmin && !store.isAdmin)) {
+        // redirect to home
+        return "/";
+     }
+  } else {
+    // continue to the url
+    return true;
+  }
+})
+
 // Create the app
 let app = createApp(App);
 app.use(router);

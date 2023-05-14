@@ -104,7 +104,7 @@ class Resource {
       imageUrl: (value) => {
         if (this.parentResourceId == null) {
           if (!value || value?.length == 0) { 
-            return Result.failure("Must enter an image url.");
+            return Result.failure("Must enter an image url.", 'imageUrl');
           } else {
             return validateUrl(value);        
           }
@@ -113,17 +113,17 @@ class Resource {
       },
       // Mandatory
       resourceUrl: (value) => {
-        if (!value || value?.length == 0) { return Result.failure("Must enter resource url.");}
+        if (!value || value?.length == 0) { return Result.failure("Must enter resource url.", 'resourceUrl');}
         return validateUrl(value);        
       },
       // Mandatory
       displayName: (value) => {
-        if (!value || value?.length == 0) { return Result.failure("Must enter display name");}
+        if (!value || value?.length == 0) { return Result.failure("Must enter display name", 'displayName');}
         return Result.success();
       },
       // Mandatory
       description: (value) => {
-        if (!value || value?.length == 0) { return Result.failure("Must enter a description");}
+        if (!value || value?.length == 0) { return Result.failure("Must enter a description", 'description');}
         return Result.success();
       },
     }

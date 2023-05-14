@@ -9,11 +9,11 @@
       
       <div class="double-line">
         <div>
-          <div class="label">Resource type</div>
+          <div class="label">Where should the resource be categorised?</div>
           <resource-type-select v-model="this.recommendation.resourceType"></resource-type-select>
         </div>
         <div>
-          <div class="label">&nbsp;</div>
+          <div class="label">Include a link where people can read/listen/discover the resource.</div>
           <base-input 
             v-model="recommendation.resourceUrl" 
             @blur="validate('resourceUrl')"
@@ -82,6 +82,7 @@ import { Resource } from '@/modules/resources/model/resource'
 
 import { addRecommendation } from '@/modules/recommendations/services/recommendation-service'
 import { validateObject, validateProperty } from '@/core/model/validation'
+import { useUserStore } from '@/core/state/userStore'
 
 export default {
 name: "recommend-view",
@@ -110,7 +111,10 @@ data() {
   }
 },
 mounted() {
+  const store = useUserStore();
   this.recommendation.resourceType = this.$route.params.typeId ?? 'books';
+  this.recommendation.name = store.displayName;
+  this.recommendation.uid = store.userId;
 },  
 computed: {
   canSubmit() {
