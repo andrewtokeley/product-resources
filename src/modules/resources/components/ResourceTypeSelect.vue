@@ -8,7 +8,6 @@
 </template>
 
 <script>  
-// import { getResourceTypes } from "@/modules/resources/services/lookup-service"
 import BaseSelect from "@/core/components/BaseSelect.vue";
 import { getResourceTypes } from '@/modules/resources/services/lookup-service';
 
@@ -20,7 +19,7 @@ export default {
   },
   data() {
     return {
-      resourceTypes:[]
+      resourceTypes:[],
     }
   },
   

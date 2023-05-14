@@ -30,8 +30,7 @@
     <div class="spacer"></div>
 
     <div class="header__right">
-      <!-- <base-button @click="$emit('recommend')">Recommend</base-button> -->
-      <base-button @click="showRecommendDialog = true">Recommend</base-button>
+      <base-button @click="$router.push('/recommend')" >Recommend</base-button>
       <search-input 
         v-model="searchTerm" 
         @search="$router.push(`/search/${searchTerm}`)" 

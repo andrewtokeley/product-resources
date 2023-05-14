@@ -31,7 +31,7 @@ const validateUrl = function(url) {
 
 
 /**
- * Returns any failing validations for an object.
+ * Returns array of failing Result instances.
  * 
  * ```
  * let person = {
@@ -62,18 +62,16 @@ const validateUrl = function(url) {
  * @returns {{}} object with properties (for each failed object property) containing a Result instance
 */
 const validateObject = function(object, schema) {
-  let props = Object.getOwnPropertyNames(object);
-  
-  var results = {} // Array.from({length: props.length}, () => Result.success())
+  let props = Object.getOwnPropertyNames(object);  
+  var results = [];
   for (const i in props) {
     const propertyName = props[i];
     const validate = validateProperty(object, schema, propertyName);
     if (!validate.success) {
-      results[propertyName] = validate;
+      results.push(validate);
     }
   }
-  // only return the properties that failed.
-  return Object.keys(results).length > 0 ? results : null;
+  return results;
 }
 
 /**

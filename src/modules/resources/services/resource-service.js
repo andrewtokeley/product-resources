@@ -3,11 +3,15 @@ import { Resource, resourceConverter } from '../model/resource'
 import { app } from "@/core/services/firebaseInit"
 import { getFirestore, orderBy, query, collection, doc, getDocs, getDoc, where, addDoc, setDoc, deleteDoc, limit, updateDoc } from "firebase/firestore"; 
 import { getAllRecommendations } from '@/modules/recommendations/services/recommendation-service';
+
+import { useLookupStore } from '@/core/state/lookupStore';
+
 const { DateTime } = require('luxon');
 
 const db = getFirestore(app);
 
-export {  
+export { 
+  getTagsForResources, 
   approveResource, 
   unapproveResource, 
   getResourcesFull, 
@@ -188,4 +192,20 @@ const unapproveResource = async function(id) {
   } else {
     return null;
   }
+}
+
+/**
+ * Returns an array of all the tags used to describe the resources.
+ * @param {*} resource 
+ * @returns 
+ */
+const getTagsForResources = function(resources) {
+  var tags = resources.map( r => r.tags );
+  tags = new Set(tags.flat());
+  
+  // get full tags
+  const store = useLookupStore()
+  const allFullTags = [...tags].map( t => store.tags.find ( st => st.key == t ));
+
+  return allFullTags;
 }

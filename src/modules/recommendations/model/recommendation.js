@@ -25,7 +25,7 @@ class Recommendation {
   static default() {
     // returns a default instance where all the fields, and their child properties are available.
     return new Recommendation({ 
-      resourceType: {key:'books', value:'Book'},
+      resourceType: 'books',
       allowPublishReason: true,
       allowPublishName: false,
       approved: false,
@@ -47,12 +47,6 @@ class Recommendation {
       reason: (value) => {
         if (!value || value.length == 0) {
           return Result.failure("People will want to know why you love this resource!");
-        }
-        return Result.success();
-      },
-      name: (value) => {
-        if (this.reason && (!value || value.length == 0)) {
-          this.name = "Anon";
         }
         return Result.success();
       },

@@ -4,7 +4,7 @@
     <p v-else class="quote no-reason">Recommended By</p>
     <div class="by">
       <a v-if="recommendation.website" @click="openUrl(recommendation.website)">{{ recommendation.name }}</a>
-      <span v-else>{{ recommendation.name }}</span>
+      <span v-else>{{ recommendation.name ?? 'Anon'}}</span>
     </div>
     <hr/>
   </div>

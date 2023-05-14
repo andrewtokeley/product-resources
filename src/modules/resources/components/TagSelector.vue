@@ -1,8 +1,8 @@
 <template>
   <div class="tag-selector">
       <ul>
-        <li v-for="tag in tags" :key="tag.key" >
-          <tag-button :enableHoverEffect="false" :selected="isSelected(tag.key)" @click="toggleSelection(tag.key)">{{tag.value}}</tag-button>
+        <li v-for="tag in m_tags" :key="tag.key" >
+          <tag-button :enableHoverEffect="singleSelect ? true :false" :selected="isSelected(tag.key)" @click="toggleSelection(tag.key)">{{tag.value}}</tag-button>
         </li>
       </ul>
   </div>
@@ -14,47 +14,74 @@ import TagButton from "@/modules/resources/components/TagButton.vue"
 
 export default {
   name: "tag-selector",
-
+  emits: ['tagClicked', 'update:modelValue'],
   components: {
     TagButton,
   },
 
   data() {
     return {
-      tags: [],
+      m_tags: [],
+      lastSelectedKey: null,
       selectedTagKeys: [],
     }
   },
 
   props: {
+    tags: {
+      type: Array,
+      default: null,
+    },
     modelValue: {
       type: Array,
       default: () => {[]}
+    },
+    singleSelect: {
+      type: Boolean,
+      default: false,
     }
   },
 
-  emits: ['update:modelValue'],
-
   async mounted() {
-    let lookup = await getTags();
-    this.tags = lookup.keyValues;
-    this.selectedTagKeys = this.modelValue;
+    if (!this.tags || this.tags.length == 0) {
+      let lookup = await getTags();
+      this.m_tags = lookup.keyValues;
+    } else {
+      this.m_tags = this.tags;
+    }
+    console.log(this.m_tags);
+    this.selectedTagKeys = this.modelValue ?? [];
   },
 
   methods: {
     toggleSelection(key) {
-      console.log('tog')
+      let isOn;
       var index = this.selectedTagKeys.indexOf(key);
       if (index > -1) {
+        // unselect, remove from selected array
         this.selectedTagKeys.splice(index, 1);
+        isOn = false;
       } else {
+        // add to selected array. Remove previously selected if singleSelect
+        if (this.singleSelect) {
+          if (this.selectedTagKeys.length == 1) {
+            this.$emit('tagClicked', this.selectedTagKeys[0], false);
+            this.selectedTagKeys = [];
+          }
+        }
         this.selectedTagKeys.push(key);
+        isOn = true;
       }
+      // send complete selected array back to client
+      this.$emit('tagClicked', key, isOn);
       this.$emit('update:modelValue', this.selectedTagKeys);
     },
 
     isSelected(key) {
-      return this.selectedTagKeys.includes(key);
+      if (this.selectedTagKeys) {
+        return this.selectedTagKeys.includes(key);
+      }
+      return false;
     }
   }
 }

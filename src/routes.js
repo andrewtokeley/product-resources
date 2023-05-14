@@ -25,6 +25,9 @@ export default [
   // show all resources of a type 
   {path: '/type/:typeId/', component:ResourceTypes},
 
+  // recommend something
+  {path: '/recommend', component: RecommendView},
+  // recommend a resource of a given type
   {path: '/recommend/:typeId', component: RecommendView},
   
   // approve recommendations

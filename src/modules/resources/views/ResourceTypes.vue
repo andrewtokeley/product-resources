@@ -7,11 +7,12 @@
       <div class="introduction">
         <div><h1 v-if="title">{{ title }}</h1></div>
         <div><p v-if="summary">{{ summary }}</p></div>
+        <tag-selector :singleSelect="true" :tags="tagsUsed" v-model="selectedTagFilter" @tagClicked="handleTagClicked"></tag-selector>
       </div>
-      <template v-if="searchResults.length > 0 && !isLoading" >
-        <book-group @click="handleOpenPreview" :showAddRecommendation="true" :isGrouped="true" :resources="searchResults"></book-group>
+      <template v-if="filteredSearchResults.length > 0 && !isLoading" >
+        <book-group @click="handleOpenPreview" :showAddRecommendation="true" :isGrouped="true" :resources="filteredSearchResults"></book-group>
       </template>
-      <div v-if="searchResults.length == 0 && !isLoading" class="noresults">
+      <div v-if="filteredSearchResults.length == 0 && !isLoading" class="noresults">
         We couldn't find anything matching, <i>{{ searchTerm }}</i>
       </div>
     </div>
@@ -26,8 +27,10 @@
 import ResourceDetail from "@/modules/resources/views/ResourceDetail.vue";
 import LoadingSymbol from "@/core/components/LoadingSymbol.vue";
 import BookGroup from '@/modules/resources/components/BookGroup.vue';
+import TagSelector from "../components/TagSelector.vue";
 
-import { searchByResourceTypes, searchByTagKey, searchByText } from '../services/resource-service.js'
+import { searchByResourceTypes, searchByTagKey, searchByText, getTagsForResources } from "@/modules/resources/services/resource-service";
+
 import { useLookupStore } from '@/core/state/lookupStore';
 import { ref } from 'vue'
 
@@ -38,6 +41,7 @@ export default {
     LoadingSymbol,
     BookGroup,
     ResourceDetail,
+    TagSelector,
   },
 
   setup() {
@@ -55,10 +59,12 @@ export default {
       searchCategory: null,
       searchTerm: null,
       searchResults: [],
+      filteredSearchResults: [],
       isLoading: true,
       showDetail: false,
       clickedResource: null,
-      // resourceTypes: [],
+      tagsUsed: [],
+      selectedTagFilter: [],
       bookResources: {
         type: Array,
         default: [{}]
@@ -71,8 +77,15 @@ export default {
     // this.resourceTypes = await getResourceTypes();
     await this.loadSearchResults()
   },
-
   methods: {
+    async handleTagClicked(key, isOn) {
+      console.log('changed ' + key + ' ' + isOn);
+      if (isOn) {
+        this.filteredSearchResults = this.searchResults.filter( r => r.tags.includes(key));
+      } else {
+        this.filteredSearchResults = this.searchResults;
+      }
+    },
     handleOpenPreview(resource) {
       this.clickedResource = resource;
       this.showDetail = true; 
@@ -86,6 +99,8 @@ export default {
       } else if (this.$route.params.searchTerm) {
         await this.loadResourcesByTextSearch(this.$route.params.searchTerm);
       }
+      this.tagsUsed = await getTagsForResources(this.searchResults);
+      this.filteredSearchResults = this.searchResults;
       this.isLoading = false;
     },
 

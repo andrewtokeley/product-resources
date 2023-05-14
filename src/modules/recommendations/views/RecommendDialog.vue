@@ -1,11 +1,11 @@
 <template>
-  <modal-dialog 
+  <!-- <modal-dialog 
     :subTitle="subTitle" 
     :title="resourceExists ? 'Review' : 'Recommend'" 
     :buttonActions="buttonActions" 
     :isLoading="false"
     @buttonClick="handleButtonClick"
-    @close="$emit('close')">
+    @close="$emit('close')"> -->
     <div class="content" >
 
       <div class="left">
@@ -61,13 +61,13 @@
         </div>
       </div>      
     </div>
-  </modal-dialog>
+  <!-- </modal-dialog> -->
 </template>
 
 <script>
 import BaseInput from '@/core/components/BaseInput.vue'
 import BaseMultilineText from '@/core/components/BaseMultilineText.vue'
-import ModalDialog from '@/core/components/ModalDialog.vue'
+// import ModalDialog from '@/core/components/ModalDialog.vue'
 // import ResourceImage from '@/modules/resources/components/ResourceImage.vue'
 import RecommendationWidget from '@/modules/recommendations/components/RecommendationWidget.vue'
 
@@ -78,11 +78,11 @@ import { addRecommendation } from '@/modules/recommendations/services/recommenda
 import { isObjectValid, validateProperty } from '@/core/model/validation'
 
 export default {
-name: "recommend-dialog",
+name: "recommend-view",
 components: { 
   BaseInput, 
   BaseMultilineText, 
-  ModalDialog, 
+  // ModalDialog, 
   RecommendationWidget,
 },  
 emits: ['close','save'],
