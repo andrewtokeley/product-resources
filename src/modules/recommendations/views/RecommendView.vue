@@ -9,7 +9,7 @@
       
       <div class="double-line">
         <div>
-          <div class="label">What sort of resource is?</div>
+          <div class="label">Resource type</div>
           <resource-type-select v-model="this.recommendation.resourceType"></resource-type-select>
         </div>
         <div>
@@ -26,7 +26,7 @@
 
       <div class="double-line">
         <div>
-          <div class="label">We think it's important for all resources to have at least one written recommendation. Here's your chance to share why you think this is a great resource.</div>
+          <div class="label">We think it's important for all resources to have at least one written recommendation. What makes this resource so great and why do you think others might like it too?</div>
           <base-multiline-text 
             v-model="recommendation.reason"
             @blur="validate('reason')"
@@ -64,7 +64,7 @@
       <div class="label">We'll publish your review shortly.</div>
       <div class="buttons">
         <base-button :isSecondary="true" @click="$router.back()">Cancel</base-button>
-        <base-button :disabled="!canSubmit">Submit</base-button>
+        <base-button :showSpinner="isSaving" :disabled="!canSubmit" @click="handleSubmit">Submit</base-button>
       </div>
     </div>
   </div>
@@ -81,7 +81,7 @@ import { Recommendation } from '@/modules/recommendations/model/recommendation'
 import { Resource } from '@/modules/resources/model/resource'
 
 import { addRecommendation } from '@/modules/recommendations/services/recommendation-service'
-import { isObjectValid, validateObject, validateProperty } from '@/core/model/validation'
+import { validateObject, validateProperty } from '@/core/model/validation'
 
 export default {
 name: "recommend-view",
@@ -119,24 +119,15 @@ computed: {
 },
 
 methods: {
-  handleButtonClick(action) {
-    if (action.id == 'cancel') {
-      this.$emit('close');
-    } else if (action.id == 'add') {
-      this.handleAdd();
-    }
-  },
-
-  async handleAdd() {
+  
+  async handleSubmit() {
     const _this = this;
-    let valid = isObjectValid(this.recommendation, this.recommendation.schema);
-    if (valid) {
-      this.isSaving = true;
-      await addRecommendation(this.recommendation);
-      setTimeout(function () {
-        _this.$emit('close');
-      }, 2000);
-    }
+    this.isSaving = true;
+    await addRecommendation(this.recommendation);
+    setTimeout(function () {
+      _this.isSaving = false;
+      _this.$router.back();
+    }, 2000);
   },
 
   validate(prop) {
@@ -146,7 +137,7 @@ methods: {
       this.recommendation[prop] = result.data;
     }
   }
-    
+   
 }
 }
 </script>

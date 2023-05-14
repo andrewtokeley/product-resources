@@ -1,7 +1,7 @@
 <template>
   <div class="recommendation">
     <p v-if="recommendation.reason" class="quote">"{{ recommendation.reason }}"</p>
-    <p v-else class="quote no-reason">Recommended By</p>
+    <p v-else class="quote">"I like this resource because..."</p>
     <div class="by">
       <a v-if="recommendation.website" @click="openUrl(recommendation.website)">{{ recommendation.name }}</a>
       <span v-else>{{ recommendation.name ?? 'Anon'}}</span>
