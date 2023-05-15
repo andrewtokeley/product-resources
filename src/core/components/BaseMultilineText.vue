@@ -1,6 +1,7 @@
 <template>
   <div class="base-multiline-text">
     <textarea
+      ref="textArea"
       :disabled="disabled"
       @input="$emit('update:modelValue', $event.target.value)"
       @blur="$emit('blur')"
@@ -37,6 +38,10 @@ export default {
   props: {
     // The bound value of the input, set by clients using the v-model property
     modelValue: String,
+    hasFocus: {
+      type: Boolean,
+      default: false,
+    },
     errorMessage: {
       type: String,
       default: ''
@@ -87,6 +92,12 @@ export default {
       lastValue: null,
       // errorMessage: "",
     };
+  },
+
+  mounted() {
+    if (this.hasFocus) {
+      setTimeout(() => { this.$refs.textArea.focus() }, 300)
+    }
   },
 
   computed: {

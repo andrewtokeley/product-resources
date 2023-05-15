@@ -8,12 +8,16 @@ import Approve from './modules/recommendations/views/ApproveRecommendations'
 import About from './modules/about/views/AboutView'
 import Home from './modules/home/views/ResourcesHome'
 import RecommendView from './modules/recommendations/views/RecommendView'
+import UserProfile from './modules/users/views/UserProfile'
 
 export default [
-  {path: '/login', component:Login, meta: { hideHeader: true }},
+  {path: '/login', component:Login, meta: { hideHeader: false }},
   
   // home page
   {path: '/', component:Home, meta: { clearSearch: true }},
+  
+  // profile page
+  {path: '/profile', component:UserProfile, meta: { requiresAuth: true }},
   
   // search across all resources
   {path: '/search/:searchTerm', component:Search},
@@ -29,7 +33,7 @@ export default [
   // recommend a resource of a given type
   {path: '/recommend/:typeId', component: RecommendView, meta: { requiresAuth: true }},
   
-  {path: '/review/:resourceId', component: RecommendView},
+  {path: '/review/:resourceId', component: RecommendView, meta: { requiresAuth: true }},
 
   // approve recommendations
   {path: '/approve', component:Approve},

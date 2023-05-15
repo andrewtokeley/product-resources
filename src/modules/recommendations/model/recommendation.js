@@ -15,8 +15,6 @@ class Recommendation {
     this.resourceUrl = config.resourceUrl;
     this.resourceId = config.resourceId,
     this.reason = config.reason;
-    this.allowPublishReason = config.allowPublishReason;
-    this.allowPublishName = config.allowPublishName;
     this.name = config.name;
     this.website = config.website;
     this.approved = config.approved;

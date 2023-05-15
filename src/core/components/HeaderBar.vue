@@ -39,7 +39,6 @@
       <base-icon :menu="menuOptions">menu</base-icon>
     </div>
 
-    <recommend-dialog v-if="showRecommendDialog" @close="showRecommendDialog = false"></recommend-dialog>
     <resource-detail 
       :resource="resourceFromQueryString"
       v-if="showResourceDialog" 
@@ -53,7 +52,6 @@ import BaseIcon from '@/core/components/BaseIcon.vue'
 import SearchInput from './SearchInput.vue'
 import TagButton from '@/modules/resources/components/TagButton.vue'
 import BaseButton from './BaseButton.vue'
-import RecommendDialog from '@/modules/recommendations/views/RecommendDialog.vue'
 import ResourceDetail from '@/modules/resources/views/ResourceDetail.vue'
 
 import { auth } from '@/core/services/firebaseInit'
@@ -72,7 +70,6 @@ export default {
     TagButton,
     BaseIcon,
     BaseButton,
-    RecommendDialog,
     ResourceDetail,
   },
   setup() {
@@ -92,8 +89,6 @@ export default {
     return {
       searchTerm: "",
       navLinks: [],
-      // tags: [],
-      // types: [],
       showRecommendDialog: false,
       showResourceDialog: false,
       tagGroups: [],
@@ -131,6 +126,7 @@ export default {
 
     handleLogout() {
       auth.signOut();
+      this.$forceUpdate();
     },
 
     isSelected(nav) {
@@ -152,6 +148,23 @@ export default {
       const vm = this;
       return {
         menuItems: [
+          {
+            isHeading: true,
+            heading: this.useUserStore.displayName,
+            subHeading: this.useUserStore.email,
+            show: this.useUserStore.isLoggedIn,
+          },
+          {
+            name: "Profile",
+            show: this.useUserStore.isLoggedIn,
+            action: () => {
+              vm.$router.push('/profile');
+            }
+          },
+          {
+            isDivider: true,
+            show: this.useUserStore.isLoggedIn,
+          },
         {
             name: "ADMIN",
             show: this.useUserStore.isAdmin,
@@ -182,7 +195,6 @@ export default {
               vm.$router.push('/admin/recommendations');
             }
           },
-          
           {
             isDivider: true,
             show: this.useUserStore.isAdmin,

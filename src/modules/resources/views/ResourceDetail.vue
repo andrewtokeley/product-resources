@@ -112,7 +112,7 @@ export default {
           window.open(this.viewResource.resourceUrl, '_blank');
         }
       } else if (action.id == 'review') {
-        this.$router.push(`/review?r=${this.viewResource.id}`);
+        this.$router.push(`/review/${this.viewResource.id}`);
       }
     },
 

@@ -6,8 +6,10 @@
       </div>
     </div>
     <div class="action-strip">
+      
       <div class="action-items" >
         <div class="label">Filter By:</div>
+        <base-select v-model="selectedStatus" :selectOptions="statusList"></base-select>
         <resource-type-select v-model="selectedResourceType"></resource-type-select>
       </div>
       <div class="action-items">
@@ -19,33 +21,36 @@
       <thead>
         <tr>
           <th></th>
-          <th><a @click="sortBy('displayName')" class="sortHeading" :class="sortHeadingClasses('displayName')">Name</a></th>
-          <th><a @click="sortBy('authorsList')" class="sortHeading" :class="sortHeadingClasses('authorsList')">Authors</a></th>
-          <th ><a @click="sortBy('numberOfRecommendations')" class="sortHeading" :class="sortHeadingClasses('numberOfRecommendations')">Reviews</a></th>
+          <th colspan="2"><a @click="sortBy('displayName')" class="sortHeading" :class="sortHeadingClasses('displayName')">Name</a></th>
           <th ><a @click="sortBy('approved')" class="sortHeading" :class="sortHeadingClasses('approved')">Status</a></th>
           <th></th>
         </tr>
       </thead>
       
-      <tbody>
-        <tr v-for="resource in resources" :key="resource.id" @click="handleEditClick(resource)">
-          <td>
-            <resource-image :hideActions="false" :preview="true" :resource="resource"></resource-image>
-          </td>
-          <td>{{ resource.displayName }}</td>
-          <td>{{ resource.authorsList }}</td>
-          <td class="centred">
-            <a v-if="resource.numberOfRecommendations > 0" @click.prevent="handleRecommendationsClick">{{resource.numberOfRecommendations}}</a>
-            <span v-else>-</span>
-          </td>
-          <td>{{ resource.statusDescription }}</td>
-          <td>
-            <div class="actions">
-              <base-icon :menu="menuItems(resource)">more_vert</base-icon>
-            </div>
-          </td>
-        </tr>
-      </tbody>
+      
+        <template v-for="resource in resources" :key="resource.id" >
+          <tbody>
+            <tr @click="handleEditClick(resource)">
+              <td rowspan="2">
+                <resource-image :hideActions="false" :preview="true" :resource="resource"></resource-image>
+              </td>
+              <td>{{ resource.displayName }}</td>
+              <!-- <td class="centred">
+                <a v-if="resource.numberOfRecommendations > 0" @click.prevent="handleRecommendationsClick">{{resource.numberOfRecommendations}}</a>
+                <span v-else>-</span>
+              </td> -->
+              <td rowspan="2">{{ resource.statusDescription }}</td>
+              <td rowspan="2">
+                <div class="actions">
+                  <base-icon :menu="menuItems(resource)">more_vert</base-icon>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>Submitted by:</td>
+            </tr>
+          </tbody>
+        </template>
     </table>
     <loading-symbol class="loader" v-else></loading-symbol>
     
@@ -65,7 +70,6 @@
       @addRelated="handleAddRelated">
     </resource-detail>
     
-    <recommend-dialog v-if="showRecommend" :resource="resource" @close="showRecommend=false"></recommend-dialog>
     <confirmation-dialog 
       v-if="showDeleteConfirm"
       heading="Delete Resource" 
@@ -82,6 +86,7 @@
 <script>
 import ResourceImage from '@/modules/resources/components/ResourceImage.vue';
 import BaseIcon from '@/core/components/BaseIcon.vue';
+import BaseSelect from '@/core/components/BaseSelect.vue';
 import EditResourceDialog from './EditResourceDialog.vue';
 import ResourceDetail from '@/modules/resources/views/ResourceDetail.vue';
 import ResourceTypeSelect from '@/modules/resources/components/ResourceTypeSelect.vue';
@@ -92,11 +97,10 @@ import LoadingSymbol from '@/core/components/LoadingSymbol.vue';
 import { deleteResource, getResourcesFull, updateResource } from '@/modules/resources/services/resource-service';
 import { cloneDeep } from 'lodash';
 import { Resource } from '@/modules/resources/model/resource';
-import RecommendDialog from '@/modules/recommendations/views/RecommendDialog.vue';
 
 export default {
   name: 'manage-resources',
-  components: { ResourceImage, BaseIcon, EditResourceDialog, BaseButton, ResourceTypeSelect, ConfirmationDialog, LoadingSymbol, ResourceDetail, RecommendDialog },
+  components: { ResourceImage, BaseIcon, BaseSelect, EditResourceDialog, BaseButton, ResourceTypeSelect, ConfirmationDialog, LoadingSymbol, ResourceDetail },
   data() {
     return {
       resource: Resource,
@@ -112,11 +116,17 @@ export default {
       isLoading: true,
       sortedBy: 'displayName',
       sortedByOrder: {},
+      statusList: [],
+      selectedStatus: null,
     }
   },
   mounted() {
     // trigger watch
     this.selectedResourceType = 'books';
+    this.statusList = [
+      { key:'approved', value: 'Approved'} ,
+      { key:'pending', value: 'Pending'} ,
+    ];
   },
   watch: {
     selectedResourceType(value) {
@@ -142,12 +152,22 @@ export default {
           },
           { 
             isDivider: true,
+            disabled: resource.approved || (!resource.approved && resource.isValid),
           },
           {
-            name: "Add Recommendation...",
-            iconName: "thumb_up",
+            name: "Approve",
+            show: !resource.approved,
+            isClickable: resource.isValid,
+            isEnabled: resource.isValid,
             action: () => {
-              this.handleRecommendClick(resource);
+              this.setApproval(resource, true);
+            }
+          },
+          {
+            name: "Un-Approve",
+            show: resource.approved,
+            action: () => {
+              this.setApproval(resource, false);
             }
           },
           { 
@@ -160,23 +180,7 @@ export default {
               this.handleDeleteClick(resource);
             }
           },
-          { 
-            isDivider: true,
-          },
-          {
-            name: "Approve",
-            show: !resource.approved,
-            action: () => {
-              this.setApproval(resource, true);
-            }
-          },
-          {
-            name: "Un-Approve",
-            show: resource.approved,
-            action: () => {
-              this.setApproval(resource, false);
-            }
-          }]
+        ]
         }
       },
     sortHeadingClasses(propName) {
@@ -366,9 +370,10 @@ th a.sorted.desc::after {
   clip-path: polygon(100% 0%, 0 0%, 50% 100%);
 }
 
-tbody td {
+tbody tr:last-child {
   /* border-bottom: 2px solid var(--prr-lightgrey); */
-  border-bottom: 1px solid #ccced2;
+  /* border-bottom: 1px solid #ccced2; */
+  border-bottom: 1px solid red;
   padding: 5px 10px;
 }
 
@@ -385,7 +390,7 @@ tr:hover .actions {
   visibility: visible;
 }
 
-tbody tr:hover {
+tbody:hover {
   background: var(--prr-extralightgrey);
   cursor: pointer;
 }

@@ -8,6 +8,8 @@ export { Resource, resourceConverter };
 class Resource {
   constructor(config) {
     this.id = config.id;
+    this.recommendedByUid = config.recommendedByUid;
+    this.recommendedByName = config.recommendedByName;
     this.displayName = config.displayName;
     this.resourceUrl = config.resourceUrl;
     this.description = config.description;
@@ -47,9 +49,9 @@ class Resource {
     } else if (this.approved && !this.isValid) {
       return "Approved (invalid)";
     } else if (!this.approved && this.isValid) {
-      return "Pending";
+      return "Draft";
     } else if (!this.approved && !this.isValid) {
-      return "Incomplete";
+      return "Draft (incomplete)";
     } else {
       return "Unknown";
     }
@@ -86,6 +88,9 @@ class Resource {
   }
 
   get imageShape() {
+    if (!this.resourceType) {
+      return 'portrait'
+    }
     switch (this.resourceType) {
       case 'podcasts':
       case 'episodes':
@@ -148,7 +153,8 @@ class Resource {
 var resourceConverter = {
   toFirestore: function (resource) {
     const result = {};
-    
+    if (resource.recommendedByUid != null) { result.recommendedByUid = resource.recommendedByUid }
+    if (resource.recommendedByName != null) { result.recommendedByName = resource.recommendedByName }
     if (resource.description != null) { result.description = resource.description }
     if (resource.approved != null) { result.approved = resource.approved }
     if (resource.resourceType != null) { result.resourceType = resource.resourceType }
@@ -195,6 +201,8 @@ var resourceConverter = {
       id: snapshot.id,
       displayName: data.displayName,
       resourceUrl: data.resourceUrl,
+      recommendedByUid: data.recommendedByUid,
+      recommendedByName: data.recommendedByName,
       description: data.description,
       publishedDate: data.publishedDate ? DateTime.fromJSDate(data.publishedDate.toDate()) : null,
       audioLengthInSeconds: data.audioLengthInSeconds,

@@ -7,6 +7,8 @@ import { createPinia } from "pinia";
 import { auth } from '@/core/services/firebaseInit'
 import { useUserStore } from "@/core/state/userStore"
 import { useLookupStore } from "@/core/state/lookupStore"
+import { DateTime } from "luxon"
+import { addUser, getUser, recordUserLogin } from "./modules/users/services/user-services"
 
 const pinia = createPinia();
 
@@ -23,29 +25,46 @@ router.beforeEach((to) => {
   // });
   const store = useUserStore();
   if (to.meta.requiresAuth) {
-     if ((!store.isLoggedIn) || (to.meta.requiresAdmin && !store.isAdmin)) {
-        // redirect to home
-        return "/";
-     }
-  } else {
-    // continue to the url
-    return true;
-  }
-})
+    if (!store.isLoggedIn) {
+      if (to.meta.requiresAdmin) {
+        return '/login?go';  
+      } else {
+        const action = to.fullPath.includes('review') ? "Review" : "Recommendation";
+        // redirect to login but say why - this is when someone unauthenticated wants to review/recommend
+        return `/login?reason=true&redirect=${to.fullPath}&action=${action}`;
+      }
+    } 
+  } 
 
-// Create the app
-let app = createApp(App);
-app.use(router);
-app.use(pinia);
+  // just continue to the destination
+  return true;
 
-let store = useLookupStore();
-store.fetchLookups().then ( () => {
-  app.mount('#app');
-})
+});
 
 auth.onAuthStateChanged(async (user) => { 
-  const store = useUserStore();
-  await store.login(user);
+  
+  // record the user's login
+  if (user) {
+    let userRecord = await getUser(user.uid)
+    if (!userRecord) {
+      await addUser(user);
+    }
+    await recordUserLogin(user.uid, DateTime.local());
+  }
+
+  // Create the app
+  let app = createApp(App);
+  app.use(router);
+  app.use(pinia);
+
+  const storeUser = useUserStore();
+  await storeUser.login(user);
+
+  let storeLookup = useLookupStore();
+  await storeLookup.fetchLookups()
+  
+  app.mount('#app');
+  
 });
 
 

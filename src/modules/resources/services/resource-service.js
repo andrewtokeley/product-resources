@@ -147,6 +147,7 @@ const searchByText = async function(text) {
  * @returns a new Resource instance 
  */
 const getResource = async function(id) {
+  if (!id) return null;
   const ref = doc(db, COLLECTION_KEY, id).withConverter(resourceConverter);
   const docSnap = await getDoc(ref);
   if (docSnap.exists()) {

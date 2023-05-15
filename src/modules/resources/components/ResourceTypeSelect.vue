@@ -47,3 +47,10 @@ export default {
   // }
 }
 </script>
+
+<style scoped>
+
+.select {
+  max-width: 200px;
+} 
+</style>

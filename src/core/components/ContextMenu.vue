@@ -8,12 +8,18 @@
   >
       <template v-for="menuItem in visibleMenuItems" :key="menuItem.id">
           <hr class="divider" v-if="menuItem.isDivider ?? false" />
+          <div v-else-if="menuItem.isHeading">
+            <div class="context-menu__row__heading">{{ menuItem.heading ?? "HEADING!" }}</div>
+            <div class="context-menu__row__subHeading" v-if="menuItem.subHeading">{{ menuItem.subHeading }}</div>
+            <hr class="divider short"/>
+          </div>
           <div
               v-else
               class="context-menu__row"
               :class="{
                   'context-menu__row--isCentred': menuItem.isFullWidth,
                   'context-menu__row--isLabel': menuItem.isLabel ?? false,
+                  'context-menu__row--isDisabled': !(menuItem.isEnabled ?? true),
               }"
               @click="handleMenuItemClick($event, menuItem)"
           >
@@ -186,7 +192,7 @@ export default {
       0 2px 6px 2px rgba(60, 64, 67, 0.15);
 }
 
-.context-menu__row {
+.context-menu__row, .context-menu__row__heading, .context-menu__row__subHeading {
   padding: 8px 16px;
   display: flex;
   align-items: center;
@@ -203,13 +209,32 @@ export default {
   cursor: pointer;
 }
 
-.context-menu__row--isLabel {
-  color: var(--prr-darkgrey);
-  text-transform: uppercase;
+.context-menu__row__heading {
   font-weight: bold;
+}
+.context-menu__row__subHeading {
+  color: var(--prr-mediumgrey);
+}
+.context-menu__row__heading, .context-menu__row__subHeading {
+  margin-left: 40px;
+  height: 0.5em;
+} 
+
+.context-menu__row--isLabel {
+  color: var(--prr-mediumgrey);
+  /* text-transform: uppercase; */
+  /* font-weight: bold; */
 }
 .context-menu__row--isLabel:hover {
   background: transparent;
+  cursor: default;
+}
+
+.context-menu__row--isDisabled {
+  color: var(--prr-mediumgrey);
+}
+
+.context-menu__row--isDisabled:hover {
   cursor: default;
 }
 
@@ -229,6 +254,7 @@ export default {
 .context-menu__row__text {
   display: flex;
   flex-direction: column;
+  /* color: black; */
 }
 
 .context-menu__row__subText,
@@ -249,5 +275,6 @@ export default {
 .divider.short {
   margin-left: 20px;
   margin-right: 20px;
+  border-bottom: 1px solid var(--prr-lightgrey);
 }
 </style>

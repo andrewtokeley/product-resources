@@ -1,7 +1,7 @@
 
 import { Recommendation, recommendationConverter } from '../model/recommendation'
 import { app } from "@/core/services/firebaseInit"
-import { updateDoc, documentId, getFirestore, collection, doc, getDoc,getDocs, query, where, addDoc, setDoc, deleteDoc, limit } from "firebase/firestore"; 
+import { updateDoc, getFirestore, collection, doc, getDoc,getDocs, query, where, addDoc, setDoc, deleteDoc, limit } from "firebase/firestore"; 
 const { DateTime } = require("luxon");
 
 const db = getFirestore(app);
@@ -86,7 +86,8 @@ const getFeaturedRecommendations = async function(maximum) {
   while (results.length < maximum && attempts < maxAttempts) {
     let randomKey = doc(collection(db, COLLECTION_KEY)).id;
     const q = query(collection(db, COLLECTION_KEY).withConverter(recommendationConverter), 
-      where(documentId(), ">=", randomKey),
+      where('resourceId', ">=", randomKey),
+      where('resourceId', "!=", null),
       // where("resourceType.key", "==", referenceTypeKey),
       limit(1));
     const querySnapshot = await getDocs(q);

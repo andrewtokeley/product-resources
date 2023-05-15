@@ -87,18 +87,19 @@ export default defineComponent({
   
   computed: {
     _options() {
+      
       return {
-        borderless: this.options.borderless ? this.options.borderless : false,
-        hoverEffect: this.options.hoverEffect ? this.options.hoverEffect : true,
-        underlineEffect: this.options.underlineEffect ? this.options.underlineEffect : true,
-        centred: this.options.centred ? this.options.centred : false,
-        large: this.options.large ? this.options.large : false,
-        white: this.options.white ? this.options.white : false,
-        placeholder: this.options.placeholder ? this.options.placeholder : "",
-        descriptionText: this.options.descriptionText ? this.options.descriptionText : null,
-        inlineErrors: this.options.inlineErrors ? this.options.inlineErrors : false,
-        readOnly: this.options.readOnly ? this.options.readOnly : false,
-        forceLowerCase: this.options.forceLowerCase ? this.options.forceLowerCase : false,
+        borderless: this.options?.borderless ? this.options.borderless : false,
+        hoverEffect: this.options?.hoverEffect ? this.options.hoverEffect : true,
+        underlineEffect: this.options?.underlineEffect ? this.options.underlineEffect : true,
+        centred: this.options?.centred ? this.options.centred : false,
+        large: this.options?.large ? this.options.large : false,
+        white: this.options?.white ? this.options.white : false,
+        placeholder: this.options?.placeholder ? this.options.placeholder : "",
+        descriptionText: this.options?.descriptionText ? this.options.descriptionText : null,
+        inlineErrors: this.options?.inlineErrors ? this.options.inlineErrors : false,
+        readOnly: this.options?.readOnly ? this.options.readOnly : false,
+        forceLowerCase: this.options?.forceLowerCase ? this.options.forceLowerCase : false,
       }
     },
 
@@ -174,6 +175,7 @@ export default defineComponent({
 
 <style>
 .base-input {
+  width: 100%;
   display: flex;
   flex-direction: column;
   margin-bottom: 10px;

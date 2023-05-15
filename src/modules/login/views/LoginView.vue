@@ -1,5 +1,17 @@
 <template>
   <div class="login">
+    <div v-if="showReason">
+      <h1>Before you leave that {{ action }}...</h1>
+      <hr class="heading-underline" />
+      
+      <p>Wait, what!? Why do I need to log in?</p>
+      <p>There are two reasons.</p>
+      <ul>
+        <li><b>Real people, real reviews</b> - this site is built on the principle of open sharing. We want reviews and recommendations to be left by, and credited to, real people. 'Anon' is not a PM.</li>
+        <li><b>Street Cred</b> - by logging in, your reviews will be linked to eachother and others will be able to see what you're into (or not!) - good karma comes to those who share!</li>
+      </ul>
+      
+    </div>
     <div class="login__ui">
       <div id="firebaseui-auth-container"></div>
     </div>
@@ -22,12 +34,19 @@ export default {
     auth.signOut();
   },
 
-  computed: {
-    
+  data() {
+    return {
+      showReason: false,
+      redirectUrl: null,
+      action: '',
+    }
+  },
+
+  computed: {    
     uiConfig() {
       const vm = this;
       return {
-        //signInFlow: "popup",
+        signInFlow: "popup",
         signInOptions: [
           {
             provider: firebase.auth.GoogleAuthProvider.PROVIDER_ID,
@@ -43,7 +62,11 @@ export default {
         signInSuccessUrl: '/book',
         callbacks: {
           signInSuccessWithAuthResult: function () { //function (authResult, redirectUrl) {
-            vm.$router.push('/');
+            if (vm.redirectUrl) {
+              vm.$router.push(vm.redirectUrl);
+            } else {
+              vm.$router.go(-1);
+            }
           },
           // signInFailure callback must be provided to handle merge conflicts which
           // occur when an existing credential is linked to an anonymous user.
@@ -56,8 +79,18 @@ export default {
   },
 
   mounted() {
+    if (this.$route.query.reason) {
+      this.showReason = true;
+    }
+    this.action = this.$route.query.action;
+    
+    const redirect = this.$route.query.redirect;
+    if (redirect) {
+      this.redirectUrl = redirect;
+    } 
     ui.start("#firebaseui-auth-container", this.uiConfig);
   },
+
 };
 
 </script>
@@ -70,6 +103,14 @@ export default {
 
 <style scoped>
 
+h1, p {
+  text-align: center;
+}
+
+.heading-underline {
+  border-bottom: 2px solid var(--prr-green);
+  width: 300px;
+}
 #firebaseui-auth-container {
   background-color: white;
   border-radius: 5px;
