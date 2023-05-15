@@ -1,7 +1,6 @@
 import Login from './modules/login/views/LoginView'
 import Search from './modules/search/views/SearchResults'
 import ResourceTypes from './modules/resources/views/ResourceTypes'
-import UpdateResource from './modules/resources/views/UpdateResource'
 import ManageResources from './modules/admin/views/ManageResources'
 import ManageLookups from './modules/admin/views/ManageLookups'
 import ManageRecommendations from './modules/admin/views/ManageRecommendations'
@@ -26,9 +25,9 @@ export default [
   {path: '/type/:typeId', component:ResourceTypes},
 
   // recommend something
-  {path: '/recommend', component: RecommendView},
+  {path: '/recommend', component: RecommendView, meta: { requiresAuth: true }},
   // recommend a resource of a given type
-  {path: '/recommend/:typeId', component: RecommendView},
+  {path: '/recommend/:typeId', component: RecommendView, meta: { requiresAuth: true }},
   
   {path: '/review/:resourceId', component: RecommendView},
 
@@ -37,13 +36,10 @@ export default [
   
   {path: '/about', component:About},
   
-  {path: '/admin/resources', component:ManageResources },
+  {path: '/admin/resources', component:ManageResources, meta: { requiresAuth: true, requiresAdmin: true } },
 
-  {path: '/admin/recommendations', component:ManageRecommendations },
+  {path: '/admin/recommendations', component:ManageRecommendations, meta: { requiresAuth: true, requiresAdmin: true } },
 
-  {path: '/admin/tags', component:ManageLookups },
+  {path: '/admin/tags', component:ManageLookups, meta: { requiresAuth: true } },
 
-  {path: '/update/:id', component:UpdateResource},
-  
-  {path: '/add', component:UpdateResource},
 ]

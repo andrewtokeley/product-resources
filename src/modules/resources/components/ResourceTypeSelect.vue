@@ -9,7 +9,7 @@
 
 <script>  
 import BaseSelect from "@/core/components/BaseSelect.vue";
-import { getResourceTypes } from '@/modules/resources/services/lookup-service';
+import { useLookupStore } from "@/core/state/lookupStore";
 
 export default {
   name: "resource-type-select",
@@ -24,8 +24,8 @@ export default {
   },
   
   async mounted() {
-    const lookup = await getResourceTypes()
-    this.resourceTypes  = lookup.keyValues;
+    const store = useLookupStore();
+    this.resourceTypes = store.resourceTypes;
   },
 
   computed: {

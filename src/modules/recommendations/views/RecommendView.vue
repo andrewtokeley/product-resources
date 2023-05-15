@@ -8,11 +8,11 @@
       
       <div class="double-line">
         <div>
-          <div class="label">Resource type</div>
+          <div class="label">Where should the resource be categorised?</div>
           <resource-type-select v-model="this.recommendation.resourceType"></resource-type-select>
         </div>
         <div>
-          <div class="label">&nbsp;</div>
+          <div class="label">Include a link where people can read/listen/discover the resource.</div>
           <base-input 
             v-model="recommendation.resourceUrl" 
             @blur="validate('resourceUrl')"

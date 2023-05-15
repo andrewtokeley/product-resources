@@ -165,16 +165,10 @@ export default {
 
     // if we're editing, do a validation check to highlight incomplete fields
     if (!this.isNew) {
-      let result = validateObject(this.editResource, this.editResource.schema);
-      if (result) {
-        let failedProperties = Object.getOwnPropertyNames(result);
-        if (failedProperties.length > 0) {
-          failedProperties.forEach( p => {
-            this.errorMessage[p] = result[p].errorMessage;
-            console.log(result[p].errorMessage)
-          })  
-        }
-      }
+      let failedResults = validateObject(this.editResource, this.editResource.schema);
+      failedResults.forEach( result => {
+        this.errorMessage[result.propertyName] = result.reason;
+      });
     }
     this.isWorking = false;
   },
