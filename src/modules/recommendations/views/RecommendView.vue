@@ -1,11 +1,10 @@
 <template>
   <div class="page">
-    <h1>I'd Like to Recommend Something!</h1>
-    <div class="content" >
-      
+    <loading-symbol v-if="isLoading"></loading-symbol>
+    <div v-else class="content" >
+      <h1>I'd Like to Recommend Something!</h1>
       <p>Thank you so much for recommending a new resource! </p>
       <p>This site is founded on the principle of sharing, and you're making it happen :-)</p>
-      
       
       <div class="double-line">
         <div>
@@ -77,11 +76,15 @@ import BaseMultilineText from '@/core/components/BaseMultilineText.vue'
 import ResourceTypeSelect from '@/modules/resources/components/ResourceTypeSelect.vue'
 import BaseButton from '@/core/components/BaseButton.vue'
 import RecommendationWidget from '../components/RecommendationWidget.vue'
+import LoadingSymbol from '@/core/components/LoadingSymbol.vue'
+
 import { Recommendation } from '@/modules/recommendations/model/recommendation'
 import { Resource } from '@/modules/resources/model/resource'
 
 import { addRecommendation } from '@/modules/recommendations/services/recommendation-service'
 import { validateObject, validateProperty } from '@/core/model/validation'
+import { getResource } from '@/modules/resources/services/resource-service'
+import { useLookupStore } from '@/core/state/lookupStore'
 
 export default {
 name: "recommend-view",
@@ -91,6 +94,7 @@ components: {
   ResourceTypeSelect,
   BaseButton,
   RecommendationWidget,
+  LoadingSymbol,
 },  
 props: {
   resource: {
@@ -105,14 +109,26 @@ beforeCreate() {
 data() {
   return {
     isSaving: false,
+    isLoading: true,
     recommendation: Recommendation.default(),
     errorMessage: [],
   }
 },
 mounted() {
-  this.recommendation.resourceType = this.$route.params.typeId ?? 'books';
+  const store = useLookupStore();
+  if (this.isReview) {
+    const resourceId = this.$route.params.resourceId;
+    const resource = getResource(resourceId);
+    this.recommendation.resourceId = resource.id;
+  } else {
+    this.recommendation.resourceType = this.$route.params.typeId ?? 'books';
+  }
+  this.recommendation.uid = store.uid;
 },  
 computed: {
+  isReview() {
+    return this.$route.params.resourceId != null;
+  },
   canSubmit() {
     return validateObject(this.recommendation, this.recommendation.schema).length == 0;
   },

@@ -129,6 +129,11 @@ export default {
     animation: button-loading-spinner 1s ease infinite;
 }
 
+.base-button--spinning .base-button__text {
+  visibility: hidden;
+  opacity: 0;
+}
+
 .base-button__text {
   display:flex;
   flex-direction: row;
@@ -138,10 +143,6 @@ export default {
 
 .material-symbols-outlined {
   margin-left: 10px;
-}
-.base-button--spinning {
-  visibility: hidden;
-  opacity: 0;
 }
 
 @keyframes button-loading-spinner {

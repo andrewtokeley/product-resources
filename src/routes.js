@@ -23,13 +23,15 @@ export default [
   {path: '/tag/:tagId', component:Search, meta: { clearSearch: true }},
   
   // show all resources of a type 
-  {path: '/type/:typeId/', component:ResourceTypes},
+  {path: '/type/:typeId', component:ResourceTypes},
 
   // recommend something
   {path: '/recommend', component: RecommendView},
   // recommend a resource of a given type
   {path: '/recommend/:typeId', component: RecommendView},
   
+  {path: '/review/:resourceId', component: RecommendView},
+
   // approve recommendations
   {path: '/approve', component:Approve},
   

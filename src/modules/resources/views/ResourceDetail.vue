@@ -60,7 +60,7 @@ export default {
     }
   },
 
-  emits: ["close", "updatedApproval", "addRelated"],
+  emits: ["close"],
   
   mounted() {
     this.viewResource = cloneDeep(this.resource);
@@ -76,14 +76,6 @@ export default {
         return null;
       }
     },
-    approvalError() {
-      let validation = this.viewResource.validate();
-      if (validation) {
-        // validation[propName].errorMessage exists, but may change to array for this to be easier 
-        return "error"
-      }
-      return null;
-    },
     buttonActions() {
       return [
         {
@@ -91,7 +83,12 @@ export default {
           title: "Check it Out",
           iconName: "open_in_new",
           isPrimary: true,
-          show: this.viewResource.resourceUrl != null && this.viewResource.resourceUrl.length > 0
+        },
+        {
+          id: 'review',
+          title: "Write a Review...",
+          isSecondary: true,
+          align: 'left',
         },
       ]
     }
@@ -114,6 +111,8 @@ export default {
         if (this.viewResource.resourceUrl) {
           window.open(this.viewResource.resourceUrl, '_blank');
         }
+      } else if (action.id == 'review') {
+        this.$router.push(`/review?r=${this.viewResource.id}`);
       }
     },
 
