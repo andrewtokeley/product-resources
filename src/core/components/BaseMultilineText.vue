@@ -16,6 +16,7 @@
         'base-multiline-text__textarea--disabled': disabled,
       }"
     />
+    
     <div
       class="base-multiline-text__characterCount"
       :class="{
@@ -24,6 +25,7 @@
     >
       {{ characterCount }}
     </div>
+    
     <div v-if="_options.inlineErrors" class="base-multiline-text__errorMessage">{{ errorMessage }}</div>
   </div>
 </template>
@@ -123,12 +125,9 @@ export default {
       get() {
         return this.modelValue;
       },
-      set(newValue) {
-        // don't want to do anything here because we only want to let the client know about the value
-        // change after it's successfully been validated/saved asynchronously (see validation())
-        // We still need an empty implementation so the value property is writable though
-        console.log("value set" + newValue);
-      },
+      set() {
+        
+      }
     },
   },
 
@@ -206,9 +205,8 @@ export default {
 }
 
 .base-multiline-text__characterCount {
-  position: relative;
-  top: 0px;
-  float: right;
+  display: flex;
+  justify-content: flex-end;
   height: 20px;
   font-size: var(--prr-font-size-small);
   color: var(--prr-mediumgrey);

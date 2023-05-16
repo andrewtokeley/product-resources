@@ -1,32 +1,36 @@
 import { Timestamp } from "firebase/firestore";
 const { DateTime } = require("luxon");
-import Result from "@/core/model/Result";
-import { isObjectValid, validateProperty, validateObject, validateUrl } from "@/core/model/validation";
+import { isObjectValid, validateProperty, validateObject, validateUrl, validateMandatoryProperty } from "@/core/model/validation";
 export { Recommendation, recommendationConverter };
 
 class Recommendation {
 
   constructor(config) {
+      
     this.id = config.id;
-    this.uid = config.uid;
-    this.dateCreated = config.dateCreated;
-    this.datePublished = config.datePublished;
-    this.resourceType = config.resourceType;
-    this.resourceUrl = config.resourceUrl;
+    this.recommendedByUid = config.recommendedByUid;
+    this.recommendedByName = config.recommendedByName;
     this.resourceId = config.resourceId,
+    this.resourceType = config.resourceType;
+    this.resourceName = config.resourceName,
+    this.resourceUrl = config.resourceUrl;
     this.reason = config.reason;
-    this.name = config.name;
-    this.website = config.website;
+    this.dateCreated = config.dateCreated;
+    this.dateApproved = config.dateApproved;
+    this.isReview = config.isReview;
     this.approved = config.approved;
   }
 
+  get canApprove() {
+    return this.resourceId != null && this.reason?.length > 0 && this.recommendedByUid && this.recommendedByName;
+  }
+
   static default() {
-    // returns a default instance where all the fields, and their child properties are available.
+    // returns a default instance with some defaults
     return new Recommendation({ 
       resourceType: 'books',
-      allowPublishReason: true,
-      allowPublishName: false,
       approved: false,
+      isReview: false,
     });
   }
 
@@ -35,26 +39,23 @@ class Recommendation {
    */
   get schema() {
     return {
+      recommendedByUid: (value) => {
+        return validateMandatoryProperty('recommendedByUid', value);
+      },
+      resourceName: (value) => {
+        return validateMandatoryProperty('resourceName', value);
+      },
       resourceUrl: (value) => {
-        // first do mandatory check
-        if (!value || value.length == 0) {
-          return Result.failure("Must enter url.");
+        const mandatoryCheck = validateMandatoryProperty('resourceUrl', value);
+        if (!mandatoryCheck.success) {
+          return mandatoryCheck;
+        } else {
+          return validateUrl(value);        
         }
-        return validateUrl(value);        
       },
       reason: (value) => {
-        if (!value || value.length == 0) {
-          return Result.failure("People will want to know why you love this resource!");
-        }
-        return Result.success();
+        return validateMandatoryProperty('reason', value);
       },
-      website: (value) => {
-        if (!value || value.length == 0) {
-          return Result.success();
-        }
-        return validateUrl(value);  
-      }
-
     }
   }
 
@@ -76,6 +77,7 @@ class Recommendation {
   validateProperty(propertyName) {
     return validateProperty(this, this.schema, propertyName);  
   }
+
 }
 
 /**
@@ -84,28 +86,28 @@ class Recommendation {
 var recommendationConverter = {
   toFirestore: function (recommendation) {
     const result = {};
-    console.log('rec')
-    if (recommendation.uid != null) result.uid = recommendation.uid;
-    if (recommendation.approved != null) result.approved = recommendation.approved;
+    
+    if (recommendation.recommendedByUid != null) result.recommendedByUid = recommendation.recommendedByUid;
+    if (recommendation.recommendedByName != null) result.recommendedByName = recommendation.recommendedByName;
+    if (recommendation.resourceName != null) result.resourceName = recommendation.resourceName;
+    if (recommendation.resourceType != null) result.resourceType = recommendation.resourceType;
+    if (recommendation.resourceUrl != null) result.resourceUrl = recommendation.resourceUrl;
+    if (recommendation.resourceId != null) result.resourceId = recommendation.resourceId;
+    if (recommendation.reason != null) result.reason = recommendation.reason;
+    
     if (recommendation.dateCreated != null && recommendation.dateCreated.isValid) { 
       result.dateCreated = Timestamp.fromDate(recommendation.dateCreated.toJSDate()); 
     } else {
       result.dateCreated = null;
     }
-    if (recommendation.datePublished != null && recommendation.datePublished.isValid) { 
-      result.datePublished = Timestamp.fromDate(recommendation.datePublished.toJSDate()); 
+    if (recommendation.dateApproved != null && recommendation.dateApproved.isValid) { 
+      result.dateApproved = Timestamp.fromDate(recommendation.dateApproved.toJSDate()); 
     } else {
-      result.datePublished = null;
+      result.dateApproved = null;
     }
-    if (recommendation.resourceType != null) result.resourceType = recommendation.resourceType;
-    if (recommendation.resourceUrl != null) result.resourceUrl = recommendation.resourceUrl;
-    if (recommendation.resourceId != null) result.resourceId = recommendation.resourceId;
-    if (recommendation.reason != null) result.reason = recommendation.reason;
-    if (recommendation.allowPublishReason != null) result.allowPublishReason = recommendation.allowPublishReason;
-    if (recommendation.allowPublishName != null) result.allowPublishName = recommendation.allowPublishName;
-    if (recommendation.name != null) result.name = recommendation.name;
-    if (recommendation.website != null) result.website = recommendation.website;
-
+    if (recommendation.isReview != null) result.isReview = recommendation.isReview;
+    if (recommendation.approved != null) result.approved = recommendation.approved;
+    
     return result;
   },
 
@@ -114,18 +116,17 @@ var recommendationConverter = {
 
     const config = {
       id: snapshot.id,
-      uid: data.uid,
-      dateCreated: data.dateCreated ? DateTime.fromJSDate(data.dateCreated.toDate()) : null,
-      datePublished: data.datePublished ? DateTime.fromJSDate(data.datePublished.toDate()) : null,
-      resourceType: data.resourceType,
+      recommendedByUid: data.recommendedByUid,
+      recommendedByName: data.recommendedByName,
+      resourceName: data.resourceName,
       resourceUrl: data.resourceUrl,
       resourceId: data.resourceId,
       reason: data.reason,
-      allowPublishReason: data.allowPublishReason,
-      allowPublishName: data.allowPublishName,
-      name: data.name,
-      website: data.website,
+      dateCreated: data.dateCreated ? DateTime.fromJSDate(data.dateCreated.toDate()) : null,
+      dateApproved: data.dateApproved ? DateTime.fromJSDate(data.dateApproved.toDate()) : null,
       approved: data.approved ?? false,
+      isReview: data.isReview ?? false,
+      resourceType: data.resourceType,
     }
 
     return new Recommendation(config);

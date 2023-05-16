@@ -14,6 +14,14 @@
 
       <p>This site is founded on the principle of sharing, and you're making it happen :-)</p>
 
+      <base-input 
+        v-model="recommendation.resourceName"
+        v-if="!isReview"
+        @blur="validate('resourceName')"
+        :errorMessage="errorMessage['resourceName']"
+        :hasFocus="!isReview"
+        :options="{ placeholder: 'Name of Resource'}">
+      </base-input>
       <div v-if="!isReview" class="double-line">
         <div>
           <div class="label">Where should the resource be categorised?</div>
@@ -24,7 +32,6 @@
           <base-input 
             v-model="recommendation.resourceUrl" 
             @blur="validate('resourceUrl')"
-            :hasFocus="!isReview"
             :errorMessage="errorMessage['resourceUrl']"
             :options="{ placeholder: 'Link to Resource', readOnly: isSaving, inlineErrors: false }">
           </base-input>
@@ -50,8 +57,9 @@
 
       <div class="buttons">
         <base-button :isSecondary="true" @click="$router.back()">Cancel</base-button>
-        <base-button :showSpinner="isSaving" :disabled="!canSubmit" @click="handleSubmit">Submit</base-button>
+        <base-button :showSpinner="isSaving" :disabled="!isValid" @click="handleSubmit">Submit</base-button>
       </div>
+      {{validationErrors}}
     </div>
   </div>
   <!-- </modal-dialog> -->
@@ -68,7 +76,6 @@ import LoadingSymbol from '@/core/components/LoadingSymbol.vue'
 import { Recommendation } from '@/modules/recommendations/model/recommendation'
 
 import { addRecommendation } from '@/modules/recommendations/services/recommendation-service'
-import { validateObject, validateProperty } from '@/core/model/validation'
 import { getResource } from '@/modules/resources/services/resource-service'
 import { useUserStore } from '@/core/state/userStore'
 
@@ -105,24 +112,30 @@ async mounted() {
       this.$router.push('/');
     }
     this.recommendation.resourceId = this.resource.id;
+    this.recommendation.resourceName = this.resource.displayName;
     this.recommendation.resourceType = this.resource.resourceType;
     this.recommendation.resourceUrl = this.resource.resourceUrl;
   } else {
     this.recommendation.resourceType = this.$route.params.typeId ?? 'books';
   }
-  this.recommendation.uid = store.uid;
-  this.recommendation.name = store.displayName;
+  this.recommendation.recommendedByUid = store.uid;
+  this.recommendation.recommendedByName = store.displayName;
+  this.recommendation.isReview = this.isReview;
   this.isLoading = false;
 },  
 computed: {
-  // reasonPlaceholder() {
-  //   return this.isReview ? "Your Review" : "Reason for recommending";
-  // },
+  validationErrors() {
+    const errors = this.recommendation.validate();
+    if (errors.length > 0) {
+      return errors.map( e => e.propertyName + ":" + e.errorMessage );
+    }
+    return null;
+  },
+  isValid() {
+    return this.recommendation.isValid;
+  },
   isReview() {
     return this.$route.params.resourceId != null;
-  },
-  canSubmit() {
-    return validateObject(this.recommendation, this.recommendation.schema).length == 0;
   },
 },
 
@@ -139,7 +152,7 @@ methods: {
   },
 
   validate(prop) {
-    let result = validateProperty(this.recommendation, this.recommendation.schema, prop);
+    let result = this.recommendation.validateProperty(prop);
     this.errorMessage[prop] = result.errorMessage;
     if (result.data) {
       this.recommendation[prop] = result.data;
@@ -207,6 +220,7 @@ margin-top: 0px;
   text-align: center;
 }
 .buttons {
+  margin-top: 20px;
   float: right;
 }
 </style>

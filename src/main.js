@@ -41,15 +41,15 @@ router.beforeEach((to) => {
 
 });
 
-auth.onAuthStateChanged(async (user) => { 
-  
+auth.onAuthStateChanged(async (authUser) => { 
+  let dbUser = null;
   // record the user's login
-  if (user) {
-    let userRecord = await getUser(user.uid)
-    if (!userRecord) {
-      await addUser(user);
+  if (authUser) {
+    dbUser = await getUser(authUser.uid)
+    if (!dbUser) {
+      await addUser(dbUser);
     }
-    await recordUserLogin(user.uid, DateTime.local());
+    await recordUserLogin(dbUser.uid, DateTime.local());
   }
 
   // Create the app
@@ -58,7 +58,7 @@ auth.onAuthStateChanged(async (user) => {
   app.use(pinia);
 
   const storeUser = useUserStore();
-  await storeUser.login(user);
+  await storeUser.login(authUser, dbUser);
 
   let storeLookup = useLookupStore();
   await storeLookup.fetchLookups()

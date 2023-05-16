@@ -42,17 +42,6 @@ const getNewResourceRecommendations = async function() {
   return result 
 }
 
-const getUnapprovedRecommendations = async function() {
-  const q = query(collection(db, COLLECTION_KEY)
-    .withConverter(recommendationConverter), where("approved", "==", false));
-  const querySnapshot = await getDocs(q);
-  const result = [];
-  querySnapshot.forEach((doc) => {
-    result.push(new Recommendation(doc.data()));
-  });
-  return result 
-}
-
 const getAllRecommendations = async function(resultLimit) {
   if (!resultLimit) { resultLimit = 100 }
   const q = query(collection(db, COLLECTION_KEY)
@@ -64,6 +53,20 @@ const getAllRecommendations = async function(resultLimit) {
   });
   return result 
 }
+
+const getUnapprovedRecommendations = async function() {
+  const q = query(collection(db, COLLECTION_KEY).withConverter(recommendationConverter), 
+    where("approved", "==", false),
+    );
+  const querySnapshot = await getDocs(q);
+  const result = [];
+  querySnapshot.forEach((doc) => {
+    result.push(new Recommendation(doc.data()));
+  });
+  console.log(result);
+  return result 
+}
+
 
 const getRecommendations = async function(resourceId) {
   const q = query(collection(db, COLLECTION_KEY)

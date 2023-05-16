@@ -12,17 +12,17 @@ export const useUserStore = defineStore({
 
   actions: {
     
-    async login(authUser) {
-      if (authUser) {
-        this.uid = authUser.uid;
+    async login(authUser, dbUser) {
+      if (authUser && dbUser) {
+        this.uid = dbUser.uid;
         this.isLoggedIn = true;
-        this.displayName = authUser.displayName;
+        this.displayName = dbUser.displayName;
         this.email = authUser.email;
         await authUser.getIdTokenResult().then( (result) => {
           this.isAdmin = result.claims.admin ?? false
         });
       } else {
-        // reset
+        // reset, user is logged out
         this.isLoggedIn = false;
         this.isAdmin = false;
         this.displayName = "";

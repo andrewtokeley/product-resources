@@ -2,46 +2,37 @@
   <div class="manage-reviews">
     <div class="header">
       <div>
-        <h1>Reviews</h1>
+        <h1>Recommendations/Reviews</h1>
       </div>
     </div>
     <div class="action-strip">
       <div class="action-items" >
-        <div class="label">Filter By:</div>
-        <resource-type-select v-model="selectedResourceType"></resource-type-select>
-      </div>
-      <div class="action-items">
-        <base-button :disabled="isLoading" :isSecondary="true" @click="showExport = true">Export...</base-button>
-        <base-button :disabled="isLoading" @click="handleAddResource">New Resource</base-button>
+        <div class="label">Show:</div>
+        <base-select v-model="filterBy" :selectOptions="filterOptions"></base-select>
       </div>
     </div>
     <table v-if="!isLoading">
       <thead>
         <tr>
-          <th></th>
-          <th><a @click="sortBy('displayName')" class="sortHeading" :class="sortHeadingClasses('displayName')">Name</a></th>
-          <th><a @click="sortBy('authorsList')" class="sortHeading" :class="sortHeadingClasses('authorsList')">Authors</a></th>
-          <th ><a @click="sortBy('numberOfRecommendations')" class="sortHeading" :class="sortHeadingClasses('numberOfRecommendations')">Reviews</a></th>
+          <th><a @click="sortBy('typeDescription')" class="sortHeading" :class="sortHeadingClasses('typeDescription')">Type</a></th>
+          <th><a @click="sortBy('resourceName')" class="sortHeading" :class="sortHeadingClasses('displayName')">Resource</a></th>
+          <th><a @click="sortBy('recommendedByUid')" class="sortHeading" :class="sortHeadingClasses('recommendedByUid')">Recommended UID</a></th>
+          <th><a @click="sortBy('recommendedByName')" class="sortHeading" :class="sortHeadingClasses('recommendedByName')">Recommended By Name</a></th>
           <th ><a @click="sortBy('approved')" class="sortHeading" :class="sortHeadingClasses('approved')">Status</a></th>
           <th></th>
         </tr>
       </thead>
       
       <tbody>
-        <tr v-for="resource in resources" :key="resource.id" @click="handleEditClick(resource)">
-          <td>
-            <resource-image :hideActions="false" :preview="true" :resource="resource"></resource-image>
-          </td>
-          <td>{{ resource.displayName }}</td>
-          <td>{{ resource.authorsList }}</td>
-          <td class="centred">
-            <a v-if="resource.numberOfRecommendations > 0" @click.prevent="handleRecommendationsClick">{{resource.numberOfRecommendations}}</a>
-            <span v-else>-</span>
-          </td>
-          <td>{{ resource.statusDescription }}</td>
+        <tr v-for="recommendation in filteredRecommendations" :key="recommendation.id" @click="handleEditClick(recommendation)">
+          <td>{{ recommendation.isReview ? "Review" : "Recommendation" }}</td>
+          <td><a :href="recommendation.resourceUrl" target="_blank">{{recommendation.resourceName}}</a></td>
+          <td>{{ recommendation.recommendedByUid }}</td>
+          <td>{{ recommendation.recommendedByName }}</td>
+          <td>{{ recommendation.statusDescription }}</td>
           <td>
             <div class="actions">
-              <base-icon :menu="menuItems(resource)">more_vert</base-icon>
+              <base-icon :menu="menuItems(recommendation)">more_vert</base-icon>
             </div>
           </td>
         </tr>
@@ -49,26 +40,10 @@
     </table>
     <loading-symbol class="loader" v-else></loading-symbol>
     
-    <edit-resource-dialog 
-      :resource="resource" 
-      v-if="showEdit" 
-      @added="handleAdded" 
-      @saved="handleSaved" 
-      @close="showEdit = false">
-    </edit-resource-dialog>
-    
-    <resource-detail 
-      v-if="showView" 
-      :resource="resource" 
-      @close="showView = false" 
-      @updatedApproval="handleApproval"
-      @addRelated="handleAddRelated">
-    </resource-detail>
-    
     <confirmation-dialog 
       v-if="showDeleteConfirm"
       heading="Delete Resource" 
-      :message="`Are you sure you want to delete the resource, ${resource.displayName}?`"
+      message="Are you sure?"
       confirmLabel="Delete"
       :isPerformingAction="isDeleting"
       @cancel="showDeleteConfirm = false"
@@ -79,73 +54,77 @@
 </template>
 
 <script>
-import ResourceImage from '@/modules/resources/components/ResourceImage.vue';
 import BaseIcon from '@/core/components/BaseIcon.vue';
-import EditResourceDialog from './EditResourceDialog.vue';
-import ResourceDetail from '@/modules/resources/views/ResourceDetail.vue';
-import ResourceTypeSelect from '@/modules/resources/components/ResourceTypeSelect.vue';
-import BaseButton from '@/core/components/BaseButton.vue';
+import BaseSelect from '@/core/components/BaseSelect.vue';
 import ConfirmationDialog from '@/core/components/ConfirmationDialog.vue';
 import LoadingSymbol from '@/core/components/LoadingSymbol.vue';
 
-import { deleteResource, getResourcesFull, updateResource } from '@/modules/resources/services/resource-service';
-import { cloneDeep } from 'lodash';
-import { Resource } from '@/modules/resources/model/resource';
-
+import { deleteRecommendation, getUnapprovedRecommendations, updateRecommendation } from '@/modules/recommendations/services/recommendation-service';
+import { Recommendation } from '@/modules/recommendations/model/recommendation';
 export default {
   name: 'manage-resources',
-  components: { ResourceImage, BaseIcon, EditResourceDialog, BaseButton, ResourceTypeSelect, ConfirmationDialog, LoadingSymbol, ResourceDetail },
+  components: {BaseIcon, ConfirmationDialog, LoadingSymbol, BaseSelect},
   data() {
     return {
-      resource: Resource,
-      parentResource: Resource,
-      resources: [],
+      selectedRecommendation: Recommendation,
+      recommendations: [],
+      filteredRecommendations: [],
       showEdit: false,
-      showAdd: false,
       showView: false,
-      showRecommend: false,
       showDeleteConfirm: false,
-      selectedResourceType: 'podcasts',
+      filterBy: 'none',
       isDeleting: false,
       isLoading: true,
-      sortedBy: 'displayName',
+      sortedBy: 'resourceName',
       sortedByOrder: {},
     }
   },
-  mounted() {
-    // trigger watch
-    this.selectedResourceType = 'books';
+  computed: {
+    filterOptions() {
+      return [
+        { key: 'all', value: "All" },
+        { key: 'reviews', value: "Reviews" },
+        { key: 'recommendations', value: "Recommendations" },
+      ];
+    }
+  },
+  async mounted() {
+    console.log('loading...')
+    this.isLoading = true;
+    this.recommendations = await getUnapprovedRecommendations();
+    console.log(this.recommendations);
+    this.isLoading = false;
+    // this.sortBy(this.sortedBy, false);
+    
+    this.filterBy = 'all';
   },
   watch: {
-    selectedResourceType(value) {
-      this.isLoading = true;
-      getResourcesFull(value).then( (resources) => {
-        this.resources = resources;
-        // resort the column, but don't toggle direction
-        this.sortBy(this.sortedBy, false);
-        this.isLoading = false;
-      })
+    filterBy(value) {
+      if (value == 'reviews') {
+        this.filteredRecommendations = this.recommendations.filter( r => r.isReview );
+      } else if (value == 'recommendations') {
+        this.filteredRecommendations = this.recommendations.filter( r => !r.isReview );
+      } else {
+        this.filteredRecommendations = this.recommendations;
+      }
     } 
   },
   methods: {
-    menuItems(resource) {
+    menuItems(recommendation) {
       return {
         menuItems: [
           {
-            name: "Preview...",
-            iconName: "preview",
+            name: "Create New Resource...",
+            iconName: 'new',
             action: () => {
-              this.handlePreviewClick(resource);
+              this.handleCreateResource(recommendation);
             }
-          },
-          { 
-            isDivider: true,
           },
           {
             name: "Delete...",
             iconName: 'delete',
             action: () => {
-              this.handleDeleteClick(resource);
+              this.handleDeleteClick(recommendation);
             }
           },
           { 
@@ -153,17 +132,17 @@ export default {
           },
           {
             name: "Approve",
-            show: !resource.approved,
-            // isClickable: resource.isValid,
+            show: !recommendation.approved,
+            isClickable: recommendation.canApprove,
             action: () => {
-              this.setApproval(resource, true);
+              this.setApproval(recommendation, true);
             }
           },
           {
             name: "Un-Approve",
-            show: resource.approved,
+            show: recommendation.approved,
             action: () => {
-              this.setApproval(resource, false);
+              this.setApproval(recommendation, false);
             }
           }]
         }
@@ -197,83 +176,41 @@ export default {
       // remember the order for next toggle
       this.sortedByOrder[propName] = order;
 
-      this.resources.sort( (a,b) => { 
+      this.filteredRecommendations.sort( (a,b) => { 
         if(a[propName] < b[propName]) { return order == 'asc' ? -1 : 1; }
         if(a[propName] > b[propName]) { return order == 'desc' ? -1 : 1; }
         return 0;
       })
     },
 
-    handleAddRelated(parent) {
-      this.showView = false;
-      this.resource = Resource.default();
-      this.resource.authors = parent.authors;
-      this.resource.parentResourceId = parent.id;
-      this.resource.parentResourceName = parent.displayName;
-      this.resource.parentResourceImageUrl = parent.imageUrl;
-      this.showEdit = true;
-    },
-
-    handleRecommendClick(resource){
-      this.resource = resource;
-      this.showRecommend = true;
-    },
-    handleApproval(approved) {
-      this.resource.approved = approved;
-      this.showView = false;
-    },
-    handleAddResource() {
-      this.resource = Resource.default();
-      this.showEdit = true;
-    },
-    handlePreviewClick(resource) {
-      this.resource = resource;
-      this.showView = true;
-    },
-    handleEditClick(resource) {
-      this.resource = resource;
-      this.showEdit = true;
-    },
-    handleAdded(resource) {
-      this.resource = resource;
-      this.resources.unshift(resource);
-      this.showEdit = false;
-    },
-    setApproval(resource, approved) {
-      resource.approved = approved;
-      updateResource(resource);
-    },
-    handleSaved(resource) {
-      // copy the saved object back into the table/selected element
-      this.resource = cloneDeep(resource);
-      let index = this.resources.findIndex( r => r.id == resource.id )
-      if (index >= 0) {
-        this.resources[index] = this.resource;
+    setApproval(recommendation, approved) {
+      if (recommendation.canApprove) {
+        recommendation.approved = approved;
+        updateRecommendation(recommendation);
       }
-      this.showEdit = false;
     },
-    handleDeleteClick(resource) {
-      this.resource = resource;
+    handleEditClick(recommendation) {
+      console.log(recommendation);
+    },
+    handleDeleteClick(recommendation) {
+      this.selectedRecommendation = recommendation;
       this.showDeleteConfirm = true
     },
     async doDelete() {
       try {
         this.isDeleting = true;
-        await deleteResource(this.resource.id);
-        let index = this.resources.indexOf(this.resource);
+        await deleteRecommendation(this.selectedRecommendation.id);
+        let index = this.recommendations.indexOf(this.selectedRecommendation);
         if (index >= 0) {
-          this.resources.splice(index,1);
+          this.recommendations.splice(index,1);
         }
-        this.resource == null;
+        this.selectedRecommendation == null;
       } catch (error) {
         this.isDeleting = false;
       }
       this.isDeleting = false;
       this.showDeleteConfirm = false;
     },
-    handleRecommendationsClick() {
-      this.$router.push('/admin/recommendations');
-    }
   }
 }
 

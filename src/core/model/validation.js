@@ -1,5 +1,5 @@
 
-export { isObjectValid, validateUrl, validateObject, validateProperty }
+export { isObjectValid, validateUrl, validateObject, validateProperty, validateMandatoryProperty }
 
 import Result from '@/core/model/Result';
 
@@ -97,4 +97,12 @@ const validateProperty = function(object, schema, propertyName) {
     result = schema[propertyName](object[propertyName]);
   }
   return result; 
+}
+
+const validateMandatoryProperty = function(propertyName, value) {
+  if (!value || value.length == 0) {
+    return Result.failure('Missing field', propertyName);
+  } else {
+    return Result.success();
+  }
 }
