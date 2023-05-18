@@ -8,6 +8,7 @@ export { Resource, resourceConverter };
 class Resource {
   constructor(config) {
     this.id = config.id;
+    this.recommendationId = config.recommendationId;
     this.recommendedByUid = config.recommendedByUid;
     this.recommendedByName = config.recommendedByName;
     this.displayName = config.displayName;
@@ -27,6 +28,18 @@ class Resource {
     this.relatedResources = config.relatedResources;
     this.source = config.source;
     this.approved = config.approved;
+  }
+
+  static fromRecommendation(recommendation) {
+    return new Resource({
+      recommendationId: recommendation.id,
+      recommendedByUid: recommendation.recommendedByUid,
+      recommendedByName: recommendation.recommendedByName,
+      displayName: recommendation.resourceName,
+      resourceType: recommendation.resourceType,
+      resourceUrl: recommendation.resourceUrl,
+      approved: false,
+    })
   }
 
   static default(type) {
@@ -57,6 +70,13 @@ class Resource {
     }
   }
 
+  get dateCreatedFormatted() {
+    if (this.createdDate && this.createdDate.isValid) {
+      return this.createdDate.toLocaleString(DateTime.DATE_FULL);
+    }
+    return null;
+  }
+
   get publishedDateFormatted() {
     if (this.publishedDate && this.publishedDate.isValid) {
       return this.publishedDate.toLocaleString(DateTime.DATE_FULL);
@@ -75,7 +95,11 @@ class Resource {
   }
 
   get authorsList() {
-    return this.authors.join(', ');
+    if (this.authors) {
+      return this.authors.join(', ');
+    } else {
+      return null
+    }
   }
 
   get actionText() {
@@ -153,6 +177,7 @@ class Resource {
 var resourceConverter = {
   toFirestore: function (resource) {
     const result = {};
+    if (resource.recommendationId != null) { result.recommendationId = resource.recommendationId }
     if (resource.recommendedByUid != null) { result.recommendedByUid = resource.recommendedByUid }
     if (resource.recommendedByName != null) { result.recommendedByName = resource.recommendedByName }
     if (resource.description != null) { result.description = resource.description }
@@ -201,6 +226,7 @@ var resourceConverter = {
       id: snapshot.id,
       displayName: data.displayName,
       resourceUrl: data.resourceUrl,
+      recommendationId: data.recommendationId,
       recommendedByUid: data.recommendedByUid,
       recommendedByName: data.recommendedByName,
       description: data.description,

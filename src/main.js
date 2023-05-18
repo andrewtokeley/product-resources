@@ -56,7 +56,7 @@ auth.onAuthStateChanged(async (authUser) => {
   let app = createApp(App);
   app.use(router);
   app.use(pinia);
-
+  console.log("store")
   const storeUser = useUserStore();
   await storeUser.login(authUser, dbUser);
 

@@ -36,7 +36,10 @@
         @search="$router.push(`/search/${searchTerm}`)" 
         @mouseover="showCategories=false">
       </search-input>
-      <base-icon :menu="menuOptions">menu</base-icon>
+      <div class="menu">
+        <base-icon :menu="menuOptions">menu</base-icon>
+        <badge-count class="badge" :count="4"></badge-count>
+      </div>
     </div>
 
     <resource-detail 
@@ -53,6 +56,7 @@ import SearchInput from './SearchInput.vue'
 import TagButton from '@/modules/resources/components/TagButton.vue'
 import BaseButton from './BaseButton.vue'
 import ResourceDetail from '@/modules/resources/views/ResourceDetail.vue'
+import BadgeCount from './BadgeCount.vue'
 
 import { auth } from '@/core/services/firebaseInit'
 import { useUserStore } from '@/core/state/userStore'
@@ -71,6 +75,7 @@ export default {
     BaseIcon,
     BaseButton,
     ResourceDetail,
+    BadgeCount,
   },
   setup() {
     const lookupStore = ref(null);
@@ -168,13 +173,13 @@ export default {
         {
             name: "ADMIN",
             show: this.useUserStore.isAdmin,
-            iconName: "settings",
             isLabel: true,
           },
           {
             name: "Resources...",
             show: this.useUserStore.isAdmin,
-            // iconName: "menu_book",
+            badgeCount: 1,
+            iconName: "menu_book",
             action: () => {
               this.$router.push('/admin/resources');
               //vm.showResourceDialog = true;
@@ -182,17 +187,19 @@ export default {
             }
           },
           {
+            name: "Reviews...",
+            show: this.useUserStore.isAdmin,
+            iconName: "rate_review",
+            badgeCount: 3,
+            action: () => {
+              vm.$router.push('/admin/reviews');
+            }
+          },
+          {
             name: "Lookups...",
             show: this.useUserStore.isAdmin,
             action: () => {
               vm.$router.push('/admin/tags');
-            }
-          },
-          {
-            name: "Recommendations...",
-            show: this.useUserStore.isAdmin,
-            action: () => {
-              vm.$router.push('/admin/recommendations');
             }
           },
           {
@@ -335,4 +342,9 @@ li {
   margin-right:20px;
 }
 
+.badge {
+  position: absolute;
+  right: 15px;
+  top: 15px;
+}
 </style>

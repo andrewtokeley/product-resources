@@ -2,8 +2,8 @@
   <div class="page">
     <loading-symbol v-if="isLoading"></loading-symbol>
     <div v-else class="content" >
-      
-      <template v-if="!isReview">
+      {{validationErrors}}
+      <template v-if="isRecommendation">
         <h1>I'd Like to Recommend Something!</h1>
         <p>Thank you so much for recommending a new resource! </p>
       </template>
@@ -16,13 +16,13 @@
 
       <base-input 
         v-model="recommendation.resourceName"
-        v-if="!isReview"
-        @blur="validate('resourceName')"
+        v-if="isRecommendation"
+        @blur="validateRecommendation('resourceName')"
         :errorMessage="errorMessage['resourceName']"
-        :hasFocus="!isReview"
+        :hasFocus="isRecommendation"
         :options="{ placeholder: 'Name of Resource'}">
       </base-input>
-      <div v-if="!isReview" class="double-line">
+      <div v-if="isRecommendation" class="double-line">
         <div>
           <div class="label">Where should the resource be categorised?</div>
           <resource-type-select v-model="this.recommendation.resourceType"></resource-type-select>
@@ -31,7 +31,7 @@
           <div class="label">&nbsp;</div>
           <base-input 
             v-model="recommendation.resourceUrl" 
-            @blur="validate('resourceUrl')"
+            @blur="validateRecommendation('resourceUrl')"
             :errorMessage="errorMessage['resourceUrl']"
             :options="{ placeholder: 'Link to Resource', readOnly: isSaving, inlineErrors: false }">
           </base-input>
@@ -41,12 +41,13 @@
         <h2>{{ resource.displayName }}</h2>
       </div>
       
-      <div v-if="!isReview" class="label">We think it's important for all recommendations to also include a public review.</div>
+      <h2 v-if="isRecommendation">Include a Review</h2>
+      <p v-if="isRecommendation">We think it's important for all recommendations to also include a public review.</p>
       <base-multiline-text 
-        v-model="recommendation.reason"
-        @blur="validate('reason')"
+        v-model="review.reason"
+        @blur="validateReview('reason')"
         :errorMessage="errorMessage['reason']"
-        :hasFocus="isReview"
+        :hasFocus="!isRecommendation"
         :options="{ numberOfLines: 5, 
           maximumLength: 500, 
           inlineErrors: false,
@@ -59,7 +60,7 @@
         <base-button :isSecondary="true" @click="$router.back()">Cancel</base-button>
         <base-button :showSpinner="isSaving" :disabled="!isValid" @click="handleSubmit">Submit</base-button>
       </div>
-      {{validationErrors}}
+
     </div>
   </div>
   <!-- </modal-dialog> -->
@@ -70,12 +71,13 @@ import BaseInput from '@/core/components/BaseInput.vue'
 import BaseMultilineText from '@/core/components/BaseMultilineText.vue'
 import ResourceTypeSelect from '@/modules/resources/components/ResourceTypeSelect.vue'
 import BaseButton from '@/core/components/BaseButton.vue'
-// import RecommendationWidget from '../components/RecommendationWidget.vue'
 import LoadingSymbol from '@/core/components/LoadingSymbol.vue'
 
 import { Recommendation } from '@/modules/recommendations/model/recommendation'
+import { Review } from '@/modules/reviews/model/review'
 
 import { addRecommendation } from '@/modules/recommendations/services/recommendation-service'
+import { addReview } from '@/modules/reviews/services/review-service';
 import { getResource } from '@/modules/resources/services/resource-service'
 import { useUserStore } from '@/core/state/userStore'
 
@@ -97,6 +99,7 @@ data() {
     isSaving: false,
     isLoading: true,
     recommendation: Recommendation.default(),
+    review: Review.default(),
     resource: null,
     errorMessage: [],
   }
@@ -104,38 +107,52 @@ data() {
 async mounted() {
   this.isLoading = true;
   const store = useUserStore();
-  if (this.isReview) {
+  console.log(store.displayName);
+  
+  if (this.isRecommendation) {    
+    // we're reviewing a new (unapproved) recommended resource
+    this.recommendation.resourceType = this.$route.params.typeId ?? 'books';
+    this.recommendation.recommendedByUid = store.uid;
+    this.recommendation.recommendedByName = store.displayName;
+    
+    this.review.resourceId = null;
+  } else {
+    // we're reviewing an existing resource
     const resourceId = this.$route.params.resourceId;
     this.resource = await getResource(resourceId);
     if (this.resource == null) {
       // invalid resourceid
       this.$router.push('/');
     }
-    this.recommendation.resourceId = this.resource.id;
-    this.recommendation.resourceName = this.resource.displayName;
-    this.recommendation.resourceType = this.resource.resourceType;
-    this.recommendation.resourceUrl = this.resource.resourceUrl;
-  } else {
-    this.recommendation.resourceType = this.$route.params.typeId ?? 'books';
+    this.review.resourceId = this.resource.id;
+    this.review.resourceName = this.resource.displayName;
   }
-  this.recommendation.recommendedByUid = store.uid;
-  this.recommendation.recommendedByName = store.displayName;
-  this.recommendation.isReview = this.isReview;
+  
+  this.review.reviewedByUid = store.uid;
+  this.review.reviewedByName = store.displayName;
+
   this.isLoading = false;
 },  
 computed: {
   validationErrors() {
-    const errors = this.recommendation.validate();
+    const errorsRecommendations = this.recommendation.validate();
+    const errorsReviews = this.review.validate();
+    const errors = [...errorsRecommendations, ...errorsReviews];
     if (errors.length > 0) {
       return errors.map( e => e.propertyName + ":" + e.errorMessage );
     }
     return null;
   },
   isValid() {
-    return this.recommendation.isValid;
+    if (this.isRecommendation) {
+      // both the rec and review need to be valid
+      return this.recommendation.isValid && this.review.isValid;
+    } else {
+      return this.review.isValid;
+    }
   },
-  isReview() {
-    return this.$route.params.resourceId != null;
+  isRecommendation() {
+    return this.$route.params.resourceId == null;
   },
 },
 
@@ -144,18 +161,34 @@ methods: {
   async handleSubmit() {
     const _this = this;
     this.isSaving = true;
-    await addRecommendation(this.recommendation);
+    if (this.isRecommendation) {
+      const recommendationId = await addRecommendation(this.recommendation);
+      this.review.recommendationId = recommendationId;
+    } 
+    await addReview(this.review);
     setTimeout(function () {
       _this.isSaving = false;
       _this.$router.back();
     }, 2000);
   },
 
-  validate(prop) {
+  validateRecommendation(prop) {
     let result = this.recommendation.validateProperty(prop);
     this.errorMessage[prop] = result.errorMessage;
     if (result.data) {
       this.recommendation[prop] = result.data;
+    }
+    if (prop == 'resourceName') {
+      // mirror the resource name into the review so we know the proposed resource name the review is for
+      this.review.resourceName = this.recommendation.resourceName;
+    }
+  },
+
+  validateReview(prop) {
+    let result = this.review.validateProperty(prop);
+    this.errorMessage[prop] = result.errorMessage;
+    if (result.data) {
+      this.review[prop] = result.data;
     }
   }
    

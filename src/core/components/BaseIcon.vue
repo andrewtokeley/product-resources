@@ -18,9 +18,9 @@
   <transition name="fade">
     <context-menu v-if="showContextMenu"
       ref="menu"
-      :items="menu.menuItems"
+      :items="menu?.menuItems"
       :activateElement="iconDivElement" 
-      :rightAligned="menu.rightAligned ?? true"
+      :rightAligned="menu?.rightAligned ?? true"
       @click="handleMenuClick"
       @close="showContextMenu = false">
     </context-menu>

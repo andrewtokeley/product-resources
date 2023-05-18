@@ -1,45 +1,41 @@
 <template>
   <div class="featured-card" @click="$emit('click', resource)">
     <resource-image class="image" :resource="resource"></resource-image>
-    <recommendation-widget class="quote" :recommendation="recommendation"></recommendation-widget>
+    <review-widget class="quote" :review="review"></review-widget>
   </div>
 </template>
 
 <script>
 import ResourceImage from '@/modules/resources/components/ResourceImage.vue';
-import RecommendationWidget from '@/modules/recommendations/components/RecommendationWidget.vue'
+import ReviewWidget from '@/modules/reviews/components/ReviewWidget.vue'
 
-import { Recommendation } from '@/modules/recommendations/model/recommendation';
+import { Review } from '@/modules/reviews/model/review';
 import { getResource } from '@/modules/resources/services/resource-service';
 
 import { ref } from 'vue'
 
 export default {
-  components: { ResourceImage, RecommendationWidget},
+  components: { ResourceImage, ReviewWidget},
   name: 'feature-card',
-  emits: ['recommend', 'click'],
-  data() { return { isLoading: true } },  
+  emits: ['click'],
+  data() { 
+    return { 
+      isLoading: true 
+    } 
+  },  
   props: {
-    recommendation: {
-      type: Recommendation,
+    review: {
+      type: Review,
       required: true
     }
   },
   async setup(props) {
     const resource = ref(null);
-    resource.value = await getResource(props.recommendation.resourceId);
+    resource.value = await getResource(props.review.resourceId);
     return {
       resource
     }
   },
-  mounted() {
-    this.isloading = false;
-  },
-  methods: {
-    // openResource(url) {
-    //   window.open(url, '_blank');
-    // }
-  },  
 }
 
 </script>

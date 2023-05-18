@@ -4,65 +4,54 @@
       :style="style"
       ref="context"
       tabindex="0"
-      @blur="blur"
-  >
+      @blur="blur">
       <template v-for="menuItem in visibleMenuItems" :key="menuItem.id">
-          <hr class="divider" v-if="menuItem.isDivider ?? false" />
-          <div v-else-if="menuItem.isHeading">
-            <div class="context-menu__row__heading">{{ menuItem.heading ?? "HEADING!" }}</div>
-            <div class="context-menu__row__subHeading" v-if="menuItem.subHeading">{{ menuItem.subHeading }}</div>
-            <hr class="divider short"/>
+        <hr class="divider" v-if="menuItem.isDivider ?? false" />
+        <div v-else-if="menuItem.isHeading">
+          <div class="context-menu__row__heading">{{ menuItem.heading ?? "HEADING!" }}</div>
+          <div class="context-menu__row__subHeading" v-if="menuItem.subHeading">{{ menuItem.subHeading }}</div>
+          <hr class="divider short"/>
+        </div>
+        <div v-else
+            class="context-menu__row"
+            :class="{
+                'context-menu__row--isCentred': menuItem.isFullWidth,
+                'context-menu__row--isLabel': menuItem.isLabel ?? false,
+                'context-menu__row--isDisabled': !(menuItem.isEnabled ?? true),
+            }"
+            @click="handleMenuItemClick($event, menuItem)">
+          <div v-if="!menuItem.isFullWidth" class="context-menu__row__icon" >
+            <badge-count v-if="menuItem.badgeCount" class="badge"></badge-count>
+            <icon
+              v-if="menuItem.iconName ?? false"
+              :options="{ hover: { backgroundColour: 'transparent' }, isClickable:  false }"
+              @click="handleMenuItemClick(nil, menuItem)"
+              >{{ menuItem.iconName }}
+            </icon>  
           </div>
-          <div
-              v-else
-              class="context-menu__row"
-              :class="{
-                  'context-menu__row--isCentred': menuItem.isFullWidth,
-                  'context-menu__row--isLabel': menuItem.isLabel ?? false,
-                  'context-menu__row--isDisabled': !(menuItem.isEnabled ?? true),
-              }"
-              @click="handleMenuItemClick($event, menuItem)"
-          >
-              <div
-                  class="context-menu__row__icon"
-                  v-if="!menuItem.isFullWidth"
-              >
-                  <icon
-                      v-if="menuItem.iconName ?? false"
-                      :options="{ hover: { backgroundColour: 'transparent' }, isClickable:  false }"
-                      @click="handleMenuItemClick(nil, menuItem)"
-                      >{{ menuItem.iconName }}</icon
-                  >
-              </div>
-              <div
-                  class="context-menu__row__text"
-                  :class="{
-                      'context-menu__row__small': menuItem.isFullWidth,
-                  }"
-              >
-                  <div>{{ menuItem.name }}</div>
-                  <div
-                      class="context-menu__row__subText"
-                      v-if="menuItem.subText"
-                  >
-                      {{ menuItem.subText }}
-                  </div>
-              </div>
+          <div class="context-menu__row__text" :class="{'context-menu__row__small': menuItem.isFullWidth}">
+            <div class="context-menu__text">
+              <span>{{ menuItem.name }}</span>
+            </div>
+            <div class="context-menu__row__subText" v-if="menuItem.subText" >
+              {{ menuItem.subText }}
+            </div>
           </div>
-      </template>
+      </div>
+    </template>
   </div>
 </template>
 
 <script>
 import { nextTick } from "vue";
-// import { constants } from "../../constants";
+import BadgeCount from "./BadgeCount.vue";
 
 export default {
   name: "ContextMenu",
 
   emits: ["opened", "close", "click"],
 
-  components: {},
+  components: {BadgeCount},
 
   beforeCreate() {
       // Not sure why this worked and importing Icon didn't. Something to do with the fact that
@@ -112,7 +101,7 @@ export default {
       },
 
       visibleMenuItems() {
-          return this.items.filter((item) => item.show ?? true);
+          return this.items?.filter((item) => item.show ?? true);
       },
   },
 
@@ -169,7 +158,7 @@ export default {
   },
 };
 </script>
-<style>
+<style scoped>
 .context-menu-mask {
   z-index: 100;
   position: fixed;
@@ -247,6 +236,7 @@ export default {
 }
 
 .context-menu__row__icon {
+  position: relative;
   width: 30px;
   padding-right: 10px;
 }
@@ -276,5 +266,23 @@ export default {
   margin-left: 20px;
   margin-right: 20px;
   border-bottom: 1px solid var(--prr-lightgrey);
+}
+
+.context-menu__text {
+  display:flex;
+  flex-direction: row;
+  justify-items: space-between;
+}
+
+.badge {
+  /* display: inline; */
+  position: absolute;
+  left: 20px;
+  top: 5px;
+  z-index: 200;
+  /* top: 0px;
+  
+  /* top: 0px;
+  right: -30px; */
 }
 </style>

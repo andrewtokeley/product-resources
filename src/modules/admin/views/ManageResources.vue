@@ -5,14 +5,18 @@
         <h1>Resources</h1>
       </div>
     </div>
+    <div class="tabs">
+      <base-button :isSecondary="activeTab != 'live'" @click="filterByStatus('live')">Live</base-button>
+      <base-button :isSecondary="activeTab != 'draft'" @click="filterByStatus('draft')" >Draft</base-button>
+      <base-button :isSecondary="activeTab != 'recommended'" @click="filterByStatus('recommended')">Recommended</base-button>
+    </div>
     <div class="action-strip">
-      
-      <div class="action-items" >
+      <div v-if="activeTab == 'live'" class="action-items left" >
         <div class="label">Filter By:</div>
-        <base-select v-model="selectedStatus" :selectOptions="statusList"></base-select>
+        <base-select v-if="false" v-model="selectedStatus" :selectOptions="statusList"></base-select>
         <resource-type-select v-model="selectedResourceType"></resource-type-select>
       </div>
-      <div class="action-items">
+      <div class="action-items right">
         <base-button :disabled="isLoading" :isSecondary="true" @click="showExport = true">Export...</base-button>
         <base-button :disabled="isLoading" @click="handleAddResource">New Resource</base-button>
       </div>
@@ -21,36 +25,27 @@
       <thead>
         <tr>
           <th></th>
-          <th colspan="2"><a @click="sortBy('displayName')" class="sortHeading" :class="sortHeadingClasses('displayName')">Name</a></th>
+          <th><a @click="sortBy('displayName')" class="sortHeading" :class="sortHeadingClasses('displayName')">Name</a></th>
+          <th><a @click="sortBy('dateCreated')" class="sortHeading" :class="sortHeadingClasses('dateCreated')">Created</a></th>
           <th ><a @click="sortBy('approved')" class="sortHeading" :class="sortHeadingClasses('approved')">Status</a></th>
           <th></th>
         </tr>
       </thead>
-      
-      
-        <template v-for="resource in resources" :key="resource.id" >
-          <tbody>
-            <tr @click="handleEditClick(resource)">
-              <td rowspan="2">
-                <resource-image :hideActions="false" :preview="true" :resource="resource"></resource-image>
-              </td>
-              <td>{{ resource.displayName }}</td>
-              <!-- <td class="centred">
-                <a v-if="resource.numberOfRecommendations > 0" @click.prevent="handleRecommendationsClick">{{resource.numberOfRecommendations}}</a>
-                <span v-else>-</span>
-              </td> -->
-              <td rowspan="2">{{ resource.statusDescription }}</td>
-              <td rowspan="2">
-                <div class="actions">
-                  <base-icon :menu="menuItems(resource)">more_vert</base-icon>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td>Submitted by:</td>
-            </tr>
-          </tbody>
-        </template>
+      <tbody>
+        <tr  v-for="resource in filteredResources" :key="resource.id"  @click="handleEditClick(resource)">
+          <td>
+            <resource-image :hideActions="false" :preview="true" :resource="resource"></resource-image>
+          </td>
+          <td>{{ resource.displayName }}</td>
+          <td>{{ resource.dateCreatedFormatted }}</td>
+          <td>{{ resource.statusDescription }}</td>
+          <td>
+            <div class="actions">
+              <base-icon :menu="menuItems(resource)">more_vert</base-icon>
+            </div>
+          </td>
+        </tr>
+      </tbody>
     </table>
     <loading-symbol class="loader" v-else></loading-symbol>
     
@@ -94,9 +89,10 @@ import BaseButton from '@/core/components/BaseButton.vue';
 import ConfirmationDialog from '@/core/components/ConfirmationDialog.vue';
 import LoadingSymbol from '@/core/components/LoadingSymbol.vue';
 
-import { deleteResource, getResourcesFull, updateResource } from '@/modules/resources/services/resource-service';
+import { deleteResource, searchByResourceTypes, updateResource } from '@/modules/resources/services/resource-service';
 import { cloneDeep } from 'lodash';
 import { Resource } from '@/modules/resources/model/resource';
+import { getUnlinkedRecommendations } from '@/modules/recommendations/services/recommendation-service';
 
 export default {
   name: 'manage-resources',
@@ -106,6 +102,7 @@ export default {
       resource: Resource,
       parentResource: Resource,
       resources: [],
+      filteredResources: [],
       showEdit: false,
       showAdd: false,
       showView: false,
@@ -118,6 +115,7 @@ export default {
       sortedByOrder: {},
       statusList: [],
       selectedStatus: null,
+      activeTab: 'live',
     }
   },
   mounted() {
@@ -127,12 +125,15 @@ export default {
       { key:'approved', value: 'Approved'} ,
       { key:'pending', value: 'Pending'} ,
     ];
+    this.filterByStatus('live');
   },
   watch: {
     selectedResourceType(value) {
       this.isLoading = true;
-      getResourcesFull(value).then( (resources) => {
+      console.log('filter by' + value);
+      searchByResourceTypes([value], 100, false).then( (resources) => {
         this.resources = resources;
+        this.filteredResources = resources;
         // resort the column, but don't toggle direction
         this.sortBy(this.sortedBy, false);
         this.isLoading = false;
@@ -212,11 +213,24 @@ export default {
       // remember the order for next toggle
       this.sortedByOrder[propName] = order;
 
-      this.resources.sort( (a,b) => { 
+      this.filteredResources.sort( (a,b) => { 
         if(a[propName] < b[propName]) { return order == 'asc' ? -1 : 1; }
         if(a[propName] > b[propName]) { return order == 'desc' ? -1 : 1; }
         return 0;
       })
+    },
+
+    async filterByStatus(status) {
+      this.activeTab = status;
+      if (status == 'live') {
+        this.filteredResources = this.resources.filter ( r => r.approved);
+      } else if (status == 'draft') {
+        this.filteredResources = this.resources.filter ( r => !r.approved);
+      } else if (status == 'recommended') {
+        const recommendations = await getUnlinkedRecommendations()
+        let psuedoResources = recommendations.map( r => Resource.fromRecommendation(r));
+        this.filteredResources = psuedoResources;
+      }
     },
 
     handleAddRelated(parent) {
@@ -305,7 +319,6 @@ export default {
 .action-items {
   display: flex;
   align-items: center;
-  
 }
 
 .header {
@@ -323,12 +336,22 @@ export default {
 
 .action-strip {
   width: 100%;
-  display: flex;
-  justify-content: space-between;
+  height: 60px;
+  /* display: flex;
+  justify-content: space-between; */
   outline: 1px solid var(--prr-lightgrey);
   padding: 10px;
   box-sizing: border-box;
 }
+
+
+.action-strip .action-items.left {
+  float: left;
+}
+.action-strip .action-items.right {
+  float: right;
+}
+
 table {
   width: 100%;
   outline: 1px solid var(--prr-lightgrey);
@@ -370,13 +393,6 @@ th a.sorted.desc::after {
   clip-path: polygon(100% 0%, 0 0%, 50% 100%);
 }
 
-tbody tr:last-child {
-  /* border-bottom: 2px solid var(--prr-lightgrey); */
-  /* border-bottom: 1px solid #ccced2; */
-  border-bottom: 1px solid red;
-  padding: 5px 10px;
-}
-
 tbody td.centred {
   text-align: center;
 }
@@ -390,7 +406,7 @@ tr:hover .actions {
   visibility: visible;
 }
 
-tbody:hover {
+tbody tr:hover {
   background: var(--prr-extralightgrey);
   cursor: pointer;
 }

@@ -1,7 +1,7 @@
 
 import { Recommendation, recommendationConverter } from '../model/recommendation'
 import { app } from "@/core/services/firebaseInit"
-import { updateDoc, getFirestore, collection, doc, getDoc,getDocs, query, where, addDoc, setDoc, deleteDoc, limit } from "firebase/firestore"; 
+import { updateDoc, getFirestore, collection, doc, getDoc,getDocs, query, where, addDoc, setDoc, deleteDoc, limit, getCountFromServer } from "firebase/firestore"; 
 const { DateTime } = require("luxon");
 
 const db = getFirestore(app);
@@ -10,17 +10,21 @@ export { getRecommendation,
   getRecommendations, 
   updateRecommendation, 
   addRecommendation, 
-  getNewResourceRecommendations,
-  getUnapprovedRecommendations,
+  getUnlinkedRecommendations,
+  getUnlinkedRecommendationsCount,
   deleteRecommendation,
-  getFeaturedRecommendations,
-  getAllRecommendations,
   approveRecommendation,
   unapproveRecommendation,
+  linkRecommendationToResource
 }
 
 const COLLECTION_KEY = "recommendations";
 
+/**
+ * Return a recommendation record
+ * @param {*} id 
+ * @returns 
+ */
 const getRecommendation = async function(id) {
   const ref = doc(db, COLLECTION_KEY, id).withConverter(recommendationConverter);
   const docSnap = await getDoc(ref);
@@ -31,9 +35,27 @@ const getRecommendation = async function(id) {
   }
 }
 
-const getNewResourceRecommendations = async function() {
+const linkRecommendationToResource = async function(recommendationId, resourceId) {
+  const ref = doc(db, COLLECTION_KEY, recommendationId);
+  await setDoc(ref, { resourceId: resourceId }, { merge: true });
+  return true; 
+}
+
+const getUnlinkedRecommendationsCount = async function() {
   const q = query(collection(db, COLLECTION_KEY)
-    .withConverter(recommendationConverter), where("resourceId", "==", null));
+    .withConverter(recommendationConverter), 
+    where("approved", "==", false)
+  );
+  const snapshot = getCountFromServer(q);
+  return snapshot.data().count;
+}
+
+const getUnlinkedRecommendations = async function() {
+  const q = query(collection(db, COLLECTION_KEY)
+    .withConverter(recommendationConverter), 
+    where("approved", "==", false),
+    where("resourceId", "==", null),
+  );
   const querySnapshot = await getDocs(q);
   const result = [];
   querySnapshot.forEach((doc) => {
@@ -42,7 +64,7 @@ const getNewResourceRecommendations = async function() {
   return result 
 }
 
-const getAllRecommendations = async function(resultLimit) {
+const getRecommendations = async function(resultLimit) {
   if (!resultLimit) { resultLimit = 100 }
   const q = query(collection(db, COLLECTION_KEY)
     .withConverter(recommendationConverter), limit(resultLimit));
@@ -54,60 +76,6 @@ const getAllRecommendations = async function(resultLimit) {
   return result 
 }
 
-const getUnapprovedRecommendations = async function() {
-  const q = query(collection(db, COLLECTION_KEY).withConverter(recommendationConverter), 
-    where("approved", "==", false),
-    );
-  const querySnapshot = await getDocs(q);
-  const result = [];
-  querySnapshot.forEach((doc) => {
-    result.push(new Recommendation(doc.data()));
-  });
-  console.log(result);
-  return result 
-}
-
-
-const getRecommendations = async function(resourceId) {
-  const q = query(collection(db, COLLECTION_KEY)
-    .withConverter(recommendationConverter), where("resourceId", "==", resourceId));
-  const querySnapshot = await getDocs(q);
-  const result = [];
-  querySnapshot.forEach((doc) => {
-    result.push(new Recommendation(doc.data()));
-  });
-  return result 
-}
-
-const getFeaturedRecommendations = async function(maximum) {
-  var results = [];
-  var attempts = 0;
-  // just in case you get some dupicates we have a few goes at getting unique set
-  var maxAttempts = 3;
-  if (!maximum) { maximum = 2 }
-
-  while (results.length < maximum && attempts < maxAttempts) {
-    let randomKey = doc(collection(db, COLLECTION_KEY)).id;
-    const q = query(collection(db, COLLECTION_KEY).withConverter(recommendationConverter), 
-      where('resourceId', ">=", randomKey),
-      where('resourceId', "!=", null),
-      // where("resourceType.key", "==", referenceTypeKey),
-      limit(1));
-    const querySnapshot = await getDocs(q);
-    if (querySnapshot.size == 1) {
-      querySnapshot.forEach((doc) => {
-        let recommendation = new Recommendation(doc.data());
-        // ensure they are for different resources
-        if (results.find( r => r.resourceId == recommendation.resourceId)) {
-          attempts += 1;
-        } else {
-          results.push(recommendation);
-        }
-      });
-    }
-  }
-  return results; 
-}
 
 const updateRecommendation = async function(recommendation) {
   if (recommendation.id) {    
@@ -121,6 +89,8 @@ const updateRecommendation = async function(recommendation) {
 const addRecommendation = async function(recommendation) {
   recommendation.dateCreated = DateTime.now();
   recommendation.approved = false;
+  // this is how we know it hasn't been linked yet.
+  recommendation.resourceId = null;
   let doc = await addDoc(collection(db, COLLECTION_KEY).withConverter(recommendationConverter), recommendation);
   return doc.id;
 }

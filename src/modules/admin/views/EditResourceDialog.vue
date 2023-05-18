@@ -9,6 +9,7 @@
     :buttonActions="buttons">
     <div class="content"> 
       <h2>General</h2>
+      
       <div class="double-line">
         <div>
           <div class="label tight">Resource Type</div>
@@ -86,6 +87,13 @@
       <div class="label">Resource ID</div>
       <base-input
           v-model="editResource.id"
+          :options="{ 
+            readOnly: true}"
+        ></base-input>
+      <div class="label">Parent ID</div>
+      <div class="label">Recommendation ID</div>
+      <base-input
+          v-model="editResource.recommendationId"
           :options="{ 
             readOnly: true}"
         ></base-input>
@@ -233,8 +241,10 @@ export default {
     },
     async handleButtonClick(button) {
       if (button.id == 'add') {
-        let id = await addResource(this.editResource);
-        this.editResource = await getResource(id);
+        console.log('add new recommendation')
+        // this will also link the resource with a review if the resource was created from one.
+        let resourceId = await addResource(this.editResource);
+        this.editResource = await getResource(resourceId);
         this.$emit('added', this.editResource);
       }
       if (button.id == 'save') {

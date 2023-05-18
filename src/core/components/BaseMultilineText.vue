@@ -105,12 +105,12 @@ export default {
   computed: {
     _options() {
       return {
-        showCharacterCount: this.options.showCharacterCount ?? false,
-        maximumLength: this.options.maximumLength ?? 300,
-        numberOfLines: this.options.numberOfLines ?? 4,
-        placeholder: this.options.placeholder ?? "",
-        readOnly: this.options.readOnly ?? false,
-        inlineErrors: this.options.inlineErrors ?? false,
+        showCharacterCount: this.options?.showCharacterCount ?? false,
+        maximumLength: this.options?.maximumLength ?? 300,
+        numberOfLines: this.options?.numberOfLines ?? 4,
+        placeholder: this.options?.placeholder ?? "",
+        readOnly: this.options?.readOnly ?? false,
+        inlineErrors: this.options?.inlineErrors ?? false,
       }
     },
     characterCount() {

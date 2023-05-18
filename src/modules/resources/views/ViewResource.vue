@@ -19,11 +19,11 @@
       <p>{{resource.description}}</p>
     </div>  
     <div class="recommendations">
-      <recommendation-widget 
-        v-for="recommendation in recommendations" 
-        :key="recommendation.id"
-        :recommendation="recommendation">
-      </recommendation-widget>
+      <review-widget 
+        v-for="review in reviews" 
+        :key="review.id"
+        :review="review">
+      </review-widget>
     </div>
     <div class="related" v-if="relatedResources?.length > 0">
       <hr class="divider" />
@@ -38,15 +38,16 @@
 
 <script>
 import { Resource } from "@/modules/resources/model/resource";
-import RecommendationWidget from '@/modules/recommendations/components/RecommendationWidget.vue';
+import ReviewWidget from '@/modules/reviews/components/ReviewWidget.vue';
 // import BookCard from '@/modules/resources/components/BookCard.vue';
 
 import { getRecommendations } from "@/modules/recommendations/services/recommendation-service";
+import { getReviewsForResource } from "@/modules/reviews/services/review-service";
 import { getRelatedResources } from '../services/resource-service';
 import { getTags } from '../services/lookup-service';
 
 export default {
-  components: { RecommendationWidget },
+  components: { ReviewWidget },
   name: "view-resource",
   emit: ['changeResource', 'back'],
   props: {
@@ -65,11 +66,17 @@ export default {
       recommendations: [],
       relatedResources: [],
       tags: [],
+      reviews: [],
     }
+  },
+
+  async mounted() {
+    this.reviews = await getReviewsForResource(this.resource.id);
   },
 
   watch: {
     async resource() {
+      console.log('get recs')
       this.recommendations = await getRecommendations(this.resource.id);
       this.relatedResources = await getRelatedResources(this.resource.id);    
       const lookup = await getTags();

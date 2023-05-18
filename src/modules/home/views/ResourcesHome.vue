@@ -57,10 +57,11 @@
 <script>
 import FeaturedCard from "@/modules/home/components/FeaturedCard.vue";
 import ResourceDetail from "@/modules/resources/views/ResourceDetail.vue";
-import { getFeaturedRecommendations } from '@/modules/recommendations/services/recommendation-service';
-import { searchByResourceTypes, getRecentlyAdded } from '@/modules/resources/services/resource-service';
 import BookGroup from '@/modules/resources/components/BookGroup.vue';
 import LoadingSymbol from '@/core/components/LoadingSymbol.vue';
+
+import { getFeaturedReviews } from "@/modules/reviews/services/review-service";
+import { searchByResourceTypes, getRecentlyAdded } from '@/modules/resources/services/resource-service';
 
 export default {
   name: 'resources-home',
@@ -77,9 +78,8 @@ export default {
     }
   },
   async mounted() {
-    // this.featured = await getFeaturedRecommendations('podcasts', 2);
     this.isLoading = true;
-    this.featured = await getFeaturedRecommendations(2);
+    this.featured = await getFeaturedReviews(2); //getFeaturedRecommendations(2);
     this.topBooks = await searchByResourceTypes(['books'], 5);
     this.topPodcasts = await searchByResourceTypes(['podcasts'], 5);
     this.recentlyAdded = await getRecentlyAdded(5);
@@ -88,7 +88,6 @@ export default {
 
   methods: {
     handleViewDetail(resource) {
-      console.log('handleViewDetail');
       this.clickedResource = resource;
       this.showDetail = true;
     },

@@ -3,12 +3,12 @@ import Search from './modules/search/views/SearchResults'
 import ResourceTypes from './modules/resources/views/ResourceTypes'
 import ManageResources from './modules/admin/views/ManageResources'
 import ManageLookups from './modules/admin/views/ManageLookups'
-import ManageRecommendations from './modules/admin/views/ManageRecommendations'
+import ManageReviews from './modules/admin/views/ManageReviews'
 import Approve from './modules/recommendations/views/ApproveRecommendations'
 import About from './modules/about/views/AboutView'
 import Home from './modules/home/views/ResourcesHome'
-import RecommendView from './modules/recommendations/views/RecommendView'
 import UserProfile from './modules/users/views/UserProfile'
+import RecommendationView from './modules/recommendations/views/RecommendationView'
 
 export default [
   {path: '/login', component:Login, meta: { hideHeader: false }},
@@ -29,11 +29,11 @@ export default [
   {path: '/type/:typeId', component:ResourceTypes},
 
   // recommend something
-  {path: '/recommend', component: RecommendView, meta: { requiresAuth: true }},
+  {path: '/recommend', component: RecommendationView, meta: { requiresAuth: true }},
   // recommend a resource of a given type
-  {path: '/recommend/:typeId', component: RecommendView, meta: { requiresAuth: true }},
+  {path: '/recommend/:typeId', component: RecommendationView, meta: { requiresAuth: true }},
   
-  {path: '/review/:resourceId', component: RecommendView, meta: { requiresAuth: true }},
+  {path: '/review/:resourceId', component: RecommendationView, meta: { requiresAuth: true }},
 
   // approve recommendations
   {path: '/approve', component:Approve},
@@ -42,7 +42,7 @@ export default [
   
   {path: '/admin/resources', component:ManageResources, meta: { requiresAuth: true, requiresAdmin: true } },
 
-  {path: '/admin/recommendations', component:ManageRecommendations, meta: { requiresAuth: true, requiresAdmin: true } },
+  {path: '/admin/reviews', component:ManageReviews, meta: { requiresAuth: true, requiresAdmin: true } },
 
   {path: '/admin/tags', component:ManageLookups, meta: { requiresAuth: true } },
 

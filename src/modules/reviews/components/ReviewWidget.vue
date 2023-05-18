@@ -1,24 +1,24 @@
 <template>
-  <div class="recommendation">
-    <p v-if="recommendation.reason" class="quote">"{{ recommendation.reason }}"</p>
+  <div class="review-widget">
+    <p v-if="review.reason" class="quote">"{{ review.reason }}"</p>
     <p v-else class="quote">"I like this resource because..."</p>
     <div class="by">
-      <a v-if="recommendation.website" @click="openUrl(recommendation.website)">{{ recommendation.name }}</a>
-      <span v-else>{{ recommendation.name ?? 'Anon'}}</span>
+      <a v-if="review.reviewedByUid" @click="handleClick()">{{ review.reviewedByName }}</a>
+      <span v-else>{{ review.reviewedByName ?? 'Anon'}}</span>
     </div>
     <hr/>
   </div>
 </template>
 
 <script>
-import { Recommendation } from "@/modules/recommendations/model/recommendation";
+import { Review } from "@/modules/reviews/model/review";
 
 export default {
-  name: "recommendation-widget",
+  name: "review-widget",
   props: {
-    recommendation: {
+    review: {
       required: true,
-      type: Recommendation
+      type: Review
     }
   },
   methods: {
@@ -31,7 +31,7 @@ export default {
 </script>
 
 <style scoped>
-.recommendation {
+.review-widget {
   margin-top: 20px;  
   min-width: 200px;
   max-width: 500px;

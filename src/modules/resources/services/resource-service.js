@@ -2,52 +2,55 @@
 import { Resource, resourceConverter } from '../model/resource'
 import { app } from "@/core/services/firebaseInit"
 import { getFirestore, orderBy, query, collection, doc, getDocs, getDoc, where, addDoc, setDoc, deleteDoc, limit, updateDoc } from "firebase/firestore"; 
-import { getAllRecommendations } from '@/modules/recommendations/services/recommendation-service';
 
 import { useLookupStore } from '@/core/state/lookupStore';
+import { linkRecommendationReviewToResource } from '@/modules/reviews/services/review-service';
+import { linkRecommendationToResource } from '@/modules/recommendations/services/recommendation-service';
 
 const { DateTime } = require('luxon');
 
 const db = getFirestore(app);
 
 export { 
+  getResource, 
   getTagsForResources, 
+  getRelatedResources,
+  getRecentlyAdded,
   approveResource, 
   unapproveResource, 
-  getResourcesFull, 
-  getRelatedResources,
   searchByResourceTypes,
   searchByTagKey, 
   searchByText, 
-  getResource, 
   updateResource, 
   addResource, 
   deleteResource,
-  getRecentlyAdded,
 }
 
 const COLLECTION_KEY = "resources";
 
-/**
- * @param {*} type 
- * Returns a Resource instance, injecting a recommendations array property
- * @param {*} resultLimit 
- */
-const getResourcesFull = async function(type, resultLimit) {
-  // get all, including the un-approved
-  var resources = await searchByResourceTypes([type], resultLimit, false);
-  var recommendations = await getAllRecommendations()
-  for (var i = 0; i<resources.length; i++) {
-    let resource = resources[i];
-    resource.recommendations = recommendations.filter( r => r.resourceId == resource.id );
-    resource.numberOfRecommendations = resource.recommendations.length;
-  }
-  return resources;
-}
+// /**
+//  * Returns resources of a given type
+//  * 
+//  * @param {*} type - the key of a resource
+//  * @param {*} resultLimit - optional result set limit
+//  */
+// const getResourcesFull = async function(type, resultLimit) {
+//   if (!resultLimit) { resultLimit = 100 }
+//   // get all, including the un-approved
+//   var resources = await searchByResourceTypes([type], resultLimit, false);
+//   var recommendations = await getAllRecommendations()
+//   for (var i = 0; i<resources.length; i++) {
+//     let resource = resources[i];
+//     resource.recommendations = recommendations.filter( r => r.resourceId == resource.id );
+//     resource.numberOfRecommendations = resource.recommendations.length;
+//   }
+//   return resources;
+// }
 
 const getRecentlyAdded = async function(resultLimit) {
   const q =query(collection(db, COLLECTION_KEY).withConverter(resourceConverter), 
-  orderBy("createdDate", "asc"),
+  where("approved", "==", true),
+  orderBy("createdDate", "desc"),
   limit(resultLimit)
   );
   
@@ -166,10 +169,24 @@ const updateResource = async function(resource) {
   }
 }
 
+/**
+ * Adds a new resource and returns the auto id
+ * @param {*} resource 
+ * @returns 
+ */
 const addResource = async function(resource) {
+
   resource.createdDate = DateTime.now();
+
   let doc = await addDoc(collection(db, COLLECTION_KEY).withConverter(resourceConverter), resource);
-  return doc.id;
+
+  // if this resource is being added from a recommendation...
+  if (resource.recommendationId) {
+    console.log('stop');
+    await linkRecommendationToResource(resource.recommendationId, doc.id);
+    await linkRecommendationReviewToResource(resource.recommendationId, doc.id);
+  }
+  
 }
 
 const deleteResource = async function(id) {

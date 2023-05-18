@@ -6,31 +6,27 @@ export { Recommendation, recommendationConverter };
 class Recommendation {
 
   constructor(config) {
-      
+    // review
     this.id = config.id;
+    this.resourceName = config.resourceName;
+    this.resourceType = config.resourceType;
+    this.resourceUrl = config.resourceUrl;
+    this.dateApproved = config.dateApproved;
+    this.dateCreated = config.dateCreated;
     this.recommendedByUid = config.recommendedByUid;
     this.recommendedByName = config.recommendedByName;
-    this.resourceId = config.resourceId,
-    this.resourceType = config.resourceType;
-    this.resourceName = config.resourceName,
-    this.resourceUrl = config.resourceUrl;
-    this.reason = config.reason;
-    this.dateCreated = config.dateCreated;
-    this.dateApproved = config.dateApproved;
-    this.isReview = config.isReview;
-    this.approved = config.approved;
-  }
 
-  get canApprove() {
-    return this.resourceId != null && this.reason?.length > 0 && this.recommendedByUid && this.recommendedByName;
+    // only set once the recommendation has been approved and a resource document has been created.
+    this.resourceId = config.resourceId
+    this.approved = config.approved;
+    
   }
 
   static default() {
     // returns a default instance with some defaults
     return new Recommendation({ 
       resourceType: 'books',
-      approved: false,
-      isReview: false,
+      approved: false
     });
   }
 
@@ -39,11 +35,11 @@ class Recommendation {
    */
   get schema() {
     return {
-      recommendedByUid: (value) => {
-        return validateMandatoryProperty('recommendedByUid', value);
-      },
       resourceName: (value) => {
         return validateMandatoryProperty('resourceName', value);
+      },
+      resourceType: (value) => {
+        return validateMandatoryProperty('resourceType', value);
       },
       resourceUrl: (value) => {
         const mandatoryCheck = validateMandatoryProperty('resourceUrl', value);
@@ -52,18 +48,8 @@ class Recommendation {
         } else {
           return validateUrl(value);        
         }
-      },
-      reason: (value) => {
-        return validateMandatoryProperty('reason', value);
-      },
+      }
     }
-  }
-
-  get datePublishedFormatted() {
-    if (this.datePublished && this.datePublished.isValid) {
-      return this.datePublished.toLocaleString(DateTime.DATE_FULL);
-    }
-    return null;
   }
 
   get isValid() {
@@ -92,8 +78,6 @@ var recommendationConverter = {
     if (recommendation.resourceName != null) result.resourceName = recommendation.resourceName;
     if (recommendation.resourceType != null) result.resourceType = recommendation.resourceType;
     if (recommendation.resourceUrl != null) result.resourceUrl = recommendation.resourceUrl;
-    if (recommendation.resourceId != null) result.resourceId = recommendation.resourceId;
-    if (recommendation.reason != null) result.reason = recommendation.reason;
     
     if (recommendation.dateCreated != null && recommendation.dateCreated.isValid) { 
       result.dateCreated = Timestamp.fromDate(recommendation.dateCreated.toJSDate()); 
@@ -105,7 +89,10 @@ var recommendationConverter = {
     } else {
       result.dateApproved = null;
     }
-    if (recommendation.isReview != null) result.isReview = recommendation.isReview;
+    // whether it's null or not we want to add this field to determine whether a recommendation has been linked
+    console.log('dddp')
+    result.resourceId = recommendation.resourceId;
+
     if (recommendation.approved != null) result.approved = recommendation.approved;
     
     return result;
@@ -116,19 +103,16 @@ var recommendationConverter = {
 
     const config = {
       id: snapshot.id,
+      resourceId: data.resourceId,
       recommendedByUid: data.recommendedByUid,
       recommendedByName: data.recommendedByName,
       resourceName: data.resourceName,
       resourceUrl: data.resourceUrl,
-      resourceId: data.resourceId,
-      reason: data.reason,
       dateCreated: data.dateCreated ? DateTime.fromJSDate(data.dateCreated.toDate()) : null,
       dateApproved: data.dateApproved ? DateTime.fromJSDate(data.dateApproved.toDate()) : null,
       approved: data.approved ?? false,
-      isReview: data.isReview ?? false,
       resourceType: data.resourceType,
     }
-
     return new Recommendation(config);
   }
 };

@@ -13,6 +13,7 @@
   >
     <div>
       <view-resource
+        v-if="!isLoading"
         :resource="viewResource"
         @back="handleBackButton"
         @changeResource="handleChangeResource">
@@ -57,14 +58,18 @@ export default {
     return {
       viewResource: Resource.default(),
       showBackButton: false,
+      isLoading: true,
     }
   },
 
   emits: ["close"],
   
   mounted() {
+    this.isLoading = true;
+    console.log('resdetail mounted');
     this.viewResource = cloneDeep(this.resource);
     this.updateHistory();
+    this.isLoading = false;
   },
 
   computed: { 
