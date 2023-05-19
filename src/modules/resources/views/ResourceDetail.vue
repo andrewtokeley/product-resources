@@ -15,6 +15,7 @@
       <view-resource
         v-if="!isLoading"
         :resource="viewResource"
+        :showUnapprovedReviews="showUnapprovedReviews"
         @back="handleBackButton"
         @changeResource="handleChangeResource">
       </view-resource>
@@ -52,6 +53,10 @@ export default {
     resource: {
       type: Object,
       default: null
+    },
+    showUnapprovedReviews: {
+      type: Boolean,
+      default: false,
     }
   },
   data() {

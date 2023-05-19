@@ -56,6 +56,10 @@ class Resource {
       
   }
 
+  get canApprove() {
+    return this.isValid;
+  }
+  
   get statusDescription() {
     if (this.approved && this.isValid) {
      return "Approved";

@@ -6,12 +6,12 @@
       </div>
     </div>
     <div class="tabs">
-      <base-button :isSecondary="activeTab != 'live'" @click="filterByStatus('live')">Live</base-button>
-      <base-button :isSecondary="activeTab != 'draft'" @click="filterByStatus('draft')" >Draft</base-button>
       <base-button :isSecondary="activeTab != 'recommended'" @click="filterByStatus('recommended')">Recommended</base-button>
+      <base-button :isSecondary="activeTab != 'pending'" @click="filterByStatus('pending')" >Pending</base-button>
+      <base-button :isSecondary="activeTab != 'approved'" @click="filterByStatus('approved')">Approved</base-button>
     </div>
     <div class="action-strip">
-      <div v-if="activeTab == 'live'" class="action-items left" >
+      <div v-if="activeTab == 'approved'" class="action-items left" >
         <div class="label">Filter By:</div>
         <base-select v-if="false" v-model="selectedStatus" :selectOptions="statusList"></base-select>
         <resource-type-select v-model="selectedResourceType"></resource-type-select>
@@ -20,7 +20,9 @@
         <base-button :disabled="isLoading" :isSecondary="true" @click="showExport = true">Export...</base-button>
         <base-button :disabled="isLoading" @click="handleAddResource">New Resource</base-button>
       </div>
+      
     </div>
+    <span class="record-count" v-if="visibleResources">{{ visibleResources.length }} results</span>
     <table v-if="!isLoading">
       <thead>
         <tr>
@@ -32,7 +34,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr  v-for="resource in filteredResources" :key="resource.id"  @click="handleEditClick(resource)">
+        <tr v-for="resource in visibleResources" :key="resource.id"  @click="handleEditClick(resource)">
           <td>
             <resource-image :hideActions="false" :preview="true" :resource="resource"></resource-image>
           </td>
@@ -41,6 +43,8 @@
           <td>{{ resource.statusDescription }}</td>
           <td>
             <div class="actions">
+              <base-button v-if="!resource.approved" :disabled="!resource.canApprove" @click.stop="setApproval(resource, true)">Approve</base-button>
+              <base-button v-else @click.stop="setApproval(resource, false)" :isSecondary="true">Un-Approve</base-button>
               <base-icon :menu="menuItems(resource)">more_vert</base-icon>
             </div>
           </td>
@@ -50,7 +54,7 @@
     <loading-symbol class="loader" v-else></loading-symbol>
     
     <edit-resource-dialog 
-      :resource="resource" 
+      :resource="selectedResource" 
       v-if="showEdit" 
       @added="handleAdded" 
       @saved="handleSaved" 
@@ -59,16 +63,15 @@
     
     <resource-detail 
       v-if="showView" 
-      :resource="resource" 
+      :resource="selectedResource" 
       @close="showView = false" 
-      @updatedApproval="handleApproval"
       @addRelated="handleAddRelated">
     </resource-detail>
     
     <confirmation-dialog 
       v-if="showDeleteConfirm"
       heading="Delete Resource" 
-      :message="`Are you sure you want to delete the resource, ${resource.displayName}?`"
+      :message="`Are you sure you want to delete the resource, ${selectedResource.displayName}?`"
       confirmLabel="Delete"
       :isPerformingAction="isDeleting"
       @cancel="showDeleteConfirm = false"
@@ -89,7 +92,7 @@ import BaseButton from '@/core/components/BaseButton.vue';
 import ConfirmationDialog from '@/core/components/ConfirmationDialog.vue';
 import LoadingSymbol from '@/core/components/LoadingSymbol.vue';
 
-import { deleteResource, searchByResourceTypes, updateResource } from '@/modules/resources/services/resource-service';
+import { deleteResource, searchByResourceTypes, getPendingResources, updateResource } from '@/modules/resources/services/resource-service';
 import { cloneDeep } from 'lodash';
 import { Resource } from '@/modules/resources/model/resource';
 import { getUnlinkedRecommendations } from '@/modules/recommendations/services/recommendation-service';
@@ -99,10 +102,12 @@ export default {
   components: { ResourceImage, BaseIcon, BaseSelect, EditResourceDialog, BaseButton, ResourceTypeSelect, ConfirmationDialog, LoadingSymbol, ResourceDetail },
   data() {
     return {
-      resource: Resource,
+      selectedResource: Resource,
       parentResource: Resource,
-      resources: [],
-      filteredResources: [],
+      recommendedResources:null,
+      pendingResources:null,
+      approvedResources: {}, // property for each resource type that's been retrieved
+      visibleResources: [],
       showEdit: false,
       showAdd: false,
       showView: false,
@@ -120,24 +125,17 @@ export default {
   },
   mounted() {
     // trigger watch
-    this.selectedResourceType = 'books';
+    // this.selectedResourceType = 'books';
     this.statusList = [
       { key:'approved', value: 'Approved'} ,
       { key:'pending', value: 'Pending'} ,
     ];
-    this.filterByStatus('live');
+    this.filterByStatus('recommended');
   },
   watch: {
-    selectedResourceType(value) {
-      this.isLoading = true;
-      console.log('filter by' + value);
-      searchByResourceTypes([value], 100, false).then( (resources) => {
-        this.resources = resources;
-        this.filteredResources = resources;
-        // resort the column, but don't toggle direction
-        this.sortBy(this.sortedBy, false);
-        this.isLoading = false;
-      })
+    selectedResourceType() {
+      // you can only apply this filter on approved tab, so refresh for this new type
+      this.filterByStatus('approved');
     } 
   },
   methods: {
@@ -221,88 +219,139 @@ export default {
     },
 
     async filterByStatus(status) {
+      this.isLoading = true;
       this.activeTab = status;
-      if (status == 'live') {
-        this.filteredResources = this.resources.filter ( r => r.approved);
-      } else if (status == 'draft') {
-        this.filteredResources = this.resources.filter ( r => !r.approved);
+      var resources = [];
+      if (status == 'approved') {
+        // check if we have retrieved resources for the selected resource type
+        resources = this.approvedResources[this.selectedResourceType];
+        if (!resources) {
+          resources = await searchByResourceTypes([this.selectedResourceType], 100, true);
+          this.approvedResources[this.selectedResourceType] = resources;
+        }
+      } else if (status == 'pending') {
+        resources = this.pendingResources;
+        if (!resources) {
+          resources = await getPendingResources(100);
+          this.pendingResources = resources;
+        }
       } else if (status == 'recommended') {
-        const recommendations = await getUnlinkedRecommendations()
-        let psuedoResources = recommendations.map( r => Resource.fromRecommendation(r));
-        this.filteredResources = psuedoResources;
+        resources = this.recommendedResources;
+        if (!resources) {
+          const recommendations = await getUnlinkedRecommendations()
+          resources = recommendations.map( r => Resource.fromRecommendation(r));
+          this.recommendedResources = resources;
+        }
       }
+      this.visibleResources = resources;
+      this.isLoading = false;
     },
 
     handleAddRelated(parent) {
       this.showView = false;
-      this.resource = Resource.default();
-      this.resource.authors = parent.authors;
-      this.resource.parentResourceId = parent.id;
-      this.resource.parentResourceName = parent.displayName;
-      this.resource.parentResourceImageUrl = parent.imageUrl;
+      this.selectedResource = Resource.default();
+      this.selectedResource.authors = parent.authors;
+      this.selectedResource.parentResourceId = parent.id;
+      this.selectedResource.parentResourceName = parent.displayName;
+      this.selectedResource.parentResourceImageUrl = parent.imageUrl;
       this.showEdit = true;
     },
 
     handleRecommendClick(resource){
-      this.resource = resource;
+      this.selectedResource = resource;
       this.showRecommend = true;
     },
-    handleApproval(approved) {
-      this.resource.approved = approved;
-      this.showView = false;
-    },
+    // handleApproval(approved) {
+    //   this.selectedResource.approved = approved;
+    //   this.showView = false;
+    // },
+
     handleAddResource() {
-      this.resource = Resource.default();
+      this.selectedResource = Resource.default();
       this.showEdit = true;
     },
+
     handlePreviewClick(resource) {
-      this.resource = resource;
+      this.selectedResource = resource;
       this.showView = true;
     },
+
     handleEditClick(resource) {
-      this.resource = resource;
+      this.selectedResource = resource;
       this.showEdit = true;
     },
+
     handleAdded(resource) {
-      this.resource = resource;
-      this.resources.unshift(resource);
+      this.selectedResource = resource;
+      // add to the top of the pending list
+      this.pendingResources.unshift(resource);
+      this.filterByStatus('pending');
       this.showEdit = false;
     },
-    setApproval(resource, approved) {
-      resource.approved = approved;
+
+    setApproval(resource, approve) {
+      resource.approved = approve;
       updateResource(resource);
+
+      const index = this.visibleResources.indexOf(resource);
+      if (index >= 0) {
+        this.visibleResources[index].approved = approve;
+        
+        // if we're approving and we've already retrieved the approved reviews
+        // add it to the top of the approvedReviews array and remove from pending 
+        if (approve) {
+          if (this.approvedResources[this.selectedResourceType]) {
+            this.approvedResources[this.selectedResourceType].unshift(resource);
+          }
+          this.pendingResources?.splice(index, 1);
+          this.visibleResources = this.pendingResources;
+        } 
+        // if we're un-approving and we've already retrieved the pending reviews
+        // add it to the top of the pendingReviews array and remove from approved
+        else {
+          if (this.pendingResources) {
+            this.pendingResources.unshift(resource);
+          }
+          this.approvedResources[this.selectedResourceType]?.splice(index, 1);
+          this.visibleResources = this.approvedResources[this.selectedResourceType];
+        }
+      }
     },
+
     handleSaved(resource) {
       // copy the saved object back into the table/selected element
-      this.resource = cloneDeep(resource);
-      let index = this.resources.findIndex( r => r.id == resource.id )
+      this.selectedResource = cloneDeep(resource);
+      let index = this.visibleResources.findIndex( r => r.id == resource.id )
       if (index >= 0) {
-        this.resources[index] = this.resource;
+        this.visibleResources[index] = this.selectedResource;
       }
       this.showEdit = false;
     },
+
     handleDeleteClick(resource) {
-      this.resource = resource;
+      this.selectedResource = resource;
       this.showDeleteConfirm = true
     },
+
     async doDelete() {
       try {
+        console.log('delete');
         this.isDeleting = true;
-        await deleteResource(this.resource.id);
-        let index = this.resources.indexOf(this.resource);
+        await deleteResource(this.selectedResource.id);
+        let index = this.visibleResources.indexOf(this.selectedResource);
         if (index >= 0) {
-          this.resources.splice(index,1);
+          this.visibleResources.splice(index,1);
         }
-        this.resource == null;
+        this.selectedResource == null;
       } catch (error) {
         this.isDeleting = false;
       }
       this.isDeleting = false;
       this.showDeleteConfirm = false;
     },
-    handleRecommendationsClick() {
-      this.$router.push('/admin/recommendations');
-    }
+    // handleRecommendationsClick() {
+    //   this.$router.push('/admin/recommendations');
+    // }
   }
 }
 
@@ -336,7 +385,7 @@ export default {
 
 .action-strip {
   width: 100%;
-  height: 60px;
+  height: 80px;
   /* display: flex;
   justify-content: space-between; */
   outline: 1px solid var(--prr-lightgrey);

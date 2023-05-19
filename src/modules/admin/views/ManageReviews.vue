@@ -12,11 +12,10 @@
     <table v-if="!isLoading">
       <thead>
         <tr>
-          <th><a @click="sortBy('resourceName')" class="sortHeading" :class="sortHeadingClasses('displayName')">Resource</a></th>
-          <th><a @click="sortBy('reviewedByName')" class="sortHeading" :class="sortHeadingClasses('reviewedByName')">Reviewed By</a></th>
-          <th ><a @click="sortBy('statusDescription')" class="sortHeading" :class="sortHeadingClasses('statusDescription')">Linked to Resource</a></th>
-          <th ><a @click="sortBy('approved')" class="sortHeading" :class="sortHeadingClasses('approved')">Approval</a></th>
-          <th></th>
+          <th style="width:200px"><a @click="sortBy('resourceName')" class="sortHeading" :class="sortHeadingClasses('resourceName')">Resource Name</a></th>
+          <th style="width:200px"><a @click="sortBy('reviewedByName')" class="sortHeading" :class="sortHeadingClasses('reviewedByName')">Reviewed By</a></th>
+          <th style="width:200px"><a @click="sortBy('statusDescription')" class="sortHeading" :class="sortHeadingClasses('statusDescription')">Linked to Resource</a></th>
+          <th style="width:200px"></th>
         </tr>
       </thead>
       
@@ -30,31 +29,34 @@
           <td v-else>
             {{ review.statusDescription }}
           </td>
-          <td>{{ review.approved ? "Approved": "Pending" }}</td>
-          <td rowspan="2">
+          <td rowspan="2" class="underline">
             <div class="actions">
               <base-button v-if="!review.approved" :disabled="!review.canApprove" @click.stop="setApproval(review, true)">Approve</base-button>
-              <base-button v-else @click.stop="setApproval(review, false)">Un-Approve</base-button>
+              <base-button v-else @click.stop="setApproval(review, false)" :isSecondary="true">Un-Approve</base-button>
               <base-icon :menu="menuItems(review)">more_vert</base-icon>
             </div>
           </td>
         </tr>
-        <tr class="underline">
-          <td  colspan="5">"{{ review.reason }}"</td>
+        <tr >
+          <td class="underline" colspan="3">
+            <div class="reason-text">"{{ review.reason }}"</div>
+          </td>
         </tr>
       </tbody>
     </table>
-    <loading-symbol class="loader" v-else></loading-symbol>
+    <loading-symbol v-else class="loader" ></loading-symbol>
     
     <edit-review-dialog
       v-if="showEdit" 
       :review="selectedReview"
-      @close="showEdit = false">
+      @close="showEdit = false"
+      @saved="handleReviewSaved(selectedReview)">
     </edit-review-dialog>
 
     <resource-detail 
       v-if="showLinkedResource" 
       :resource="linkedResource"
+      :showUnapprovedReviews="true"
       @close="showLinkedResource = false">
     </resource-detail>
 
@@ -80,8 +82,9 @@ import EditReviewDialog from './EditReviewDialog.vue';
 import ResourceDetail from '@/modules/resources/views/ResourceDetail.vue';
 
 import { deleteReview, getReviewsByApproval, setReviewApprove } from '@/modules/reviews/services/review-service';
-
+import { cloneDeep } from 'lodash';
 import { getResource } from '@/modules/resources/services/resource-service';
+
 import { Review } from '@/modules/reviews/model/review';
 
 export default {
@@ -90,8 +93,8 @@ export default {
   data() {
     return {
       selectedReview: Review,
-      pendingReviews: [],
-      approvedReviews: [],
+      pendingReviews: null,
+      approvedReviews: null,
       visibleReviews: [],
       showLinkedResource: false,
       showEdit: false,
@@ -116,14 +119,14 @@ export default {
       if (state == 'approved') {
         this.activeTab = 'approved';
         // show approved only
-        if (this.approvedReviews.length == 0) {
+        if (!this.approvedReviews) {
           this.approvedReviews = await getReviewsByApproval(true);
         }
         this.visibleReviews = this.approvedReviews;
       } else {
         this.activeTab = 'pending';
         // show pending only
-        if (this.pendingReviews.length == 0) {
+        if (!this.pendingReviews) {
           this.pendingReviews = await getReviewsByApproval(false);
         }
         this.visibleReviews = this.pendingReviews;
@@ -177,24 +180,58 @@ export default {
       // remember the order for next toggle
       this.sortedByOrder[propName] = order;
 
+      this.visibleReviews.sort( (a,b) => { 
+        if(a[propName] < b[propName]) { return order == 'asc' ? -1 : 1; }
+        if(a[propName] > b[propName]) { return order == 'desc' ? -1 : 1; }
+        return 0;
+      })
+
     },
 
     setApproval(review, approve) {
-      console.log('set approval');
       setReviewApprove(review.id, approve);
       const index = this.visibleReviews.indexOf(review);
       if (index >= 0) {
         this.visibleReviews[index].approved = approve;
+        
+        // if we're approving and we've already retrieved the approved reviews
+        // add it to the top of the approvedReviews array and remove from pending 
+        if (approve) {
+          if (this.approvedReviews.length > 0) {
+            this.approvedReviews = [review, ...this.approvedReviews];
+          }
+          this.pendingReviews.splice(index, 1);
+          this.visibleReviews = this.pendingReviews;
+        } 
+        // if we're un-approving and we've already retrieved the pending reviews
+        // add it to the top of the pendingReviews array and remove from approved
+        else {
+          if (this.pendingReviews.length > 0) {
+            this.pendingReviews = [review, ...this.pendingReviews];
+          }
+          this.approvedReviews.splice(index, 1);
+          this.visibleReviews = this.approvedReviews;
+        }
       }
     },
 
     async handleShowResourceDetail(review) {
       const resourceId = review.resourceId;
       if (resourceId) {
-        this.linkedResource = await getResource(resourceId);  
-        this.showLinkedResource = true;
+        this.linkedResource = await getResource(resourceId);
+        if (this.linkedResource) {
+          this.showLinkedResource = true;
+        }
       }
+    },
 
+    handleReviewSaved(review) {
+      this.selectedReview = cloneDeep(review);
+      let index = this.visibleReviews.findIndex( r => r.id == review.id )
+      if (index >= 0) {
+        this.visibleReviews[index] = this.selectedReview;
+      }
+      this.showEdit = false;
     },
 
     handleEditReview(review) {
@@ -211,9 +248,9 @@ export default {
       try {
         this.isDeleting = true;
         await deleteReview(this.selectedReview.id);
-        let index = this.reviews.indexOf(this.selectedReview);
+        let index = this.visibleReviews.indexOf(this.selectedReview);
         if (index >= 0) {
-          this.reviews.splice(index,1);
+          this.visibleReviews.splice(index,1);
         }
         this.selectedReview == null;
       } catch (error) {
@@ -310,7 +347,7 @@ th a.sorted.desc::after {
   clip-path: polygon(100% 0%, 0 0%, 50% 100%);
 }
 
-tbody tr.underline td {
+tbody td.underline {
   /* border-bottom: 2px solid var(--prr-lightgrey); */
   border-bottom: 1px solid #ccced2;
   padding: 5px 10px;
@@ -336,5 +373,10 @@ tbody:hover .actions {
 tbody:hover {
   background: var(--prr-extralightgrey);
   cursor: pointer;
+}
+
+.reason-text {
+  margin: 10px 0px 10px 25px; 
+  color: var(--prr-mediumgrey);
 }
 </style>

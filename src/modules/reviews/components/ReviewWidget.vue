@@ -1,5 +1,6 @@
 <template>
   <div class="review-widget">
+    <p class="draft-heading" v-if="!review.approved">DRAFT</p>
     <p v-if="review.reason" class="quote">"{{ review.reason }}"</p>
     <p v-else class="quote">"I like this resource because..."</p>
     <div class="by">
@@ -63,4 +64,7 @@ hr {
   margin-bottom: 30px;
 }
 
+.draft-heading {
+  color: red;
+}
 </style>

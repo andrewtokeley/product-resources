@@ -16,6 +16,7 @@ export {
   getTagsForResources, 
   getRelatedResources,
   getRecentlyAdded,
+  getPendingResources,
   approveResource, 
   unapproveResource, 
   searchByResourceTypes,
@@ -62,6 +63,19 @@ const getRecentlyAdded = async function(resultLimit) {
   return result
 }
 
+const getPendingResources = async function(resultLimit) {
+  if (!resultLimit) { resultLimit = 50 }
+  const q =query(collection(db, COLLECTION_KEY).withConverter(resourceConverter), 
+  where("approved", "==", false),
+  );
+  const querySnapshot = await getDocs(q);
+  const result = [];
+  querySnapshot.forEach((doc) => {
+    result.push(new Resource(doc.data()));
+  });
+  return result
+}
+
 const getRelatedResources = async function(id) {
   const q =query(collection(db, COLLECTION_KEY).withConverter(resourceConverter), 
   where("parentResourceId", "==", id),
@@ -75,21 +89,21 @@ const getRelatedResources = async function(id) {
   });
   return result
 }
+/**
+ * Returns approved or unapproved resources of the given types
+ * @param {*} keys 
+ * @param {*} resultLimit 
+ * @param {*} approvedOnly 
+ * @returns 
+ */
+const searchByResourceTypes = async function(keys, resultLimit, approval) {
+  if (approval == null) { approval = true; }
 
-const searchByResourceTypes = async function(keys, resultLimit, approvedOnly) {
-  let _approvedOnly = (approvedOnly == null) ? true : approvedOnly;
   if (!resultLimit) { resultLimit = 50 }
-  var q;
-  if (_approvedOnly) {
-    q = query(collection(db, COLLECTION_KEY).withConverter(resourceConverter), 
+  const q = query(collection(db, COLLECTION_KEY).withConverter(resourceConverter), 
     where("resourceType", "in", keys), 
-    where("approved", "==", true),
+    where("approved", "==", approval),
     limit(resultLimit));
-  } else {
-    q = query(collection(db, COLLECTION_KEY).withConverter(resourceConverter), 
-    where("resourceType", "in", keys), 
-    limit(resultLimit));
-  }
   
   const querySnapshot = await getDocs(q);
   const result = [];
@@ -191,7 +205,9 @@ const addResource = async function(resource) {
 
 const deleteResource = async function(id) {
   const ref = doc(db, COLLECTION_KEY, id).withConverter(resourceConverter);
-  return await deleteDoc(ref);
+  await deleteDoc(ref);
+
+  // unlink any reviews
 }
 
 const approveResource = async function(id) {

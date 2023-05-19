@@ -159,7 +159,7 @@ export default defineComponent({
 
     handleInput(event) {
       let newValue = event.target.value;
-      if (this.options.forceLowerCase) {
+      if (this._options.forceLowerCase) {
         newValue = newValue.toLowerCase();
       }
       this.$emit("update:modelValue", newValue);

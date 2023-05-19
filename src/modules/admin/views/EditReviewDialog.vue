@@ -20,6 +20,10 @@
         v-model="editReview.reason">
       </base-multiline-text>
 
+      <div class="label">Linked To</div>
+      <base-input
+        v-model="editReview.resourceId">
+      </base-input>
     </div>
   </modal-dialog>
 </template>
@@ -27,6 +31,7 @@
 <script>
 import BaseMultilineText from "@/core/components/BaseMultilineText.vue";
 import ModalDialog from '@/core/components/ModalDialog.vue';
+import BaseInput from '@/core/components/BaseInput.vue';
 
 import { Review } from '@/modules/reviews/model/review';
 import { cloneDeep } from 'lodash';
@@ -37,6 +42,7 @@ export default {
   components: { 
     BaseMultilineText,
     ModalDialog,
+    BaseInput,
   },
   name: "edit-review",
   emits: ['close', 'saved'],

@@ -58,13 +58,27 @@ const getReview = async function(id) {
   }
 }
 
-const getReviewsForResource = async function(resourceId) {
+/**
+ * Get's the reviews for a resource, optionally including unapproved ones. Note only admin role can see unapproved reviews.
+ * @param {} resourceId 
+ * @returns 
+ */
+const getReviewsForResource = async function(resourceId, includeUnApproved) {
   console.log('get reviews...')
-  const q = query(collection(db, COLLECTION_KEY)
+  if (includeUnApproved == null) {
+    includeUnApproved = false;
+  }
+  var q;
+  if (includeUnApproved) {
+    q = query(collection(db, COLLECTION_KEY)
+    .withConverter(reviewConverter), 
+    where("resourceId", "==", resourceId));
+  } else {
+    q = query(collection(db, COLLECTION_KEY)
     .withConverter(reviewConverter), 
     where("resourceId", "==", resourceId),
-    where("approved", "==", true)
-  );
+    where("approved", "==", true));
+  }
   const querySnapshot = await getDocs(q);
   const result = [];
   querySnapshot.forEach((doc) => {

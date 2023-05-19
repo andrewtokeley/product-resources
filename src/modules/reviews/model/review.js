@@ -26,7 +26,7 @@ class Review {
   }
 
   get statusDescription() {
-    if (this.resourceId != null && this.resourceId != undefined) {
+    if (this.resourceId?.length > 0) {
       return "Linked";
     } else {
       return "Not Linked";

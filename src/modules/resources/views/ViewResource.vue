@@ -17,21 +17,24 @@
     <div class="topblock" :class="{ tall: isImageTall, short : !isImageTall }" >
       <resource-image class="image" @click="handleOpenResource(resource)" :resource="resource" :hideActions="true"></resource-image>
       <p>{{resource.description}}</p>
-    </div>  
-    <div class="recommendations">
-      <review-widget 
-        v-for="review in reviews" 
-        :key="review.id"
-        :review="review">
-      </review-widget>
     </div>
-    <div class="related" v-if="relatedResources?.length > 0">
-      <hr class="divider" />
-      <h2>Recommended {{ childDescription }}</h2>
-      <div v-for="resource in relatedResources" :key="resource.id" @click="$emit('changeResource',resource)">
-        <book-card :resource="resource" :preview="true" :showTitle="false" :showDescription="true"></book-card>  
+    <div v-if="!isLoading">
+      <div class="reviews">
+        <review-widget 
+          v-for="review in reviews" 
+          :key="review.id"
+          :review="review">
+        </review-widget>
       </div>
-    </div>
+      <div class="related" v-if="relatedResources?.length > 0">
+        <hr class="divider" />
+        <h2>Recommended {{ childDescription }}</h2>
+        <div v-for="resource in relatedResources" :key="resource.id" @click="$emit('changeResource',resource)">
+          <book-card :resource="resource" :preview="true" :showTitle="false" :showDescription="true"></book-card>  
+        </div>
+      </div>
+      <loading-symbol v-if="isLoading" class="loader"></loading-symbol>
+    </div>    
 
   </div>
 </template>
@@ -39,15 +42,14 @@
 <script>
 import { Resource } from "@/modules/resources/model/resource";
 import ReviewWidget from '@/modules/reviews/components/ReviewWidget.vue';
-// import BookCard from '@/modules/resources/components/BookCard.vue';
+import LoadingSymbol from '@/core/components/LoadingSymbol.vue';
 
-import { getRecommendations } from "@/modules/recommendations/services/recommendation-service";
 import { getReviewsForResource } from "@/modules/reviews/services/review-service";
 import { getRelatedResources } from '../services/resource-service';
 import { getTags } from '../services/lookup-service';
 
 export default {
-  components: { ReviewWidget },
+  components: { ReviewWidget, LoadingSymbol },
   name: "view-resource",
   emit: ['changeResource', 'back'],
   props: {
@@ -55,6 +57,10 @@ export default {
       type: Resource,
       default: Resource.default()
     },
+    showUnapprovedReviews: {
+      type: Boolean,
+      default: false,
+    }
   },
   beforeCreate() {
   // this is needed to avoid circular references - the recommend dialog contains the resource image which contains the dialog
@@ -63,27 +69,33 @@ export default {
 },
   data() {
     return {
-      recommendations: [],
+      // recommendations: [],
       relatedResources: [],
       tags: [],
       reviews: [],
+      isLoading: true,
     }
   },
 
   async mounted() {
-    this.reviews = await getReviewsForResource(this.resource.id);
+    const lookup = await getTags();
+    this.tags = lookup.keyValues;
+    this.refreshRelatedData();
   },
 
   watch: {
     async resource() {
-      console.log('get recs')
-      this.recommendations = await getRecommendations(this.resource.id);
-      this.relatedResources = await getRelatedResources(this.resource.id);    
-      const lookup = await getTags();
-      this.tags = lookup.keyValues;
+      console.log('here');
+      this.refreshRelatedData();
     }
   },
   methods: {
+    async refreshRelatedData() {
+      this.isLoading = true;
+      this.relatedResources = await getRelatedResources(this.resource.id);    
+      this.reviews = await getReviewsForResource(this.resource.id, this.showUnapprovedReviews);
+      this.isLoading = false;
+    },
     tagDescription(key) {
       return this.tags.find( t => t.key == key )?.value;
     },
@@ -168,24 +180,12 @@ export default {
   color: var(--prr-mediumgrey);
 }
 
-.recommendations {
+.reviews {
   display: flex;
   flex-direction: row;
   justify-content: space-evenly;
   flex-wrap: wrap;
 }
-/* .recommendation {
-  width:50%;
-  margin: 20px 0px 40px 0px;
-} */
-/* .related {
-  background: var(--prr-extralightgrey);
-  border-radius: 15px;
-  padding: 10px;
-  margin-bottom: 15px;
-  cursor: pointer;
-} */
-
 .related h2{
   text-transform:capitalize;
 }
