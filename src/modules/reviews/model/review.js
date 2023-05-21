@@ -59,7 +59,14 @@ class Review {
 
   get dateApprovedFormatted() {
     if (this.dateApproved && this.dateApproved.isValid) {
-      return this.dateApproved.toLocaleString(DateTime.DATE_FULL);
+      return this.dateApproved.toLocaleString(DateTime.DATETIME_FULL);
+    }
+    return null;
+  }
+
+  get dateCreatedFormatted() {
+    if (this.dateCreated && this.dateCreated.isValid) {
+      return this.dateCreated.toLocaleString(DateTime.DATETIME_FULL);
     }
     return null;
   }

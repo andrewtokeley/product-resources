@@ -4,8 +4,8 @@ import { app } from "@/core/services/firebaseInit"
 import { getFirestore, orderBy, query, collection, doc, getDocs, getDoc, where, addDoc, setDoc, deleteDoc, limit, updateDoc } from "firebase/firestore"; 
 
 import { useLookupStore } from '@/core/state/lookupStore';
-import { linkRecommendationReviewToResource } from '@/modules/reviews/services/review-service';
-import { linkRecommendationToResource } from '@/modules/recommendations/services/recommendation-service';
+import { linkRecommendationReviewToResource, unlinkReviewsFromResource } from '@/modules/reviews/services/review-service';
+import { linkRecommendationToResource, unlinkRecommendationFromResource } from '@/modules/recommendations/services/recommendation-service';
 
 const { DateTime } = require('luxon');
 
@@ -196,18 +196,19 @@ const addResource = async function(resource) {
 
   // if this resource is being added from a recommendation...
   if (resource.recommendationId) {
-    console.log('stop');
     await linkRecommendationToResource(resource.recommendationId, doc.id);
     await linkRecommendationReviewToResource(resource.recommendationId, doc.id);
   }
-  
+  return doc.id;
 }
 
 const deleteResource = async function(id) {
   const ref = doc(db, COLLECTION_KEY, id).withConverter(resourceConverter);
   await deleteDoc(ref);
 
-  // unlink any reviews
+  // unlink any reviews and recommendation
+  await unlinkReviewsFromResource(id);
+  await unlinkRecommendationFromResource(id)
 }
 
 const approveResource = async function(id) {

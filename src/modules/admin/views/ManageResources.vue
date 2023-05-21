@@ -6,24 +6,26 @@
       </div>
     </div>
     <div class="tabs">
-      <base-button :isSecondary="activeTab != 'recommended'" @click="filterByStatus('recommended')">Recommended</base-button>
-      <base-button :isSecondary="activeTab != 'pending'" @click="filterByStatus('pending')" >Pending</base-button>
+      <base-button :isSecondary="activeTab != 'recommendations'" @click="filterByStatus('recommendations')">Recommendations</base-button>
+      <base-button :isSecondary="activeTab != 'draft'" @click="filterByStatus('draft')" >Draft</base-button>
       <base-button :isSecondary="activeTab != 'approved'" @click="filterByStatus('approved')">Approved</base-button>
     </div>
     <div class="action-strip">
       <div v-if="activeTab == 'approved'" class="action-items left" >
         <div class="label">Filter By:</div>
-        <base-select v-if="false" v-model="selectedStatus" :selectOptions="statusList"></base-select>
         <resource-type-select v-model="selectedResourceType"></resource-type-select>
       </div>
-      <div class="action-items right">
+      <div v-if="activeTab != 'recommendations'" class="action-items right">
         <base-button :disabled="isLoading" :isSecondary="true" @click="showExport = true">Export...</base-button>
         <base-button :disabled="isLoading" @click="handleAddResource">New Resource</base-button>
       </div>
       
     </div>
-    <span class="record-count" v-if="visibleResources">{{ visibleResources.length }} results</span>
-    <table v-if="!isLoading">
+    <div class="record-count" v-if="visibleRecords.length > 0">
+      <span>{{ visibleRecords.length }} results</span>
+    </div>
+
+    <table v-if="activeTab != 'recommendations' && !isLoading && visibleRecords?.length > 0">
       <thead>
         <tr>
           <th></th>
@@ -34,7 +36,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="resource in visibleResources" :key="resource.id"  @click="handleEditClick(resource)">
+        <tr v-for="resource in visibleRecords" :key="resource.id"  @click="handleEditClick(resource)">
           <td>
             <resource-image :hideActions="false" :preview="true" :resource="resource"></resource-image>
           </td>
@@ -51,7 +53,39 @@
         </tr>
       </tbody>
     </table>
-    <loading-symbol class="loader" v-else></loading-symbol>
+
+    <table v-if="activeTab == 'recommendations' && !isLoading && visibleRecords?.length > 0">
+      <thead>
+        <tr>
+          <th><a @click="sortBy('resourceUrl')" class="sortHeading" :class="sortHeadingClasses('resourceUrl')">Url</a></th>
+          <th><a @click="sortBy('dateCreated')" class="sortHeading" :class="sortHeadingClasses('dateCreated')">Created</a></th>
+          <th><a @click="sortBy('recommendedByName')" class="sortHeading" :class="sortHeadingClasses('recommendedByName')">Recommended By</a></th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody class="body-hover" v-for="recommendation in visibleRecords" :key="recommendation.id">
+        <tr>
+          <td><a :href="recommendation.resourceUrl" target="_blank">{{ recommendation.resourceUrl }}</a></td>
+          <td>{{ recommendation.dateCreatedFormatted }}</td>
+          <td>{{ recommendation.recommendedByName }}</td>
+          <td rowspan="2">
+            <div class="actions">
+              <base-button v-if="!recommendation.resourceId" :showSpinner="isCreatingResource"  @click.stop="createResourceFromRecommendation(recommendation)">Create Resource...</base-button>
+              <base-icon :menu="recommendationMenuItems(recommendation)">more_vert</base-icon>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2">Internal Note: {{recommendation.comment}}</td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div v-if="visibleRecords.length == 0" class="no-results">
+      Nothing to see here 😭
+    </div>
+    <loading-symbol v-if="isLoading" class="loader" ></loading-symbol>
     
     <edit-resource-dialog 
       :resource="selectedResource" 
@@ -64,14 +98,15 @@
     <resource-detail 
       v-if="showView" 
       :resource="selectedResource" 
+      :show-unapproved-reviews="true"
       @close="showView = false" 
       @addRelated="handleAddRelated">
     </resource-detail>
     
     <confirmation-dialog 
       v-if="showDeleteConfirm"
-      heading="Delete Resource" 
-      :message="`Are you sure you want to delete the resource, ${selectedResource.displayName}?`"
+      heading="Delete" 
+      :message="deleteMessage"
       confirmLabel="Delete"
       :isPerformingAction="isDeleting"
       @cancel="showDeleteConfirm = false"
@@ -84,7 +119,6 @@
 <script>
 import ResourceImage from '@/modules/resources/components/ResourceImage.vue';
 import BaseIcon from '@/core/components/BaseIcon.vue';
-import BaseSelect from '@/core/components/BaseSelect.vue';
 import EditResourceDialog from './EditResourceDialog.vue';
 import ResourceDetail from '@/modules/resources/views/ResourceDetail.vue';
 import ResourceTypeSelect from '@/modules/resources/components/ResourceTypeSelect.vue';
@@ -92,35 +126,40 @@ import BaseButton from '@/core/components/BaseButton.vue';
 import ConfirmationDialog from '@/core/components/ConfirmationDialog.vue';
 import LoadingSymbol from '@/core/components/LoadingSymbol.vue';
 
-import { deleteResource, searchByResourceTypes, getPendingResources, updateResource } from '@/modules/resources/services/resource-service';
+import { deleteResource, searchByResourceTypes, getPendingResources, updateResource, addResource } from '@/modules/resources/services/resource-service';
+import { deleteRecommendation, getUnlinkedRecommendations } from '@/modules/recommendations/services/recommendation-service';
+
 import { cloneDeep } from 'lodash';
 import { Resource } from '@/modules/resources/model/resource';
-import { getUnlinkedRecommendations } from '@/modules/recommendations/services/recommendation-service';
+import { Recommendation } from '@/modules/recommendations/model/recommendation';
 
 export default {
   name: 'manage-resources',
-  components: { ResourceImage, BaseIcon, BaseSelect, EditResourceDialog, BaseButton, ResourceTypeSelect, ConfirmationDialog, LoadingSymbol, ResourceDetail },
+  components: { ResourceImage, BaseIcon, EditResourceDialog, BaseButton, ResourceTypeSelect, ConfirmationDialog, LoadingSymbol, ResourceDetail },
   data() {
     return {
       selectedResource: Resource,
+      selectedRecommendation: Recommendation,
       parentResource: Resource,
-      recommendedResources:null,
+      recommendations:null,
       pendingResources:null,
       approvedResources: {}, // property for each resource type that's been retrieved
-      visibleResources: [],
+      visibleRecords: [],
       showEdit: false,
       showAdd: false,
       showView: false,
       showRecommend: false,
       showDeleteConfirm: false,
+      deleteMessage: 'Are you sure?',
       selectedResourceType: 'podcasts',
       isDeleting: false,
       isLoading: true,
+      isCreatingResource: false,
       sortedBy: 'displayName',
       sortedByOrder: {},
       statusList: [],
       selectedStatus: null,
-      activeTab: 'live',
+      activeTab: 'recommendations',
     }
   },
   mounted() {
@@ -128,9 +167,9 @@ export default {
     // this.selectedResourceType = 'books';
     this.statusList = [
       { key:'approved', value: 'Approved'} ,
-      { key:'pending', value: 'Pending'} ,
+      { key:'draft', value: 'Pending'} ,
     ];
-    this.filterByStatus('recommended');
+    this.filterByStatus('recommendations');
   },
   watch: {
     selectedResourceType() {
@@ -139,6 +178,19 @@ export default {
     } 
   },
   methods: {
+    recommendationMenuItems(recommendation) {
+      return {
+        menuItems: [
+          {
+            name: "Delete...",
+            iconName: "delete",
+            action: () => {
+              this.handleDeleteRecommendationClick(recommendation);
+            }
+          },
+        ]
+      }
+    },
     menuItems(resource) {
       return {
         menuItems: [
@@ -221,30 +273,51 @@ export default {
     async filterByStatus(status) {
       this.isLoading = true;
       this.activeTab = status;
-      var resources = [];
+      var results = [];
       if (status == 'approved') {
         // check if we have retrieved resources for the selected resource type
-        resources = this.approvedResources[this.selectedResourceType];
-        if (!resources) {
-          resources = await searchByResourceTypes([this.selectedResourceType], 100, true);
-          this.approvedResources[this.selectedResourceType] = resources;
+        results = this.approvedResources[this.selectedResourceType];
+        if (!results) {
+          results = await searchByResourceTypes([this.selectedResourceType], 100, true);
+          this.approvedResources[this.selectedResourceType] = results;
         }
-      } else if (status == 'pending') {
-        resources = this.pendingResources;
-        if (!resources) {
-          resources = await getPendingResources(100);
-          this.pendingResources = resources;
+      } else if (status == 'draft') {
+        results = this.pendingResources;
+        if (!results) {
+          results = await getPendingResources(100);
+          this.pendingResources = results;
         }
-      } else if (status == 'recommended') {
-        resources = this.recommendedResources;
-        if (!resources) {
-          const recommendations = await getUnlinkedRecommendations()
-          resources = recommendations.map( r => Resource.fromRecommendation(r));
-          this.recommendedResources = resources;
+      } else if (status == 'recommendations') {
+        results = this.recommendations;
+        if (!results) {
+          results = await getUnlinkedRecommendations()
+          // results = recommendations.map( r => {
+          //   let resource = Resource.fromRecommendation(r)
+          //   resource.comment = r.recommendationComment ?? "No comment";
+          //   return resource;
+          // });
+          this.recommendations = results;
         }
       }
-      this.visibleResources = resources;
+      this.visibleRecords = results;
+      console.log(this.visibleRecords.length);
       this.isLoading = false;
+    },
+
+    async createResourceFromRecommendation(recommendation) {
+      this.isCreatingResource = true;
+      let resource = Resource.fromRecommendation(recommendation);
+      resource.displayName = "New Resource";
+      const id = await addResource(resource);
+      resource.id = id;
+      //remove the recommendation from the table and add to drafts
+      let index = this.recommendations.indexOf(recommendation)
+      if (index >= 0) {
+        this.recommendations.splice(index, 1);
+        this.pendingResources?.unshift(resource);
+        this.filterByStatus('draft');
+      } 
+      this.isCreatingResource = false;
     },
 
     handleAddRelated(parent) {
@@ -285,7 +358,7 @@ export default {
       this.selectedResource = resource;
       // add to the top of the pending list
       this.pendingResources.unshift(resource);
-      this.filterByStatus('pending');
+      this.filterByStatus('draft');
       this.showEdit = false;
     },
 
@@ -293,9 +366,9 @@ export default {
       resource.approved = approve;
       updateResource(resource);
 
-      const index = this.visibleResources.indexOf(resource);
+      const index = this.visibleRecords.indexOf(resource);
       if (index >= 0) {
-        this.visibleResources[index].approved = approve;
+        this.visibleRecords[index].approved = approve;
         
         // if we're approving and we've already retrieved the approved reviews
         // add it to the top of the approvedReviews array and remove from pending 
@@ -304,7 +377,7 @@ export default {
             this.approvedResources[this.selectedResourceType].unshift(resource);
           }
           this.pendingResources?.splice(index, 1);
-          this.visibleResources = this.pendingResources;
+          this.visibleRecords = this.pendingResources;
         } 
         // if we're un-approving and we've already retrieved the pending reviews
         // add it to the top of the pendingReviews array and remove from approved
@@ -313,7 +386,7 @@ export default {
             this.pendingResources.unshift(resource);
           }
           this.approvedResources[this.selectedResourceType]?.splice(index, 1);
-          this.visibleResources = this.approvedResources[this.selectedResourceType];
+          this.visibleRecords = this.approvedResources[this.selectedResourceType];
         }
       }
     },
@@ -321,28 +394,52 @@ export default {
     handleSaved(resource) {
       // copy the saved object back into the table/selected element
       this.selectedResource = cloneDeep(resource);
-      let index = this.visibleResources.findIndex( r => r.id == resource.id )
+      let index = this.visibleRecords.findIndex( r => r.id == resource.id )
       if (index >= 0) {
-        this.visibleResources[index] = this.selectedResource;
+        this.visibleRecords[index] = this.selectedResource;
       }
       this.showEdit = false;
     },
 
+    handleDeleteRecommendationClick(recommendation) {
+      this.selectedResource = null;
+      this.selectedRecommendation = recommendation;
+      this.deleteMessage = 'Are you sure you want to delete the recommendation by ${recommendation.recommendedByName}.';
+      this.showDeleteConfirm = true
+    },
+
     handleDeleteClick(resource) {
       this.selectedResource = resource;
+      this.selectedRecommendation = null;
+      this.deleteMessage = 'Are you sure you want to delete the resource, "${resource.displayName}".';
       this.showDeleteConfirm = true
     },
 
     async doDelete() {
       try {
-        console.log('delete');
         this.isDeleting = true;
-        await deleteResource(this.selectedResource.id);
-        let index = this.visibleResources.indexOf(this.selectedResource);
-        if (index >= 0) {
-          this.visibleResources.splice(index,1);
+        var deleteRecord;
+        var deleted = false;
+        if (this.selectedRecommendation) {
+          deleteRecord = this.selectedRecommendation;
+          await deleteRecommendation(this.selectedRecommendation.id);
+          deleted = true;
+        } 
+        if (this.selectedResource) {
+          deleteRecord = this.selectedResource;
+          await deleteResource(this.selectedResource.id);
+          // force refresh of recommendations (hacky!)
+          this.recommendations = null;
+          deleted = true;
         }
-        this.selectedResource == null;
+        if (deleted) {          
+          let index = this.visibleRecords.indexOf(deleteRecord);
+          if (index >= 0) {
+            this.visibleRecords.splice(index,1);
+          }
+          this.selectedResource == null;
+          this.selectedRecommendation == null;
+        }
       } catch (error) {
         this.isDeleting = false;
       }
@@ -385,7 +482,7 @@ export default {
 
 .action-strip {
   width: 100%;
-  height: 80px;
+  height: 60px;
   /* display: flex;
   justify-content: space-between; */
   outline: 1px solid var(--prr-lightgrey);
@@ -446,6 +543,10 @@ tbody td.centred {
   text-align: center;
 }
 
+td {
+  padding: 5px;
+  border-bottom: 1px solid var(--prr-lightgrey);
+}
 tr .actions {
   display:flex;
   justify-content: flex-end;
@@ -458,5 +559,30 @@ tr:hover .actions {
 tbody tr:hover {
   background: var(--prr-extralightgrey);
   cursor: pointer;
+}
+
+tbody.body-hover:hover {
+  background: var(--prr-extralightgrey);
+  cursor: pointer;
+}
+tbody.body-hover:hover .actions {
+  visibility: visible;
+}
+
+.no-results {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100px;
+  border: 1px solid var(--prr-lightgrey);
+  /* font-size: var(--prr-font-size-large); */
+}
+
+.record-count {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 }
 </style>

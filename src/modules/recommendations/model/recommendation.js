@@ -9,6 +9,7 @@ class Recommendation {
     // review
     this.id = config.id;
     this.resourceName = config.resourceName;
+    this.comment = config.comment;
     this.resourceType = config.resourceType;
     this.resourceUrl = config.resourceUrl;
     this.dateApproved = config.dateApproved;
@@ -30,17 +31,24 @@ class Recommendation {
     });
   }
 
+  get dateCreatedFormatted() {
+    if (this.dateCreated && this.dateCreated.isValid) {
+      return this.dateCreated.toLocaleString(DateTime.DATETIME_FULL);
+    }
+    return null;
+  }
+
   /**
    * Validation schema for use in isObjectValid(object, schema)
    */
   get schema() {
     return {
-      resourceName: (value) => {
-        return validateMandatoryProperty('resourceName', value);
-      },
-      resourceType: (value) => {
-        return validateMandatoryProperty('resourceType', value);
-      },
+      // resourceName: (value) => {
+      //   return validateMandatoryProperty('resourceName', value);
+      // },
+      // resourceType: (value) => {
+      //   return validateMandatoryProperty('resourceType', value);
+      // },
       resourceUrl: (value) => {
         const mandatoryCheck = validateMandatoryProperty('resourceUrl', value);
         if (!mandatoryCheck.success) {
@@ -75,6 +83,7 @@ var recommendationConverter = {
     
     if (recommendation.recommendedByUid != null) result.recommendedByUid = recommendation.recommendedByUid;
     if (recommendation.recommendedByName != null) result.recommendedByName = recommendation.recommendedByName;
+    if (recommendation.comment != null) result.comment = recommendation.comment;
     if (recommendation.resourceName != null) result.resourceName = recommendation.resourceName;
     if (recommendation.resourceType != null) result.resourceType = recommendation.resourceType;
     if (recommendation.resourceUrl != null) result.resourceUrl = recommendation.resourceUrl;
@@ -90,7 +99,6 @@ var recommendationConverter = {
       result.dateApproved = null;
     }
     // whether it's null or not we want to add this field to determine whether a recommendation has been linked
-    console.log('dddp')
     result.resourceId = recommendation.resourceId;
 
     if (recommendation.approved != null) result.approved = recommendation.approved;
@@ -104,6 +112,7 @@ var recommendationConverter = {
     const config = {
       id: snapshot.id,
       resourceId: data.resourceId,
+      comment: data.comment,
       recommendedByUid: data.recommendedByUid,
       recommendedByName: data.recommendedByName,
       resourceName: data.resourceName,

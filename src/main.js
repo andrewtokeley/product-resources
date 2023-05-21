@@ -7,8 +7,6 @@ import { createPinia } from "pinia";
 import { auth } from '@/core/services/firebaseInit'
 import { useUserStore } from "@/core/state/userStore"
 import { useLookupStore } from "@/core/state/lookupStore"
-import { DateTime } from "luxon"
-import { addUser, getUser, recordUserLogin } from "./modules/users/services/user-services"
 
 const pinia = createPinia();
 
@@ -17,12 +15,14 @@ let router = createRouter({
   routes: routes,
 })
 
+// mount the app
+
+const storeUser = useUserStore();
+const lookupStore = useLookupStore();
+lookupStore.fetchLookups();
+
 router.beforeEach((to) => {
-  // analytics.logEvent('page_view', {
-  //   page_location: to.fullPath,
-  //   page_path: to.path,
-  //   page_title: to.meta.page_title
-  // });
+  console.log('beforeEachRoute')
   const store = useUserStore();
   if (to.meta.requiresAuth) {
     if (!store.isLoggedIn) {
@@ -42,29 +42,11 @@ router.beforeEach((to) => {
 });
 
 auth.onAuthStateChanged(async (authUser) => { 
-  let dbUser = null;
-  // record the user's login
-  if (authUser) {
-    dbUser = await getUser(authUser.uid)
-    if (!dbUser) {
-      await addUser(dbUser);
-    }
-    await recordUserLogin(dbUser.uid, DateTime.local());
-  }
-
-  // Create the app
-  let app = createApp(App);
+  await storeUser.updateAuthUser(authUser);
+  const app = createApp(App);
   app.use(router);
   app.use(pinia);
-  console.log("store")
-  const storeUser = useUserStore();
-  await storeUser.login(authUser, dbUser);
-
-  let storeLookup = useLookupStore();
-  await storeLookup.fetchLookups()
-  
   app.mount('#app');
-  
 });
 
 

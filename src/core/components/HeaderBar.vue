@@ -130,8 +130,9 @@ export default {
   methods: {
 
     handleLogout() {
+      console.log('logout');
       auth.signOut();
-      this.$forceUpdate();
+      //this.$router.push('/');
     },
 
     isSelected(nav) {

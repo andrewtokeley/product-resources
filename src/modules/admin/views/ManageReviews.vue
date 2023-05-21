@@ -13,6 +13,7 @@
       <thead>
         <tr>
           <th style="width:200px"><a @click="sortBy('resourceName')" class="sortHeading" :class="sortHeadingClasses('resourceName')">Resource Name</a></th>
+          <th style="width:200px"><a @click="sortBy('dateCreated')" class="sortHeading" :class="sortHeadingClasses('dateCreated')">Created</a></th>
           <th style="width:200px"><a @click="sortBy('reviewedByName')" class="sortHeading" :class="sortHeadingClasses('reviewedByName')">Reviewed By</a></th>
           <th style="width:200px"><a @click="sortBy('statusDescription')" class="sortHeading" :class="sortHeadingClasses('statusDescription')">Linked to Resource</a></th>
           <th style="width:200px"></th>
@@ -22,6 +23,7 @@
       <tbody v-for="review in visibleReviews" :key="review.id" @click="handleEditReview(review)">
         <tr>
           <td>{{ review.resourceName }}</td>
+          <td>{{ review.dateCreatedFormatted }}</td>
           <td>{{ review.reviewedByName }}</td>
           <td v-if="review.resourceId">
             <a @click.prevent.stop="handleShowResourceDetail(review)" >{{ review.statusDescription }}</a>
@@ -38,7 +40,7 @@
           </td>
         </tr>
         <tr >
-          <td class="underline" colspan="3">
+          <td class="underline" colspan="4">
             <div class="reason-text">"{{ review.reason }}"</div>
           </td>
         </tr>
@@ -197,7 +199,7 @@ export default {
         // if we're approving and we've already retrieved the approved reviews
         // add it to the top of the approvedReviews array and remove from pending 
         if (approve) {
-          if (this.approvedReviews.length > 0) {
+          if (this.approvedReviews?.length > 0) {
             this.approvedReviews = [review, ...this.approvedReviews];
           }
           this.pendingReviews.splice(index, 1);
@@ -206,7 +208,7 @@ export default {
         // if we're un-approving and we've already retrieved the pending reviews
         // add it to the top of the pendingReviews array and remove from approved
         else {
-          if (this.pendingReviews.length > 0) {
+          if (this.pendingReviews?.length > 0) {
             this.pendingReviews = [review, ...this.pendingReviews];
           }
           this.approvedReviews.splice(index, 1);

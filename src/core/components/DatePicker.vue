@@ -6,9 +6,10 @@
 </template>
 
 <script>
-const { DateTime } = require("luxon");
 import flatPickr from 'vue-flatpickr-component';
 import 'flatpickr/dist/flatpickr.css';
+const { DateTime } = require('luxon');
+
 // import BaseIcon from './BaseIcon.vue';
 
 export default {

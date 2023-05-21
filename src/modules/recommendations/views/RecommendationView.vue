@@ -2,47 +2,44 @@
   <div class="page">
     <loading-symbol v-if="isLoading"></loading-symbol>
     <div v-else class="content" >
-      {{validationErrors}}
       <template v-if="isRecommendation">
-        <h1>I'd Like to Recommend Something!</h1>
+        <h1>Recommend a New Resource</h1>
         <p>Thank you so much for recommending a new resource! </p>
       </template>
       <template v-else>
-        <h1>I'd like to Write a Review!</h1>
+        <h1>Write a Review</h1>
         <p>Thank you so much for sharing your thoughts on this resource! </p>
       </template>
 
-      <p>This site is founded on the principle of sharing, and you're making it happen :-)</p>
-
-      <base-input 
-        v-model="recommendation.resourceName"
-        v-if="isRecommendation"
-        @blur="validateRecommendation('resourceName')"
-        :errorMessage="errorMessage['resourceName']"
-        :hasFocus="isRecommendation"
-        :options="{ placeholder: 'Name of Resource'}">
-      </base-input>
-      <div v-if="isRecommendation" class="double-line">
-        <div>
-          <div class="label">Where should the resource be categorised?</div>
-          <resource-type-select v-model="this.recommendation.resourceType"></resource-type-select>
-        </div>
-        <div>
-          <div class="label">&nbsp;</div>
+      <div v-if="isRecommendation">
+          <div class="label tight">Where can people find it?</div> 
           <base-input 
             v-model="recommendation.resourceUrl" 
+            :hasFocus="true"
             @blur="validateRecommendation('resourceUrl')"
             :errorMessage="errorMessage['resourceUrl']"
             :options="{ placeholder: 'Link to Resource', readOnly: isSaving, inlineErrors: false }">
           </base-input>
-        </div>
+          <div class="label">Anything you'd like to share about the resource to help us categorise it and understand why you're recommending it?</div>
+          <base-multiline-text 
+            v-model="recommendation.comment"
+            @blur="validateReview('comment')"
+            :errorMessage="errorMessage['comment']"
+            :options="{ numberOfLines: 5, 
+              maximumLength: 500, 
+              inlineErrors: false,
+              showCharacterCount: true, 
+              placeholder: 'Comment (optional)',
+              readOnly: isSaving}">
+          </base-multiline-text>
       </div>
+      
       <div v-else>
         <h2>{{ resource.displayName }}</h2>
       </div>
       
-      <h2 v-if="isRecommendation">Include a Review</h2>
-      <p v-if="isRecommendation">We think it's important for all recommendations to also include a public review.</p>
+      <h2 v-if="isRecommendation">Leave a Review</h2>
+      <p v-if="isRecommendation">All recommendations must include a public review.</p>
       <base-multiline-text 
         v-model="review.reason"
         @blur="validateReview('reason')"
@@ -69,7 +66,6 @@
 <script>
 import BaseInput from '@/core/components/BaseInput.vue'
 import BaseMultilineText from '@/core/components/BaseMultilineText.vue'
-import ResourceTypeSelect from '@/modules/resources/components/ResourceTypeSelect.vue'
 import BaseButton from '@/core/components/BaseButton.vue'
 import LoadingSymbol from '@/core/components/LoadingSymbol.vue'
 
@@ -85,8 +81,7 @@ export default {
 name: "recommend-view",
 components: { 
   BaseInput, 
-  BaseMultilineText, 
-  ResourceTypeSelect,
+  BaseMultilineText,
   BaseButton,
   LoadingSymbol,
 },  
@@ -108,10 +103,10 @@ async mounted() {
   this.isLoading = true;
   const store = useUserStore();
   console.log(store.displayName);
-  
+
   if (this.isRecommendation) {    
     // we're reviewing a new (unapproved) recommended resource
-    this.recommendation.resourceType = this.$route.params.typeId ?? 'books';
+    // this.recommendation.resourceType = this.$route.params.typeId ?? 'books';
     this.recommendation.recommendedByUid = store.uid;
     this.recommendation.recommendedByName = store.displayName;
     

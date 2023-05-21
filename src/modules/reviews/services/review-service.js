@@ -11,6 +11,7 @@ export { getReview,
   getReviewsForResource, 
   getFeaturedReviews,
   linkRecommendationReviewToResource,
+  unlinkReviewsFromResource,
   updateReview, 
   addReview, 
   getReviewsByApproval,
@@ -20,6 +21,20 @@ export { getReview,
 }
 
 const COLLECTION_KEY = "reviews";
+
+const unlinkReviewsFromResource = async function(resourceId) {
+  const q = query(collection(db, COLLECTION_KEY).withConverter(reviewConverter), 
+  where("resourceId", "==", resourceId),
+  );
+  const querySnapshot = await getDocs(q);
+  querySnapshot.forEach(async (doc) => {
+    let review = doc.data();
+    review.resourceId = null;
+    review.approved = false;
+    await updateReview(review);
+  });
+  return true; 
+};
 
 const linkRecommendationReviewToResource = async function(recommendationId, resourceId) {
   const q = query(collection(db, COLLECTION_KEY).withConverter(reviewConverter), 

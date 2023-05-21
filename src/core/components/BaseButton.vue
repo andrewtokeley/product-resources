@@ -70,9 +70,7 @@ export default {
   font-weight: 600;
   min-width: 120px;
   transition: background 400ms;
-}
-.base-button:focus {
-  outline: none;
+  border: 1px transparent solid;
 }
 .base-button:hover {
   cursor: pointer;

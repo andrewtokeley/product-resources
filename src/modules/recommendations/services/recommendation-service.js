@@ -15,7 +15,8 @@ export { getRecommendation,
   deleteRecommendation,
   approveRecommendation,
   unapproveRecommendation,
-  linkRecommendationToResource
+  linkRecommendationToResource,
+  unlinkRecommendationFromResource
 }
 
 const COLLECTION_KEY = "recommendations";
@@ -33,6 +34,20 @@ const getRecommendation = async function(id) {
   } else {
     return null;
   }
+}
+
+const unlinkRecommendationFromResource = async function(resourceId) {
+  const q = query(collection(db, COLLECTION_KEY).withConverter(recommendationConverter), 
+  where("resourceId", "==", resourceId),
+  );
+  const querySnapshot = await getDocs(q);
+  querySnapshot.forEach(async (doc) => {
+    let recommendation = doc.data();
+    recommendation.resourceId = null;
+    recommendation.approved = false;
+    await updateRecommendation(recommendation);
+  });
+  return true; 
 }
 
 const linkRecommendationToResource = async function(recommendationId, resourceId) {
