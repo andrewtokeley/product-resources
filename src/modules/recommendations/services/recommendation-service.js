@@ -59,10 +59,11 @@ const linkRecommendationToResource = async function(recommendationId, resourceId
 const getUnlinkedRecommendationsCount = async function() {
   const q = query(collection(db, COLLECTION_KEY)
     .withConverter(recommendationConverter), 
-    where("approved", "==", false)
+    where("approved", "==", false),
+    where("resourceId", "==", null),
   );
-  const snapshot = getCountFromServer(q);
-  return snapshot.data().count;
+  const snapshot = await getCountFromServer(q);
+  return snapshot.data().count; 
 }
 
 const getUnlinkedRecommendations = async function() {

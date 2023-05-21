@@ -15,11 +15,7 @@ let router = createRouter({
   routes: routes,
 })
 
-// mount the app
-
-const storeUser = useUserStore();
-const lookupStore = useLookupStore();
-lookupStore.fetchLookups();
+// refresh lookups in the store
 
 router.beforeEach((to) => {
   console.log('beforeEachRoute')
@@ -41,12 +37,28 @@ router.beforeEach((to) => {
 
 });
 
-auth.onAuthStateChanged(async (authUser) => { 
-  await storeUser.updateAuthUser(authUser);
-  const app = createApp(App);
-  app.use(router);
-  app.use(pinia);
-  app.mount('#app');
-});
+let app;
+let storeUser;
+auth.onAuthStateChanged(async (authUser) => {
+  if (!app) {
+    console.log('first load');
+    
+    app = createApp(App).use(pinia);
+    
+    // update lookups
+    storeUser = useUserStore();
+    const lookupStore = useLookupStore();
+    await lookupStore.fetchLookups();
+    console.log('lookups fetched');
+    
+    app.use(router);
+    app.mount('#app');
+    console.log('app mounted');
+  }
+  // update store with user
+  if (storeUser) {
+    await storeUser.updateAuthUser(authUser);  
+  }
+})
 
 

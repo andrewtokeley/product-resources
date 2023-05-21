@@ -1,7 +1,6 @@
 import { addUser, getUser, recordUserLogin } from '@/modules/users/services/user-services';
 import { DateTime } from 'luxon';
 import { defineStore } from 'pinia'
-import { auth } from '@/core/services/firebaseInit'
 
 // auth.onAuthStateChanged(async (authUser) => { 
 //   await this.updateAuthUser(authUser);
@@ -20,6 +19,7 @@ export const useUserStore = defineStore({
   actions: {
     
     async updateAuthUser(authUser) {
+      console.log('updateAuthUser started');
       if (authUser) {
         const token = await authUser.getIdTokenResult();
         this.uid = authUser.uid;
@@ -33,33 +33,16 @@ export const useUserStore = defineStore({
         }
         await recordUserLogin(authUser.uid, DateTime.now());
         this.displayName = dbUser.displayName;
-        
+        console.log('updateAuthUser store updated with authenticated');
       } else {
         // the user logged out.
         this.isLoggedIn = false;
         this.isAdmin = false;
         this.displayName = "";
         this.email = "";
+        console.log('updateAuthUser store updated with anon user');
       }
-      console.log('end');
+      console.log('updateAuthUser ended');
     },
-
-    // async login(authUser, dbUser) {
-    //   if (authUser && dbUser) {
-    //     this.uid = dbUser.uid;
-    //     this.isLoggedIn = true;
-    //     this.displayName = dbUser.displayName;
-    //     this.email = authUser.email;
-    //     await authUser.getIdTokenResult().then( (result) => {
-    //       this.isAdmin = result.claims.admin ?? false
-    //     });
-    //   } else {
-    //     // reset, user is logged out
-    //     this.isLoggedIn = false;
-    //     this.isAdmin = false;
-    //     this.displayName = "";
-    //     this.email = "";
-    //   }
-    // },
   },
 })

@@ -5,14 +5,12 @@
     </div>
     <div v-else>
       <section class="featured clearbackground">  
-        <template  v-for="recommendation in featured" :key="recommendation.id">
-          <Suspense>
-            <featured-card 
-            class="card" 
-            :recommendation="recommendation"
-            @click="handleViewDetail"></featured-card>
-          </Suspense>
-        </template>   
+        <featured-card 
+        v-for="review in featured" :key="review.id"
+        :review="review"
+        class="card" 
+        :recommendation="recommendation"
+        @click="handleViewDetail"></featured-card>
       </section>
       
       <section class="featured">

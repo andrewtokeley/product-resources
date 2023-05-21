@@ -9,6 +9,7 @@ const db = getFirestore(app);
 export { getReview, 
   getReviews,
   getReviewsForResource, 
+  getReviewsByUser,
   getFeaturedReviews,
   linkRecommendationReviewToResource,
   unlinkReviewsFromResource,
@@ -21,6 +22,20 @@ export { getReview,
 }
 
 const COLLECTION_KEY = "reviews";
+
+
+const getReviewsByUser = async function (uid) {
+  const q = query(collection(db, COLLECTION_KEY).withConverter(reviewConverter), 
+  where("reviewedByUid", "==", uid),
+  where("approved", "==", true),
+  );
+  let results = [];
+  const querySnapshot = await getDocs(q);
+  querySnapshot.forEach(async (doc) => {
+    results.push(doc.data());
+  });
+  return results; 
+}
 
 const unlinkReviewsFromResource = async function(resourceId) {
   const q = query(collection(db, COLLECTION_KEY).withConverter(reviewConverter), 

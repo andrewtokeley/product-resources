@@ -1,9 +1,10 @@
 <template>
   <div class="login-view">
     <h1>{{  heading }}</h1>
-    <p v-if="explaination">{{  explaination }}</p>
+    <p v-if="explanation">{{  explanation }}</p>
     <div v-if="error">{{ error }}</div>
-    <login-widget 
+    <login-widget v-if="redirectUrl" 
+      :redirectUrl="redirectUrl"
       @error="handleError(error)" 
       @success="handleSuccess">
     </login-widget>
@@ -11,7 +12,6 @@
 </template>
 
 <script>
-import { useUserStore } from '@/core/state/userStore';
 import LoginWidget from '../components/LoginWidget.vue';
 
 export default {
@@ -21,26 +21,23 @@ export default {
   data() {
     return {
       error: null,
-      redirectUrl: '/',
+      redirectUrl: null,
       heading: 'Sign In',
-      explaination: '',
-    }
-  },
-  computed: {
-    store() {
-      return useUserStore();
+      explanation: '',
     }
   },
 
   mounted() {
+    
     this.redirectUrl = this.$route.query.redirect ?? "/";
+    console.log('loginview: ' + this.redirectUrl);
     const action = this.$route.query.action?.toLowerCase();
     if (action) {
       if (action == 'review') {
-        this.explaination = "Before you make that review..."
+        this.explanation = "Before you make that review..."
       }
       if (action == 'recommendation') {
-        this.explaination = "Before you make that recommendation..."
+        this.explanation = "Before you make that recommendation..."
       }
     }
   },
@@ -51,7 +48,7 @@ export default {
     },
     handleSuccess() {
       console.log('success');
-      this.$router.push(this.redirectUrl ?? '/');
+      // this.$router.push(this.redirectUrl ?? '/');
     }
   }
 

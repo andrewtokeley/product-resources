@@ -35,6 +35,7 @@ import { ref } from 'vue';
 
 export default {
   name: 'resource-detail',
+  emits: ["close"],
   components: {
     ModalDialog,
     ViewResource,
@@ -67,11 +68,9 @@ export default {
     }
   },
 
-  emits: ["close"],
   
   mounted() {
     this.isLoading = true;
-    console.log('resdetail mounted');
     this.viewResource = cloneDeep(this.resource);
     this.updateHistory();
     this.isLoading = false;

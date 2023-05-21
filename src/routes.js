@@ -10,6 +10,7 @@ import UserProfile from './modules/users/views/UserProfile'
 import RecommendationView from './modules/recommendations/views/RecommendationView'
 import TermsOfService from '@/modules/about/views/TermsOfService';
 import PrivacyView from '@/modules/about/views/PrivacyView';
+import UserReviews from '@/modules/users/views/UserReviews';
 
 export default [
   {path: '/login', component:Login, meta: { hideHeader: false }},
@@ -19,7 +20,9 @@ export default [
   
   // profile page
   {path: '/profile', component:UserProfile, meta: { requiresAuth: true }},
-  
+
+  {path: '/user/:userUid', component:UserReviews },
+
   // search across all resources
   {path: '/search/:searchTerm', component:Search},
   

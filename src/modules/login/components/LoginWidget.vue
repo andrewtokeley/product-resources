@@ -8,6 +8,7 @@
 // FirebaseUI is not compatible with firebase 9, so we have to use these compat versions.
 import { auth, firebase } from "@/core/services/firebaseInitCompat"
 import 'firebaseui/dist/firebaseui.css';
+import { useUserStore } from '@/core/state/userStore';
 
 var firebaseui = require('firebaseui');
 var ui = new firebaseui.auth.AuthUI(auth);
@@ -21,7 +22,6 @@ export default {
       default: '/',
     }
   },
-
   computed: {    
     uiConfig() {
       const vm = this;
@@ -39,19 +39,16 @@ export default {
         privacyPolicyUrl: function () {
           return "/privacy";
         },
-        // signInSuccessUrl: '/',
+        signInSuccessUrl: vm.redirectUrl ?? '/',
         callbacks: {
-          signInSuccessWithAuthResult: function() { //(authResult, redirectUrl)
-            // if (vm.redirectUrl) {
-            //   console.log("redict")
-            //   vm.$router.push(vm.redirectUrl);
-            // } else {
-            //   console.log("redict - go back")
-            //   vm.$router.go(-1);
-            // }
-            // const user = useUserStore()
-            // user.login(authResult, 
-            vm.$emit('success');
+          signInSuccessWithAuthResult: async function(authResult) {
+            //update the store now, rather than waiting for the authentication handler
+            console.log("signInSuccessWithAuthResult - logged in? " + store.isLoggedIn)
+            const store = useUserStore()
+            await store.updateAuthUser(authResult);
+            console.log("signInSuccessWithAuthResult - logged in now? " + store.isLoggedIn)
+            return true;
+
           },
           // signInFailure callback must be provided to handle merge conflicts which
           // occur when an existing credential is linked to an anonymous user.
@@ -64,6 +61,7 @@ export default {
   },
 
   mounted() {
+    console.log('login-widget: ' + this.redirectUrl);
     ui.start("#firebaseui-auth-container", this.uiConfig);
   },
 

@@ -1,7 +1,9 @@
 <template>
-  <div class="featured-card" @click="$emit('click', resource)">
-    <resource-image class="image" :resource="resource"></resource-image>
-    <review-widget class="quote" :review="review"></review-widget>
+  <div v-if="resource">
+    <div class="featured-card" @click="$emit('click', resource)">
+      <resource-image class="image" :resource="resource"></resource-image>
+      <review-widget class="quote" :review="review"></review-widget>
+    </div>
   </div>
 </template>
 
@@ -12,30 +14,33 @@ import ReviewWidget from '@/modules/reviews/components/ReviewWidget.vue'
 import { Review } from '@/modules/reviews/model/review';
 import { getResource } from '@/modules/resources/services/resource-service';
 
-import { ref } from 'vue'
-
 export default {
-  components: { ResourceImage, ReviewWidget},
+  components: { ResourceImage, ReviewWidget },
+
   name: 'feature-card',
+  
   emits: ['click'],
+  
   data() { 
     return { 
-      isLoading: true 
+      isLoading: true,
+      resource: null,
     } 
   },  
+
   props: {
     review: {
       type: Review,
       required: true
     }
   },
-  async setup(props) {
-    const resource = ref(null);
-    resource.value = await getResource(props.review.resourceId);
-    return {
-      resource
-    }
+  
+  async mounted() {
+    this.isLoading = true;
+    this.resource = await getResource(this.review.resourceId);
+    this.isLoading = false;
   },
+
 }
 
 </script>

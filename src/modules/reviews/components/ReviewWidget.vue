@@ -4,7 +4,7 @@
     <p v-if="review.reason" class="quote">"{{ review.reason }}"</p>
     <p v-else class="quote">"I like this resource because..."</p>
     <div class="by">
-      <a v-if="review.reviewedByUid" @click="handleClick()">{{ review.reviewedByName }}</a>
+      <a v-if="review.reviewedByUid" @click="handleUserClick(review.reviewedByUid)">{{ review.reviewedByName }}</a>
       <span v-else>{{ review.reviewedByName ?? 'Anon'}}</span>
     </div>
     <hr/>
@@ -16,15 +16,17 @@ import { Review } from "@/modules/reviews/model/review";
 
 export default {
   name: "review-widget",
+  
   props: {
     review: {
       required: true,
       type: Review
     }
   },
+
   methods: {
-    openUrl(url) {
-      window.open(url, '_blank');
+    handleUserClick(userUid) {
+      this.$router.push(`/user/${userUid}`);
     }
   }
 }

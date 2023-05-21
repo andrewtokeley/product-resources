@@ -30,7 +30,7 @@
     <div class="spacer"></div>
 
     <div class="header__right">
-      <base-button @click="$router.push('/recommend')" >Recommend</base-button>
+      <base-button @click="$router.push('/recommend')" >Recommend...</base-button>
       <search-input 
         v-model="searchTerm" 
         @search="$router.push(`/search/${searchTerm}`)" 
@@ -38,7 +38,7 @@
       </search-input>
       <div class="menu">
         <base-icon :menu="menuOptions">menu</base-icon>
-        <badge-count class="badge" :count="4"></badge-count>
+        <badge-count v-if="todoCount > 0" class="badge" :count="todoCount"></badge-count>
       </div>
     </div>
 
@@ -66,7 +66,8 @@ import { getResource } from '@/modules/resources/services/resource-service'
 
 import { ref } from 'vue';
 import { useLookupStore } from '@/core/state/lookupStore';
-
+import { getUnapprovedReviewsCount } from '@/modules/reviews/services/review-service'
+import { getUnlinkedRecommendationsCount } from '@/modules/recommendations/services/recommendation-service'
 export default {
   name: 'HeaderBar',
   components: {
@@ -98,6 +99,8 @@ export default {
       showResourceDialog: false,
       tagGroups: [],
       resourceFromQueryString: Resource,
+      numberOfUnapprovedReviews: 0,
+      numberOfRecommendations: 0,
     }
   },
   
@@ -111,10 +114,12 @@ export default {
       {id: 'people', path:'/type/people', title:'PEOPLE'},
     ];
 
-    console.log("accessing store");
     this.tagGroups = await groupTags(this.lookupStore.tags);
+    this.numberOfUnapprovedReviews = await getUnapprovedReviewsCount();
+    this.numberOfRecommendations = await getUnlinkedRecommendationsCount();
+
     const resourceId = this.$route.query.r   
-  if (resourceId) {
+    if (resourceId) {
       if (resourceId.toLowerCase() == 'new') {
         this.showRecommendDialog = true;
       } else {
@@ -145,7 +150,10 @@ export default {
   },
 
   computed: {
-    
+    todoCount() {
+      return this.numberOfRecommendations + this.numberOfUnapprovedReviews;
+    },
+
     useUserStore() {
       return useUserStore()
     },
@@ -177,9 +185,9 @@ export default {
             isLabel: true,
           },
           {
-            name: "Resources...",
+            name: this.numberOfRecommendations > 0 ? `Resources (${this.numberOfRecommendations})...` : "Resources...",
             show: this.useUserStore.isAdmin,
-            badgeCount: 1,
+            badgeCount: this.numberOfRecommendations,
             iconName: "menu_book",
             action: () => {
               this.$router.push('/admin/resources');
@@ -188,10 +196,10 @@ export default {
             }
           },
           {
-            name: "Reviews...",
+            name: this.numberOfUnapprovedReviews > 0 ? `Reviews (${this.numberOfUnapprovedReviews})...` : "Reviews...",
             show: this.useUserStore.isAdmin,
             iconName: "rate_review",
-            badgeCount: 3,
+            badgeCount: this.numberOfUnapprovedReviews,
             action: () => {
               vm.$router.push('/admin/reviews');
             }
