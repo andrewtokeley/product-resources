@@ -269,7 +269,7 @@ export default {
   align-items: center;
 }
 .left-nav .nav-with-submenu a {
-  padding: 20px 60px 40px 0;
+  padding: 20px 60px 40px 10px;
   font-weight: var(--prr-font-weight);
 }
 .nav-with-submenu:hover .submenu {
