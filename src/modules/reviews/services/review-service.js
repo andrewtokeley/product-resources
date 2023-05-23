@@ -1,7 +1,7 @@
 
 import { Review, reviewConverter } from '@/modules/reviews/model/review';
 import { app } from "@/core/services/firebaseInit"
-import { updateDoc, getFirestore, collection, doc, getDoc,getDocs, query, where, addDoc, setDoc, deleteDoc, limit, getCountFromServer } from "firebase/firestore"; 
+import { documentId, updateDoc, getFirestore, collection, doc, getDoc,getDocs, query, where, addDoc, setDoc, deleteDoc, limit, getCountFromServer } from "firebase/firestore"; 
 const { DateTime } = require("luxon");
 import { Timestamp } from "firebase/firestore";
 
@@ -176,10 +176,11 @@ const getFeaturedReviews = async function(maximum) {
   while (results.length < maximum && attempts < maxAttempts) {
     let randomKey = doc(collection(db, COLLECTION_KEY)).id;
     const q = query(collection(db, COLLECTION_KEY).withConverter(reviewConverter), 
-      where('id', ">=", randomKey),
+      where(documentId(), ">=", randomKey),
       where('approved', "==", true),
       limit(1));
     const querySnapshot = await getDocs(q);
+    console.log(randomKey);
     if (querySnapshot.size == 1) {
       querySnapshot.forEach((doc) => {
         let review = new Review(doc.data());

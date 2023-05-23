@@ -4,14 +4,31 @@
       <loading-symbol></loading-symbol>
     </div>
     <div v-else>
-      <section class="featured clearbackground">  
-        <featured-card 
-        v-for="review in featured" :key="review.id"
-        :review="review"
-        class="card" 
-        :recommendation="recommendation"
-        @click="handleViewDetail"></featured-card>
-      </section>
+      <!-- <section class="featured clearbackground">   -->
+        <carousel :items-to-show="2" :wrap-around="true">
+          <slide v-for="review in featured" :key="review.id">
+            <featured-card 
+              :review="review"
+              class="carousel__item" 
+              @click="handleViewDetail">
+            </featured-card>
+          </slide>
+
+          <template #addons>
+            <navigation />
+          </template>
+        </carousel>
+        <carousel :items-to-show="3" :wrap-around="true">
+          <slide v-for="slide in 10" :key="slide">
+            <div class="carousel__item">{{ slide }}</div>
+          </slide>
+
+          <template #addons>
+            <navigation />
+          </template>
+        </carousel>
+        
+      <!-- </section> -->
       
       <section class="featured">
         <book-group   
@@ -57,13 +74,23 @@ import FeaturedCard from "@/modules/home/components/FeaturedCard.vue";
 import ResourceDetail from "@/modules/resources/views/ResourceDetail.vue";
 import BookGroup from '@/modules/resources/components/BookGroup.vue';
 import LoadingSymbol from '@/core/components/LoadingSymbol.vue';
+import 'vue3-carousel/dist/carousel.css'
 
-import { getFeaturedReviews } from "@/modules/reviews/services/review-service";
+import { Carousel, Slide, Navigation } from 'vue3-carousel'
+
 import { searchByResourceTypes, getRecentlyAdded } from '@/modules/resources/services/resource-service';
+import { reviewStore } from "@/modules/reviews/store/reviewStore";
 
 export default {
   name: 'resources-home',
-  components: { FeaturedCard, BookGroup, LoadingSymbol, ResourceDetail },
+  components: { 
+    FeaturedCard, 
+    BookGroup, 
+    LoadingSymbol, 
+    ResourceDetail,
+    Carousel, 
+    Slide,  
+    Navigation },
   data() {
     return {
       featured: [],
@@ -77,10 +104,15 @@ export default {
   },
   async mounted() {
     this.isLoading = true;
-    this.featured = await getFeaturedReviews(2); //getFeaturedRecommendations(2);
     this.topBooks = await searchByResourceTypes(['books'], 5);
     this.topPodcasts = await searchByResourceTypes(['podcasts'], 5);
     this.recentlyAdded = await getRecentlyAdded(5);
+
+    // will get some featured reviews if none have been defined for this session yet.
+    let store = reviewStore()
+    store.fetchFeatured();
+    this.featured = store.featuredReviews;
+
     this.isLoading = false;
   },
 
@@ -100,6 +132,10 @@ export default {
 }
 .resources-home.loading {
   display:none;
+}
+
+section.carousel {
+  background: transparent;
 }
 
 section {

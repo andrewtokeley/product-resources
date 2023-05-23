@@ -49,13 +49,16 @@ export default {
 
 
 .featured-card {
-  margin: 25px 0px 0px 20px;
-  height: 240px;
-  max-width: 400px;
-  min-width: 300px;
+  /* margin: 25px 0px 0px 20px; */
+  /* height: 240px; */
+  padding: 0px 15px;
+  width: 100%;
+  /* max-width: 400px; */
+  /* min-width: 300px; */
+  /* width: 400px; */
   flex: 1 1 0px;
   border-radius: 10px;
-  /* background: var(--prr-extralightgrey); */
+  background: white;
   cursor: pointer;
 }
 .quote {
