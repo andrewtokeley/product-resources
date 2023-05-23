@@ -28,6 +28,7 @@ class Resource {
     this.relatedResources = config.relatedResources;
     this.source = config.source;
     this.approved = config.approved;
+    this.isFavourite = config.isFavourite;
   }
 
   static fromRecommendation(recommendation) {
@@ -38,6 +39,7 @@ class Resource {
       displayName: recommendation.resourceName,
       resourceType: recommendation.resourceType,
       resourceUrl: recommendation.resourceUrl,
+      isFavourite: false,
       approved: false,
     })
   }
@@ -52,6 +54,7 @@ class Resource {
       resourceType: type,
       createdDate: DateTime.now(),
       authors: [], 
+      isFavourite: false,
       tags: [] });
       
   }
@@ -125,6 +128,7 @@ class Resource {
         return 'square';
       case 'videos':
       case 'posts':
+      case 'websites':
         return 'landscape';
       default:
         return 'portrait';
@@ -186,6 +190,7 @@ var resourceConverter = {
     if (resource.recommendedByName != null) { result.recommendedByName = resource.recommendedByName }
     if (resource.description != null) { result.description = resource.description }
     if (resource.approved != null) { result.approved = resource.approved }
+    if (resource.isFavourite != null) { result.isFavourite = resource.isFavourite }
     if (resource.resourceType != null) { result.resourceType = resource.resourceType }
     if (resource.resourceUrl != null) { result.resourceUrl = resource.resourceUrl }
     if (resource.displayName != null) { result.displayName = resource.displayName }
@@ -246,6 +251,7 @@ var resourceConverter = {
       parentResourceName: data.parentResourceName,
       parentResourceImageUrl: data.parentResourceImageUrl,
       approved: data.approved ?? false,
+      isFavourite: data.isFavourite ?? false,
     }
     return new Resource(config);
   }

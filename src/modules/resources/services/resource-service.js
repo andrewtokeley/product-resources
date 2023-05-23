@@ -115,7 +115,10 @@ const searchByResourceTypes = async function(keys, resultLimit, approval) {
 
 const searchByTagKey = async function(tagKey) {
   const q = query(collection(db, COLLECTION_KEY)
-    .withConverter(resourceConverter), where("tags", "array-contains", tagKey));
+    .withConverter(resourceConverter), 
+    where("tags", "array-contains", tagKey),
+    where("approved", "==", true)
+  );
   const querySnapshot = await getDocs(q);
   const result = [];
   querySnapshot.forEach((doc) => {

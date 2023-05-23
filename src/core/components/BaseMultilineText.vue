@@ -98,7 +98,7 @@ export default {
 
   mounted() {
     if (this.hasFocus) {
-      setTimeout(() => { this.$refs.textArea.focus() }, 300)
+      setTimeout(() => { this.$refs.textArea?.focus() }, 300)
     }
   },
 

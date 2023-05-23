@@ -276,6 +276,7 @@ table {
   width: 100%;
   outline: 1px solid var(--prr-lightgrey);
   border-spacing: 0px;
+  margin-bottom: 200px;
 }
 
 thead th {

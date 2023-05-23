@@ -2,6 +2,7 @@
   <div class="page">
     <loading-symbol v-if="isLoading"></loading-symbol>
     <div v-else class="content" >
+      
       <template v-if="isRecommendation">
         <h1>Recommend a New Resource</h1>
         <p>Thank you so much for recommending a new resource! </p>
@@ -12,46 +13,49 @@
       </template>
 
       <div v-if="isRecommendation">
-          <div class="label tight">Where can people find it?</div> 
-          <base-input 
-            v-model="recommendation.resourceUrl" 
-            :hasFocus="true"
-            @blur="validateRecommendation('resourceUrl')"
-            :errorMessage="errorMessage['resourceUrl']"
-            :options="{ placeholder: 'Link to Resource', readOnly: isSaving, inlineErrors: false }">
-          </base-input>
-          <div class="label">Anything you'd like to share about the resource to help us categorise it and understand why you're recommending it?</div>
+        <div class="label tight">Where can people find it?</div> 
+        <base-input 
+          v-model="recommendation.resourceUrl" 
+          :hasFocus="true"
+          @blur="validateRecommendation('resourceUrl')"
+          :errorMessage="errorMessage['resourceUrl']"
+          :options="{ placeholder: 'Link to Resource', readOnly: isSaving, inlineErrors: false }">
+        </base-input>
+        <div class="label">Anything you'd like to share about the resource to help us categorise it and understand why you're recommending it?</div>
+        <base-multiline-text 
+          v-model="recommendation.comment"
+          @blur="validateReview('comment')"
+          :errorMessage="errorMessage['comment']"
+          :options="{ numberOfLines: 5, 
+            maximumLength: 500, 
+            inlineErrors: false,
+            showCharacterCount: true, 
+            placeholder: 'Comment (optional)',
+            readOnly: isSaving}">
+        </base-multiline-text>
+      </div>
+      
+      <div class="review">
+        <h2 v-if="resource">{{ resource.displayName }}</h2>
+        <resource-image v-if="resource" class="image" :resource="resource"></resource-image>
+        <div class="label tight" v-if="isRecommendation">We think it's important for all recommendations to include a public review.</div>
+        <div class="textarea-wrap">
           <base-multiline-text 
-            v-model="recommendation.comment"
-            @blur="validateReview('comment')"
-            :errorMessage="errorMessage['comment']"
+            v-model="review.reason"
+            @blur="validateReview('reason')"
+            :errorMessage="errorMessage['reason']"
+            :hasFocus="!isRecommendation"
             :options="{ numberOfLines: 5, 
               maximumLength: 500, 
               inlineErrors: false,
               showCharacterCount: true, 
-              placeholder: 'Comment (optional)',
+              placeholder: 'Your Review',
               readOnly: isSaving}">
           </base-multiline-text>
+        </div>
       </div>
       
-      <div v-else>
-        <h2>{{ resource.displayName }}</h2>
-      </div>
       
-      <h2 v-if="isRecommendation">Leave a Review</h2>
-      <p v-if="isRecommendation">All recommendations must include a public review.</p>
-      <base-multiline-text 
-        v-model="review.reason"
-        @blur="validateReview('reason')"
-        :errorMessage="errorMessage['reason']"
-        :hasFocus="!isRecommendation"
-        :options="{ numberOfLines: 5, 
-          maximumLength: 500, 
-          inlineErrors: false,
-          showCharacterCount: true, 
-          placeholder: 'Your Review',
-          readOnly: isSaving}">
-      </base-multiline-text>
 
       <div class="buttons">
         <base-button :isSecondary="true" @click="$router.back()">Cancel</base-button>
@@ -68,6 +72,7 @@ import BaseInput from '@/core/components/BaseInput.vue'
 import BaseMultilineText from '@/core/components/BaseMultilineText.vue'
 import BaseButton from '@/core/components/BaseButton.vue'
 import LoadingSymbol from '@/core/components/LoadingSymbol.vue'
+import ResourceImage from '@/modules/resources/components/ResourceImage.vue'
 
 import { Recommendation } from '@/modules/recommendations/model/recommendation'
 import { Review } from '@/modules/reviews/model/review'
@@ -84,6 +89,7 @@ components: {
   BaseMultilineText,
   BaseButton,
   LoadingSymbol,
+  ResourceImage,
 },  
 beforeCreate() {
   // this is needed to avoid circular references - the recommend dialog contains the resource image which contains the dialog
@@ -102,8 +108,7 @@ data() {
 async mounted() {
   this.isLoading = true;
   const store = useUserStore();
-  console.log(store.displayName);
-
+  
   if (this.isRecommendation) {    
     // we're reviewing a new (unapproved) recommended resource
     // this.recommendation.resourceType = this.$route.params.typeId ?? 'books';
@@ -118,11 +123,12 @@ async mounted() {
     if (this.resource == null) {
       // invalid resourceid
       this.$router.push('/');
+    } else {
+      this.review.resourceId = this.resource.id;
+      this.review.resourceName = this.resource.displayName;
     }
-    this.review.resourceId = this.resource.id;
-    this.review.resourceName = this.resource.displayName;
   }
-  
+
   this.review.reviewedByUid = store.uid;
   this.review.reviewedByName = store.displayName;
 
@@ -139,10 +145,13 @@ computed: {
     return null;
   },
   isValid() {
+    
     if (this.isRecommendation) {
       // both the rec and review need to be valid
+      console.log('checking both');
       return this.recommendation.isValid && this.review.isValid;
     } else {
+      console.log('checking review');
       return this.review.isValid;
     }
   },
@@ -163,7 +172,8 @@ methods: {
     await addReview(this.review);
     setTimeout(function () {
       _this.isSaving = false;
-      _this.$router.back();
+      _this.$router.push({ path: '/recommend/confirm', query: {'action': _this.isRecommendation ? "recommendation" : "review"}});
+      
     }, 2000);
   },
 
@@ -250,5 +260,18 @@ margin-top: 0px;
 .buttons {
   margin-top: 20px;
   float: right;
+}
+
+.review {
+  position: relative;
+}
+.image {
+  float: left;
+  margin-right: 15px;
+}
+
+.textarea-wrap {
+  overflow: hidden;
+  padding: 0 4px 0 0px;
 }
 </style>

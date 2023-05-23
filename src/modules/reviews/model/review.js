@@ -33,6 +33,14 @@ class Review {
     }
   }
 
+  get source() {
+    if (this.recommendationId != null) {
+      return "Recommendation"
+    } else {
+      return this.resourceName ?? "Direct"
+    }
+  }
+
   get canApprove() {
     return (this.resourceId != null && this.resourceId != undefined)  && 
       this.reason?.length > 0 && 
@@ -59,14 +67,14 @@ class Review {
 
   get dateApprovedFormatted() {
     if (this.dateApproved && this.dateApproved.isValid) {
-      return this.dateApproved.toLocaleString(DateTime.DATETIME_FULL);
+      return this.dateApproved.toLocaleString(DateTime.DATETIME_MED);
     }
     return null;
   }
 
   get dateCreatedFormatted() {
     if (this.dateCreated && this.dateCreated.isValid) {
-      return this.dateCreated.toLocaleString(DateTime.DATETIME_FULL);
+      return this.dateCreated.toLocaleString(DateTime.DATETIME_MED);
     }
     return null;
   }

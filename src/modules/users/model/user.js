@@ -3,19 +3,19 @@ const { DateTime } = require("luxon");
 import { validateUrl } from "@/core/model/validation";
 import Result from "@/core/model/Result";
 
-export { User, userConverter };
+export { User, UserPrivate, userConverter, userPrivateConverter };
 
 class User {
   constructor(config) {
     this.uid = config?.uid;
     this.displayName = config?.displayName;
-    this.email = config?.email;
     this.website = config?.website;
-    this.lastLoggedInDate = config?.lastLoggedInDate;
   }
+ 
   static default() {
     return new User();
   }
+
   /**
    * Validation schema for use in isObjectValid(object, schema)
    */
@@ -38,6 +38,14 @@ class User {
   }
 }
 
+class UserPrivate {
+  constructor(config) {
+    this.uid = config.uid;
+    this.email = config?.email;
+    this.lastLoggedInDate = config?.lastLoggedInDate;
+  }
+}
+
 /**
  * FirestoreDataConverter implementation for User instances
  */
@@ -45,9 +53,7 @@ var userConverter = {
   toFirestore: function (user) {
     const result = {};
     if (user.displayName) { result.displayName = user.displayName }
-    if (user.email) { result.email = user.email; }
     if (user.website) { result.website = user.website; }
-    if (user.lastLoggedInDate) { result.lastLoggedInDate = Timestamp.fromDate(user.lastLoggedInDate.toJSDate()); }
     
     return result;
   },
@@ -57,11 +63,33 @@ var userConverter = {
     const config = {
       uid: snapshot.id,
       displayName: data.displayName,
-      email: data.email,
       website: data.website,
-      lastLoggedInDate: data.lastLoggedInDate ? DateTime.fromJSDate(data.lastLoggedInDate.toDate()) : DateTime.local(),
     }
 
     return new User(config);
+  }
+};
+
+/**
+ * FirestoreDataConverter implementation for User instances
+ */
+var userPrivateConverter = {
+  toFirestore: function (user) {
+    const result = {};
+    if (user.email) { result.email = user.email; }
+    if (user.lastLoggedInDate) { result.lastLoggedInDate = Timestamp.fromDate(user.lastLoggedInDate.toJSDate()); }
+    
+    return result;
+  },
+
+  fromFirestore: function (snapshot, options) {
+    const data = snapshot.data(options);
+    const config = {
+      uid: snapshot.id,
+      email: data.email,
+      lastLoggedInDate: data.lastLoggedInDate ? DateTime.fromJSDate(data.lastLoggedInDate.toDate()) : DateTime.local(),
+    }
+
+    return new UserPrivate(config);
   }
 };

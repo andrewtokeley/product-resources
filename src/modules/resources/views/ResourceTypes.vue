@@ -7,10 +7,17 @@
       <div class="introduction">
         <div><h1 v-if="title">{{ title }}</h1></div>
         <div><p v-if="summary">{{ summary }}</p></div>
+        <!-- <div class="label" v-if="tagsUsed">Filter results by;</div> -->
         <tag-selector :singleSelect="true" :tags="tagsUsed" v-model="selectedTagFilter" @tagClicked="handleTagClicked"></tag-selector>
       </div>
       <template v-if="filteredSearchResults.length > 0 && !isLoading" >
-        <book-group @click="handleOpenPreview" :showAddRecommendation="true" :isGrouped="true" :resources="filteredSearchResults"></book-group>
+        <book-group 
+          @click="handleOpenPreview" 
+          :showMore="false"
+          :showAddRecommendation="true" 
+          :isGrouped="true" 
+          :resources="filteredSearchResults">
+        </book-group>
       </template>
       <div v-if="filteredSearchResults.length == 0 && !isLoading" class="noresults">
         We couldn't find anything matching, <i>{{ searchTerm }}</i>
@@ -195,7 +202,14 @@ export default {
 .introduction {
   background: var(--prr-lightgrey);
   border-radius: 15px;
-  padding: 15px 15px 25px 15px;
+  padding: 5px 15px 15px 15px;
+}
+.introduction p {
+  margin-bottom: 15px;
+}
+
+.introduction .label {
+  margin-left: 10px;
 }
 .resources-search {
   width: 100%;
@@ -210,7 +224,7 @@ export default {
 
 h1 {
   font-size: var(--prr-font-size-huge);
-  margin-top: 20px;
+  margin-top: 10px;
   margin-bottom: 5px;
 }
 

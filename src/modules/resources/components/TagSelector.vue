@@ -1,16 +1,30 @@
 <template>
   <div class="tag-selector">
-      <ul>
+    <div v-for="tagGroup in tagGroups" :key="tagGroup.groupName" class="tag-group">
+      <span v-if="showCategoryHeading(tagGroup)" class="tag-group-label">{{ tagGroup.groupName }}:</span>
+      <ul class="tag-list">
+        <li v-for="tag in tagGroup.tags" :key="tag.key" >
+          <tag-button 
+            :enableHoverEffect="singleSelect ? true :false" 
+            :selected="isSelected(tag.key)" 
+            @click="toggleSelection(tag.key)">
+            {{tag.value}}
+          </tag-button>
+        </li>
+      </ul>
+    </div>
+      <!-- <ul>
         <li v-for="tag in m_tags" :key="tag.key" >
           <tag-button :enableHoverEffect="singleSelect ? true :false" :selected="isSelected(tag.key)" @click="toggleSelection(tag.key)">{{tag.value}}</tag-button>
         </li>
-      </ul>
+      </ul> -->
   </div>
 </template>
 
 <script>
-import { getTags } from "@/modules/resources/services/lookup-service"
 import TagButton from "@/modules/resources/components/TagButton.vue"
+import { groupTags } from "../services/lookup-service"
+import { useLookupStore } from "@/core/state/lookupStore"
 
 export default {
   name: "tag-selector",
@@ -21,7 +35,7 @@ export default {
 
   data() {
     return {
-      m_tags: [],
+      tagGroups: [],
       lastSelectedKey: null,
       selectedTagKeys: [],
     }
@@ -43,17 +57,19 @@ export default {
   },
 
   async mounted() {
-    if (!this.tags || this.tags.length == 0) {
-      let lookup = await getTags();
-      this.m_tags = lookup.keyValues;
-    } else {
-      this.m_tags = this.tags;
+    let tags = this.tags;
+    if (!tags || tags.length == 0) {
+      const store = useLookupStore();
+      tags = store.tags;
     }
-    console.log(this.m_tags);
+    this.tagGroups = await groupTags(tags);
     this.selectedTagKeys = this.modelValue ?? [];
   },
 
   methods: {
+    showCategoryHeading(tagGroup) {
+      return tagGroup.groupName.toLowerCase() != '_general';
+    },
     toggleSelection(key) {
       let isOn;
       var index = this.selectedTagKeys.indexOf(key);
@@ -89,22 +105,42 @@ export default {
 
 <style scoped>
 
-.tag-selector {
+.tag-list {
+  display: inline;
   width: 100%;
-  display: flex;
   flex-direction: row;
   flex-wrap: wrap;
   align-items: flex-start;
+  box-sizing: border-box;
 }
 
-.tag-selector ul {
+.tag-group {
+  /* display: flex;
+  flex-direction: row; */
+}
+.tag-group-label {
+  font-size: var(--prr-font-size-normal);
+  overflow: hidden;
+  margin-left:10px;
+}
+
+ul.tag-list {
   list-style-type: none;
   padding-left: 0px;
   margin-top: 0px;
+  
 }
 
-.tag-selector li {
+.tag-list li {
   padding: 5px;
   display: inline-block;
 }
+
+/* .tag-group h2 {
+  font-size: var(--prr-font-size-normal);
+  font-weight: 800;
+  margin-bottom: 5px;
+  color: var(--prr-darkgrey);
+  
+} */
 </style>

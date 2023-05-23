@@ -3,12 +3,14 @@ import { Review, reviewConverter } from '@/modules/reviews/model/review';
 import { app } from "@/core/services/firebaseInit"
 import { updateDoc, getFirestore, collection, doc, getDoc,getDocs, query, where, addDoc, setDoc, deleteDoc, limit, getCountFromServer } from "firebase/firestore"; 
 const { DateTime } = require("luxon");
+import { Timestamp } from "firebase/firestore";
 
 const db = getFirestore(app);
 
 export { getReview, 
   getReviews,
   getReviewsForResource, 
+  getReviewForRecommendation,
   getReviewsByUser,
   getFeaturedReviews,
   linkRecommendationReviewToResource,
@@ -19,6 +21,7 @@ export { getReview,
   getUnapprovedReviewsCount,
   deleteReview,
   setReviewApprove,
+  deleteUnlinkedReviewsForRecommendation,
 }
 
 const COLLECTION_KEY = "reviews";
@@ -90,11 +93,11 @@ const getReview = async function(id) {
 
 /**
  * Get's the reviews for a resource, optionally including unapproved ones. Note only admin role can see unapproved reviews.
+ * 
  * @param {} resourceId 
  * @returns 
  */
 const getReviewsForResource = async function(resourceId, includeUnApproved) {
-  console.log('get reviews...')
   if (includeUnApproved == null) {
     includeUnApproved = false;
   }
@@ -117,6 +120,23 @@ const getReviewsForResource = async function(resourceId, includeUnApproved) {
   return result 
 }
 
+const getReviewForRecommendation = async function(recommendationId) {
+  const q = query(collection(db, COLLECTION_KEY)
+    .withConverter(reviewConverter),
+    where("recommendationId", "==", recommendationId),
+    limit(1));
+  const querySnapshot = await getDocs(q);
+  if (querySnapshot.size == 1) {
+    return new Review(querySnapshot.docs[0].data());
+  }
+  return null;
+}
+
+/**
+ * Get all reviews up to the limit
+ * @param {*} resultLimit 
+ * @returns 
+ */
 const getReviews = async function(resultLimit) {
   if (!resultLimit) { resultLimit = 100 }
   const q = query(collection(db, COLLECTION_KEY)
@@ -198,10 +218,33 @@ const deleteReview = async function(id) {
   return await deleteDoc(ref);
 }
 
+/**
+ * Deletes any reviews that are associated with a recommendation but have not been linked to a resource yet.
+ * @param {*} recommendationId 
+ * @returns 
+ */
+const deleteUnlinkedReviewsForRecommendation = async function(recommendationId) {
+  const q = query(collection(db, COLLECTION_KEY).withConverter(reviewConverter), 
+    where('recommendationId', "==", recommendationId),
+    where('resourceId', '==', null));
+  const querySnapshot = await getDocs(q);
+  let results = [];
+  querySnapshot.forEach((doc) => {
+    results.push(doc.ref);
+  });
+  for (let i = 0; i< results.length; i++) {
+    await delete(results[i]);
+  }
+  return true;
+}
+
 const setReviewApprove = async function(id, approve) {
+  
   if (id) {    
     const ref = doc(db, COLLECTION_KEY, id).withConverter(reviewConverter);
-    return await updateDoc(ref, { approved: approve });
+    return await updateDoc(ref, { 
+      approved: approve,
+      dateApproved: approve ? Timestamp.fromDate(new Date()) : null });
   } else {
     return null;
   }

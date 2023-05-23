@@ -29,10 +29,13 @@ export const useUserStore = defineStore({
 
         let dbUser = await getUser(authUser.uid);
         if (!dbUser) {
-          await addUser(authUser);
+          this.displayName = authUser.displayName;
+          await addUser(authUser);          
+        } else {
+          this.displayName = dbUser.displayName;
         }
+        
         await recordUserLogin(authUser.uid, DateTime.now());
-        this.displayName = dbUser.displayName;
         console.log('updateAuthUser store updated with authenticated');
       } else {
         // the user logged out.

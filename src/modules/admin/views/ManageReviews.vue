@@ -12,9 +12,10 @@
     <table v-if="!isLoading">
       <thead>
         <tr>
-          <th style="width:200px"><a @click="sortBy('resourceName')" class="sortHeading" :class="sortHeadingClasses('resourceName')">Resource Name</a></th>
-          <th style="width:200px"><a @click="sortBy('dateCreated')" class="sortHeading" :class="sortHeadingClasses('dateCreated')">Created</a></th>
+          <th v-if="activeTab == 'pending'" style="width:200px"><a @click="sortBy('dateCreated')" class="sortHeading" :class="sortHeadingClasses('dateCreated')">Created</a></th>
+          <th v-else style="width:200px"><a @click="sortBy('dateApproved')" class="sortHeading" :class="sortHeadingClasses('dateApproved')">Approved</a></th>
           <th style="width:200px"><a @click="sortBy('reviewedByName')" class="sortHeading" :class="sortHeadingClasses('reviewedByName')">Reviewed By</a></th>
+          <th style="width:200px"><a @click="sortBy('source')" class="sortHeading" :class="sortHeadingClasses('source')">Source</a></th>
           <th style="width:200px"><a @click="sortBy('statusDescription')" class="sortHeading" :class="sortHeadingClasses('statusDescription')">Linked to Resource</a></th>
           <th style="width:200px"></th>
         </tr>
@@ -22,9 +23,10 @@
       
       <tbody v-for="review in visibleReviews" :key="review.id" @click="handleEditReview(review)">
         <tr>
-          <td>{{ review.resourceName }}</td>
-          <td>{{ review.dateCreatedFormatted }}</td>
+          <td v-if="activeTab == 'pending'">{{ review.dateCreatedFormatted }}</td>
+          <td v-else>{{ review.dateApprovedFormatted }}</td>
           <td>{{ review.reviewedByName }}</td>
+          <td>{{ review.source }}</td>
           <td v-if="review.resourceId">
             <a @click.prevent.stop="handleShowResourceDetail(review)" >{{ review.statusDescription }}</a>
           </td>
@@ -52,7 +54,7 @@
       v-if="showEdit" 
       :review="selectedReview"
       @close="showEdit = false"
-      @saved="handleReviewSaved(selectedReview)">
+      @saved="handleReviewSaved">
     </edit-review-dialog>
 
     <resource-detail 
@@ -86,6 +88,7 @@ import ResourceDetail from '@/modules/resources/views/ResourceDetail.vue';
 import { deleteReview, getReviewsByApproval, setReviewApprove } from '@/modules/reviews/services/review-service';
 import { cloneDeep } from 'lodash';
 import { getResource } from '@/modules/resources/services/resource-service';
+const { DateTime } = require('luxon');
 
 import { Review } from '@/modules/reviews/model/review';
 
@@ -113,6 +116,7 @@ export default {
   async mounted() {
     this.isLoading = true;
     this.filterByApproval(false);
+    this.sortBy('dateCreated');
     this.isLoading = false;
   },
   methods: {
@@ -195,7 +199,7 @@ export default {
       const index = this.visibleReviews.indexOf(review);
       if (index >= 0) {
         this.visibleReviews[index].approved = approve;
-        
+        this.visibleReviews[index].dateApproved = DateTime.now();
         // if we're approving and we've already retrieved the approved reviews
         // add it to the top of the approvedReviews array and remove from pending 
         if (approve) {
@@ -312,6 +316,7 @@ table {
   width: 100%;
   outline: 1px solid var(--prr-lightgrey);
   border-spacing: 0px;
+  margin-bottom: 200px;
 }
 
 thead th {
@@ -380,5 +385,6 @@ tbody:hover {
 .reason-text {
   margin: 10px 0px 10px 25px; 
   color: var(--prr-mediumgrey);
+  white-space: pre-wrap;
 }
 </style>

@@ -23,7 +23,7 @@ router.beforeEach((to) => {
   if (to.meta.requiresAuth) {
     if (!store.isLoggedIn) {
       if (to.meta.requiresAdmin) {
-        return '/login?go';  
+        return '/login?invalid';  
       } else {
         const action = to.fullPath.includes('review') ? "Review" : "Recommendation";
         // redirect to login but say why - this is when someone unauthenticated wants to review/recommend

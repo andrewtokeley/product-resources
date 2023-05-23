@@ -1,6 +1,7 @@
 
 import { Recommendation, recommendationConverter } from '../model/recommendation'
 import { app } from "@/core/services/firebaseInit"
+import { deleteUnlinkedReviewsForRecommendation, getReviewForRecommendation } from '@/modules/reviews/services/review-service';
 import { updateDoc, getFirestore, collection, doc, getDoc,getDocs, query, where, addDoc, setDoc, deleteDoc, limit, getCountFromServer } from "firebase/firestore"; 
 const { DateTime } = require("luxon");
 
@@ -8,10 +9,10 @@ const db = getFirestore(app);
 
 export { getRecommendation, 
   getRecommendations, 
-  updateRecommendation, 
-  addRecommendation, 
   getUnlinkedRecommendations,
   getUnlinkedRecommendationsCount,
+  updateRecommendation, 
+  addRecommendation, 
   deleteRecommendation,
   approveRecommendation,
   unapproveRecommendation,
@@ -74,9 +75,16 @@ const getUnlinkedRecommendations = async function() {
   );
   const querySnapshot = await getDocs(q);
   const result = [];
-  querySnapshot.forEach((doc) => {
-    result.push(new Recommendation(doc.data()));
+  querySnapshot.forEach(async (doc) => {
+    let recommendation = new Recommendation(doc.data())
+    result.push(recommendation);
   });
+
+  for (let i=0; i<result.length;i++) {
+    // grab the review for this recommendation
+    let review = await getReviewForRecommendation(result[i].id);
+    result[i].review = review;
+  }
   return result 
 }
 
@@ -111,9 +119,15 @@ const addRecommendation = async function(recommendation) {
   return doc.id;
 }
 
-const deleteRecommendation = async function(id) {
-  const ref = doc(db, COLLECTION_KEY, id).withConverter(recommendationConverter);
-  return await deleteDoc(ref);
+/**
+ * Deletes a recommendation record and any associated reviews (should only be one) that haven't been linked to a resource yet.
+ * @param {*} id 
+ * @returns 
+ */
+const deleteRecommendation = async function(recommendationId) {
+  const ref = doc(db, COLLECTION_KEY, recommendationId).withConverter(recommendationConverter);
+  await deleteDoc(ref);
+  await deleteUnlinkedReviewsForRecommendation(recommendationId);
 }
 
 const approveRecommendation = async function(id) {

@@ -12,6 +12,7 @@
         <book-group 
           v-if="searchResults" 
           heading="Results" 
+          :showMore="true"
           :resources="searchResults"
           :showDescription="true" 
           :includeItemCount="false" 

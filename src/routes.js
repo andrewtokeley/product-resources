@@ -8,6 +8,7 @@ import About from './modules/about/views/AboutView'
 import Home from './modules/home/views/ResourcesHome'
 import UserProfile from './modules/users/views/UserProfile'
 import RecommendationView from './modules/recommendations/views/RecommendationView'
+import RecommendationConfirmation from '@/modules/recommendations/views/RecommendationConfirmation';
 import TermsOfService from '@/modules/about/views/TermsOfService';
 import PrivacyView from '@/modules/about/views/PrivacyView';
 import UserReviews from '@/modules/users/views/UserReviews';
@@ -36,7 +37,8 @@ export default [
   {path: '/recommend', component: RecommendationView, meta: { requiresAuth: true }},
   // recommend a resource of a given type
   {path: '/recommend/:typeId', component: RecommendationView, meta: { requiresAuth: true }},
-  
+  {path: '/recommend/confirm', component: RecommendationConfirmation },
+
   {path: '/review/:resourceId', component: RecommendationView, meta: { requiresAuth: true }},
   
   {path: '/about', component:About},

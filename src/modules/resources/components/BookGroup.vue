@@ -45,6 +45,10 @@ export default {
     }
   },
   props: {
+    showMore: {
+      type: Boolean,
+      default: false,
+    },
     isGrouped: {
       type: Boolean,
       default: true
@@ -87,7 +91,11 @@ export default {
         return resourceTypes.map( type => {
           // each group is an augmented resourcetype object.
           var group = type;
-          group.link = this.typeLink(type.key);
+          if (this.showMore) {
+            group.link = this.typeLink(type.key);
+          } else {
+            group.link = null;
+          }
           group.heading = type.value ?? this._heading;
           group.resources = this.resourcesByType(type.key)
           return group;

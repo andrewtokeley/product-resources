@@ -15,7 +15,7 @@
         <div class="label">Filter By:</div>
         <resource-type-select v-model="selectedResourceType"></resource-type-select>
       </div>
-      <div v-if="activeTab != 'recommendations'" class="action-items right">
+      <div class="action-items right">
         <base-button :disabled="isLoading" :isSecondary="true" @click="showExport = true">Export...</base-button>
         <base-button :disabled="isLoading" @click="handleAddResource">New Resource</base-button>
       </div>
@@ -31,7 +31,8 @@
           <th></th>
           <th><a @click="sortBy('displayName')" class="sortHeading" :class="sortHeadingClasses('displayName')">Name</a></th>
           <th><a @click="sortBy('dateCreated')" class="sortHeading" :class="sortHeadingClasses('dateCreated')">Created</a></th>
-          <th ><a @click="sortBy('approved')" class="sortHeading" :class="sortHeadingClasses('approved')">Status</a></th>
+          <th v-if="activeTab == 'approved'" ><a @click="sortBy('isFavourite')" class="sortHeading" :class="sortHeadingClasses('isFavourite')">Favourite</a></th>
+          <th v-else ><a @click="sortBy('approved')" class="sortHeading" :class="sortHeadingClasses('approved')">Status</a></th>
           <th></th>
         </tr>
       </thead>
@@ -42,7 +43,8 @@
           </td>
           <td>{{ resource.displayName }}</td>
           <td>{{ resource.dateCreatedFormatted }}</td>
-          <td>{{ resource.statusDescription }}</td>
+          <td v-if="activeTab == 'approved'">{{ resource.isFavourite ? "Yes" : "" }}</td>
+          <td v-else>{{ resource.statusDescription }}</td>
           <td>
             <div class="actions">
               <base-button v-if="!resource.approved" :disabled="!resource.canApprove" @click.stop="setApproval(resource, true)">Approve</base-button>
@@ -57,10 +59,10 @@
     <table v-if="activeTab == 'recommendations' && !isLoading && visibleRecords?.length > 0">
       <thead>
         <tr>
-          <th><a @click="sortBy('resourceUrl')" class="sortHeading" :class="sortHeadingClasses('resourceUrl')">Url</a></th>
-          <th><a @click="sortBy('dateCreated')" class="sortHeading" :class="sortHeadingClasses('dateCreated')">Created</a></th>
-          <th><a @click="sortBy('recommendedByName')" class="sortHeading" :class="sortHeadingClasses('recommendedByName')">Recommended By</a></th>
-          <th></th>
+          <th style="width: 200px;"><a @click="sortBy('resourceUrl')" class="sortHeading" :class="sortHeadingClasses('resourceUrl')">Url</a></th>
+          <th style="width: 200px;"><a @click="sortBy('dateCreated')" class="sortHeading" :class="sortHeadingClasses('dateCreated')">Created</a></th>
+          <th style="width: 200px;"><a @click="sortBy('recommendedByName')" class="sortHeading" :class="sortHeadingClasses('recommendedByName')">Recommended By</a></th>
+          <th>Action</th>
         </tr>
       </thead>
       <tbody class="body-hover" v-for="recommendation in visibleRecords" :key="recommendation.id">
@@ -76,9 +78,14 @@
           </td>
         </tr>
         <tr>
-          <td colspan="2">Internal Note: {{recommendation.comment}}</td>
+          <td colspan="3">Internal Note: {{recommendation.comment ?? '-'}}</td>
+          
+        </tr>
+        <tr>
+          <td class="review" colspan="3">"{{recommendation.review?.reason}}""</td>
           <td></td>
         </tr>
+
       </tbody>
     </table>
 
@@ -247,6 +254,7 @@ export default {
     },
 
     sortBy(propName, toggle) {
+      console.log('stop')
       this.sortedBy = propName;
       let _toggle = toggle ?? true;
 
@@ -263,7 +271,9 @@ export default {
       // remember the order for next toggle
       this.sortedByOrder[propName] = order;
 
-      this.filteredResources.sort( (a,b) => { 
+      this.visibleRecords.sort( (a,b) => { 
+        if (a[propName] == null) a[propName] = '';
+        if (b[propName] == null) b[propName] = '';
         if(a[propName] < b[propName]) { return order == 'asc' ? -1 : 1; }
         if(a[propName] > b[propName]) { return order == 'desc' ? -1 : 1; }
         return 0;
@@ -296,6 +306,7 @@ export default {
           //   resource.comment = r.recommendationComment ?? "No comment";
           //   return resource;
           // });
+          console.log('lll')
           this.recommendations = results;
         }
       }
@@ -404,14 +415,14 @@ export default {
     handleDeleteRecommendationClick(recommendation) {
       this.selectedResource = null;
       this.selectedRecommendation = recommendation;
-      this.deleteMessage = 'Are you sure you want to delete the recommendation by ${recommendation.recommendedByName}.';
+      this.deleteMessage = `Are you sure you want to delete the recommendation by ${recommendation.recommendedByName}.`;
       this.showDeleteConfirm = true
     },
 
     handleDeleteClick(resource) {
       this.selectedResource = resource;
       this.selectedRecommendation = null;
-      this.deleteMessage = 'Are you sure you want to delete the resource, "${resource.displayName}".';
+      this.deleteMessage = `Are you sure you want to delete the resource, "${resource.displayName}".`;
       this.showDeleteConfirm = true
     },
 
@@ -428,7 +439,8 @@ export default {
         if (this.selectedResource) {
           deleteRecord = this.selectedResource;
           await deleteResource(this.selectedResource.id);
-          // force refresh of recommendations (hacky!)
+          // force refresh of recommendations (hacky!) since the one linked to the deleted resource
+          // will now be unlinked.
           this.recommendations = null;
           deleted = true;
         }
@@ -502,6 +514,7 @@ table {
   width: 100%;
   outline: 1px solid var(--prr-lightgrey);
   border-spacing: 0px;
+  margin-bottom: 200px;
 }
 
 thead th {
@@ -539,13 +552,18 @@ th a.sorted.desc::after {
   clip-path: polygon(100% 0%, 0 0%, 50% 100%);
 }
 
+tbody > tr:last-child td {
+  border-bottom: 1px solid var(--prr-lightgrey);
+}
 tbody td.centred {
   text-align: center;
 }
 
 td {
-  padding: 5px;
-  border-bottom: 1px solid var(--prr-lightgrey);
+  padding: 5px 5px 5px 10px;
+  /* border-bottom: 1px solid var(--prr-lightgrey); */
+  overflow: hidden;
+  max-width: 200px;
 }
 tr .actions {
   display:flex;
@@ -569,6 +587,12 @@ tbody.body-hover:hover .actions {
   visibility: visible;
 }
 
+.review {
+  font-style: italic;
+  color: var(--prr-mediumgrey);
+  padding: 15px 25px;
+  white-space: pre-wrap;
+}
 .no-results {
   display: flex;
   align-items: center;

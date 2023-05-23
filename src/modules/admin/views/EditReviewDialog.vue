@@ -7,22 +7,29 @@
     @buttonClick="handleButtonClick"
     :buttonActions="buttons">
     <div class="content"> 
+
+      <div class="label">Review ID</div>
+      ID: {{ editReview.id }}
       
-      <div class="label">From</div>
-      {{ editReview.reviewedByName }}
-      <br />
-      {{ editReview.reviewedByUid }}
+      <div class="label">Reviewed By</div>
+      <base-input
+        v-model="editReview.reviewedByName">
+      </base-input>
+      ID: {{ editReview.reviewedByUid }}
       <hr class="divider" />
-      <p>Review for {{ editReview.resourceName }}</p>
       
       <div class="label">Review</div>
       <base-multiline-text
         v-model="editReview.reason">
       </base-multiline-text>
 
+      <hr class="divider" />
       <div class="label">Linked To</div>
       <base-input
         v-model="editReview.resourceId">
+      </base-input>
+      <base-input
+        v-model="editReview.resourceName">
       </base-input>
     </div>
   </modal-dialog>

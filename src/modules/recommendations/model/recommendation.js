@@ -33,7 +33,7 @@ class Recommendation {
 
   get dateCreatedFormatted() {
     if (this.dateCreated && this.dateCreated.isValid) {
-      return this.dateCreated.toLocaleString(DateTime.DATETIME_FULL);
+      return this.dateCreated.toLocaleString(DateTime.DATETIME_MED);
     }
     return null;
   }
