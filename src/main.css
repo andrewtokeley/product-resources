@@ -54,3 +54,7 @@ hr {
   border: 0px;
   border-bottom: 1px solid var(--prr-mediumgrey);
 }
+
+.splide__pagination__page.is-active {
+  background: var(--prr-green) !important;
+}

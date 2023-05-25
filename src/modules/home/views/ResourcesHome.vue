@@ -4,33 +4,14 @@
       <loading-symbol></loading-symbol>
     </div>
     <div v-else>
-      <!-- <section class="featured clearbackground">   -->
-        <carousel :items-to-show="2" :wrap-around="true">
-          <slide v-for="review in featured" :key="review.id">
-            <featured-card 
-              :review="review"
-              class="carousel__item" 
-              @click="handleViewDetail">
-            </featured-card>
-          </slide>
-
-          <template #addons>
-            <navigation />
-          </template>
-        </carousel>
-        <carousel :items-to-show="3" :wrap-around="true">
-          <slide v-for="slide in 10" :key="slide">
-            <div class="carousel__item">{{ slide }}</div>
-          </slide>
-
-          <template #addons>
-            <navigation />
-          </template>
-        </carousel>
-        
-      <!-- </section> -->
       
-      <section class="featured">
+      <splide :options="splideOptions" aria-label="Vue Splide Example">
+        <SplideSlide v-for="review in featured" :key="review.id">
+          <featured-card :review="review" @click="handleViewDetail"></featured-card>
+        </SplideSlide>
+      </splide>
+      
+      <section class="featured ">
         <book-group   
         heading="Recently Added" 
         headingIcon="new_releases" 
@@ -74,9 +55,10 @@ import FeaturedCard from "@/modules/home/components/FeaturedCard.vue";
 import ResourceDetail from "@/modules/resources/views/ResourceDetail.vue";
 import BookGroup from '@/modules/resources/components/BookGroup.vue';
 import LoadingSymbol from '@/core/components/LoadingSymbol.vue';
-import 'vue3-carousel/dist/carousel.css'
-
-import { Carousel, Slide, Navigation } from 'vue3-carousel'
+// import 'vue3-carousel/dist/carousel.css'
+// import { Carousel, Slide, Navigation } from 'vue3-carousel'
+import { Splide, SplideSlide } from '@splidejs/vue-splide';
+import '@splidejs/vue-splide/css';
 
 import { searchByResourceTypes, getRecentlyAdded } from '@/modules/resources/services/resource-service';
 import { reviewStore } from "@/modules/reviews/store/reviewStore";
@@ -88,9 +70,9 @@ export default {
     BookGroup, 
     LoadingSymbol, 
     ResourceDetail,
-    Carousel, 
-    Slide,  
-    Navigation },
+    Splide,
+    SplideSlide,
+  },
   data() {
     return {
       featured: [],
@@ -102,6 +84,18 @@ export default {
       showDetail: false,
     }
   },
+
+  computed: {
+    splideOptions() {
+      return { 
+        rewind: true,
+        perPage: 1,
+        autoplay: true,
+        interval: 5000,
+      }
+    }
+  },
+
   async mounted() {
     this.isLoading = true;
     this.topBooks = await searchByResourceTypes(['books'], 5);
@@ -112,6 +106,7 @@ export default {
     let store = reviewStore()
     store.fetchFeatured();
     this.featured = store.featuredReviews;
+    console.log(store.featuredReviews.length);
 
     this.isLoading = false;
   },
@@ -126,6 +121,12 @@ export default {
 </script>
 
 <style scoped>
+.splide__pagination__page.is-active {
+  background: var(--prr-green) !important;
+}
+</style>
+<style scoped>
+
 
 .resources-home {
   display:block;
@@ -153,8 +154,9 @@ section.featured {
   flex-wrap: wrap;
 }
 
-section.featured.clearbackground {
+section.featured.clear-background {
   background: transparent;
 }
+
 
 </style>
