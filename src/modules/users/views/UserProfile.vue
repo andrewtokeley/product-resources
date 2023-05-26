@@ -1,11 +1,9 @@
 <template>
   <div class="user-profile">
     <h1>Manage Your Profile</h1>
-    <p>Here is where you manage your profile</p>
+    
     <div class="label">This is the name that will be displayed with your reviews.</div>
     <base-input v-model="user.displayName" :errorMessage="errorMessage['displayName']" @blur="validate('displayName')" :options="{placeholder: 'Display name'}"></base-input>
-    <div class="label">If you want people to be able to find you online, leave your website address.</div>
-    <base-input v-model="user.website" :errorMessage="errorMessage['website']" @blur="validate('website')" :options="{placeholder: 'Website/LinkedIn'}"></base-input>
     <!-- <h2>Your Recommendations</h2>
     <h2>Your Reviews</h2> -->
     <div class="actions">
@@ -63,8 +61,17 @@ export default {
 
     async handleSave() {
       this.isSaving = true;
-      await updateUser(this.user);
+      
+      // save and update state with user's updated displayName
+      const store = useUserStore();
+      if (this.user.displayName != store.displayName) {
+        await updateUser(this.user);
+        store.setDisplayName(this.user.displayName);
+      }
+      
       this.isSaving = false;
+
+      // simply go back after save.
       this.$router.go(-1);
     }
   },

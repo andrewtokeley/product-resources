@@ -2,7 +2,8 @@
   <div class="header">
     
     <div class="left-nav">
-      <ul>
+      
+      <ul class="desktop">
         <li v-for="nav in navLinks" :key="nav.path">
           <router-link 
             :class="{ selected: isSelected(nav)}" 
@@ -25,23 +26,28 @@
           </div>
         </li>
       </ul>
+    
+      <div class="mobile">
+        <side-bar></side-bar>
+      </div>
     </div>
     
     <div class="spacer"></div>
 
     <div class="header__right">
-      <base-button @click="$router.push('/recommend')" >Recommend...</base-button>
+      <base-button class="desktop" @click="$router.push('/recommend')" >Recommend...</base-button>
       <search-input 
+        class="desktop"
         v-model="searchTerm" 
         @search="$router.push(`/search/${searchTerm}`)" 
         @mouseover="showCategories=false">
       </search-input>
-      <div class="menu">
+      <div>
         <base-icon :menu="menuOptions">menu</base-icon>
         <badge-count v-if="todoCount > 0" class="badge" :count="todoCount"></badge-count>
       </div>
     </div>
-
+    
     <resource-detail 
       :resource="resourceFromQueryString"
       v-if="showResourceDialog" 
@@ -57,6 +63,7 @@ import TagButton from '@/modules/resources/components/TagButton.vue'
 import BaseButton from './BaseButton.vue'
 import ResourceDetail from '@/modules/resources/views/ResourceDetail.vue'
 import BadgeCount from './BadgeCount.vue'
+import SideBar from '@/modules/navigation/components/SideBar.vue';
 
 import { auth } from '@/core/services/firebaseInit'
 import { useUserStore } from '@/core/state/userStore'
@@ -68,6 +75,7 @@ import { ref } from 'vue';
 import { useLookupStore } from '@/core/state/lookupStore';
 import { getUnapprovedReviewsCount } from '@/modules/reviews/services/review-service'
 import { getUnlinkedRecommendationsCount } from '@/modules/recommendations/services/recommendation-service'
+
 export default {
   name: 'HeaderBar',
   components: {
@@ -77,6 +85,7 @@ export default {
     BaseButton,
     ResourceDetail,
     BadgeCount,
+    SideBar,
   },
   setup() {
     const lookupStore = ref(null);
@@ -135,9 +144,7 @@ export default {
   methods: {
 
     handleLogout() {
-      console.log('logout');
       auth.signOut();
-      //this.$router.push('/');
     },
 
     isSelected(nav) {
@@ -249,6 +256,7 @@ export default {
 
 <style scoped>
 .header {
+  padding: 0px 10px;
   font-size: var(--prr-font-size-medium);
   display:flex;
   flex-direction: row;
@@ -355,5 +363,23 @@ li {
   position: absolute;
   right: 15px;
   top: 15px;
+}
+
+.mobile {
+  display: none;
+}
+
+@media only screen and (max-width: 600px) {
+  .desktop {
+    display: none;
+  }
+  .mobile {
+    display:block;
+  }
+
+  .header {
+    min-width: 100%;
+    max-width: 100%;
+  }
 }
 </style>

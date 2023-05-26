@@ -3,12 +3,14 @@
     :titleIcon="titleIcon"
     :title="viewResource.displayName" 
     :subTitle="viewResource.authorsList"
+    :iconActions="iconActions"
     :buttonActions="buttonActions"
     :fullscreen="true"
     :isLoading="false"
     :showBackButton="showBackButton"
     @close="handleClose" 
     @buttonClick="handleButtonClick"
+    @iconClick="handleIconClick"
     @backButtonClick="handleBackButton"
   >
     <div>
@@ -85,6 +87,15 @@ export default {
         return null;
       }
     },
+    iconActions() {
+      return [
+        {
+          id: 'edit',
+          iconName: 'edit',
+          show: this.userStore.isAdmin,
+        }
+      ]
+    },
     buttonActions() {
       return [
         {
@@ -115,6 +126,7 @@ export default {
       this.updateHistory();
       this.showBackButton = false;
     },
+
     async handleButtonClick(action) {
       if (action.id == 'view') {
         if (this.viewResource.resourceUrl) {
@@ -122,6 +134,13 @@ export default {
         }
       } else if (action.id == 'review') {
         this.$router.push(`/review/${this.viewResource.id}`);
+      }
+    },
+
+    async handleIconClick(action) {
+      console.log(action);
+      if (action.id == 'edit') {
+        this.$router.push(`/admin/resources?edit=${this.viewResource.id}`);
       }
     },
 

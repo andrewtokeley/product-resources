@@ -115,8 +115,8 @@ export default {
   
   async mounted() {
     this.isLoading = true;
-    this.filterByApproval(false);
-    this.sortBy('dateCreated');
+    await this.filterByApproval(false);
+    this.sortBy('dateCreated', 'desc');
     this.isLoading = false;
   },
   methods: {
@@ -169,12 +169,12 @@ export default {
       return classes;
     },
 
-    sortBy(propName, toggle) {
+    sortBy(propName, order) {
       this.sortedBy = propName;
-      let _toggle = toggle ?? true;
 
-      var order = this.sortedByOrder[propName] ?? 'asc';
-      if (_toggle) {  
+      // if no order is provided toggle from last ordering
+      const toggle = (order == undefined)
+      if (toggle) {  
         // reverse the order
         if (this.sortedByOrder[propName] == 'desc') {
           order = 'asc'
@@ -188,7 +188,7 @@ export default {
 
       this.visibleReviews.sort( (a,b) => { 
         if(a[propName] < b[propName]) { return order == 'asc' ? -1 : 1; }
-        if(a[propName] > b[propName]) { return order == 'desc' ? -1 : 1; }
+        if(a[propName] > b[propName]) { return order == 'asc' ? 1 : -1; }
         return 0;
       })
 

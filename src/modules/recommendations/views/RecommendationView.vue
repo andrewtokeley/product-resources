@@ -52,6 +52,8 @@
               placeholder: 'Your Review',
               readOnly: isSaving}">
           </base-multiline-text>
+          <div class="label">Feel free to update the name that will appear with your review</div>
+          <base-input v-model="review.reviewedByName"></base-input>
         </div>
       </div>
       
@@ -81,6 +83,7 @@ import { addRecommendation } from '@/modules/recommendations/services/recommenda
 import { addReview } from '@/modules/reviews/services/review-service';
 import { getResource } from '@/modules/resources/services/resource-service'
 import { useUserStore } from '@/core/state/userStore'
+import { getUser, updateUser } from '@/modules/users/services/user-services'
 
 export default {
 name: "recommend-view",
@@ -107,13 +110,12 @@ data() {
 },
 async mounted() {
   this.isLoading = true;
-  const store = useUserStore();
   
   if (this.isRecommendation) {    
     // we're reviewing a new (unapproved) recommended resource
     // this.recommendation.resourceType = this.$route.params.typeId ?? 'books';
-    this.recommendation.recommendedByUid = store.uid;
-    this.recommendation.recommendedByName = store.displayName;
+    this.recommendation.recommendedByUid = this.userStore.uid;
+    this.recommendation.recommendedByName = this.userStore.displayName;
     
     this.review.resourceId = null;
   } else {
@@ -129,12 +131,15 @@ async mounted() {
     }
   }
 
-  this.review.reviewedByUid = store.uid;
-  this.review.reviewedByName = store.displayName;
+  this.review.reviewedByUid = this.userStore.uid;
+  this.review.reviewedByName = this.userStore.displayName;
 
   this.isLoading = false;
 },  
 computed: {
+  userStore() {
+    return useUserStore();
+  },
   validationErrors() {
     const errorsRecommendations = this.recommendation.validate();
     const errorsReviews = this.review.validate();
@@ -148,10 +153,8 @@ computed: {
     
     if (this.isRecommendation) {
       // both the rec and review need to be valid
-      console.log('checking both');
       return this.recommendation.isValid && this.review.isValid;
     } else {
-      console.log('checking review');
       return this.review.isValid;
     }
   },
@@ -169,7 +172,18 @@ methods: {
       const recommendationId = await addRecommendation(this.recommendation);
       this.review.recommendationId = recommendationId;
     } 
+    
+    // add the review
     await addReview(this.review);
+
+    // update the user's display name if they've updated it for this review
+    if (this.review.reviewedByName != this.userStore.displayName) {
+      this.userStore.setDisplayName(this.review.reviewedByName);
+      const user = await getUser(this.userStore.uid);
+      user.displayName = this.review.reviewedByName;
+      await updateUser(user);
+    }
+
     setTimeout(function () {
       _this.isSaving = false;
       _this.$router.push({ path: '/recommend/confirm', query: {'action': _this.isRecommendation ? "recommendation" : "review"}});

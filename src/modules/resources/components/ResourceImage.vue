@@ -72,7 +72,7 @@ export default {
 
 .resource-image.landscape {
   height:124px;
-  width: 185px;
+  width: 175px;
 }
 .resource-image.landscape.preview {
   height:75px;

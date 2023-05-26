@@ -45,7 +45,7 @@ export default [
   {path: '/terms', component:TermsOfService},
   {path: '/privacy', component:PrivacyView},
 
-  {path: '/admin/resources', component:ManageResources, meta: { requiresAuth: true, requiresAdmin: true } },
+  {path: '/admin/resources/', component:ManageResources, meta: { requiresAuth: true, requiresAdmin: true } },
 
   {path: '/admin/reviews', component:ManageReviews, meta: { requiresAuth: true, requiresAdmin: true } },
 

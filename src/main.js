@@ -41,21 +41,19 @@ let app;
 let storeUser;
 auth.onAuthStateChanged(async (authUser) => {
   if (!app) {
-    console.log('first load');
     
-    app = createApp(App).use(pinia);
+    app = createApp(App);
     
-    // update lookups
+    // cache lookups in state
+    app.use(pinia);
     storeUser = useUserStore();
     const lookupStore = useLookupStore();
     await lookupStore.fetchLookups();
-    console.log('lookups fetched');
     
     app.use(router);
     app.mount('#app');
-    console.log('app mounted');
   }
-  // update store with user
+  // update state with user
   if (storeUser) {
     await storeUser.updateAuthUser(authUser);  
   }

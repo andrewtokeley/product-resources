@@ -173,7 +173,7 @@ h1 {
 
 .row.singleRow {
   flex-wrap: nowrap;
-  justify-content: space-evenly;
+  justify-content: flex-start;
 }
 
 .add-resource-card {
@@ -186,4 +186,11 @@ h1 {
   background: var(--prr-extralightgrey);
 }
 
+@media only screen and (max-width: 600px) {
+
+  .row {
+    justify-content: space-around;
+  }
+  
+}
 </style>

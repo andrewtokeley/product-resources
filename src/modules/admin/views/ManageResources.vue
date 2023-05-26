@@ -133,7 +133,7 @@ import BaseButton from '@/core/components/BaseButton.vue';
 import ConfirmationDialog from '@/core/components/ConfirmationDialog.vue';
 import LoadingSymbol from '@/core/components/LoadingSymbol.vue';
 
-import { deleteResource, searchByResourceTypes, getPendingResources, updateResource, addResource } from '@/modules/resources/services/resource-service';
+import { deleteResource, searchByResourceTypes, getPendingResources, updateResource, addResource, getResource } from '@/modules/resources/services/resource-service';
 import { deleteRecommendation, getUnlinkedRecommendations } from '@/modules/recommendations/services/recommendation-service';
 
 import { cloneDeep } from 'lodash';
@@ -169,14 +169,24 @@ export default {
       activeTab: 'recommendations',
     }
   },
-  mounted() {
+  async mounted() {
     // trigger watch
     // this.selectedResourceType = 'books';
     this.statusList = [
       { key:'approved', value: 'Approved'} ,
       { key:'draft', value: 'Pending'} ,
     ];
-    this.filterByStatus('recommendations');
+    const resourceId = this.$route.query.edit;
+    if (resourceId) {
+      this.selectedResource = await getResource(resourceId);
+      if (this.selectedResource) {
+        this.selectedResourceType = this.selectedResource.resourceType;
+        this.filterByStatus('approved');
+        this.showEdit = true;
+      }
+    } else {
+      this.filterByStatus('recommendations');
+    }
   },
   watch: {
     selectedResourceType() {
@@ -368,7 +378,7 @@ export default {
     handleAdded(resource) {
       this.selectedResource = resource;
       // add to the top of the pending list
-      this.pendingResources.unshift(resource);
+      this.pendingResources?.unshift(resource);
       this.filterByStatus('draft');
       this.showEdit = false;
     },

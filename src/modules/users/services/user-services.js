@@ -1,10 +1,10 @@
 import { app } from "@/core/services/firebaseInit"
-import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore"; 
+import { writeBatch, getFirestore, doc, getDoc, setDoc } from "firebase/firestore"; 
 
 import { userConverter, userPrivateConverter } from '@/modules/users/model/user'
+// import { userConverter, userPrivateConverter } from '@/modules/users/model/user'
 import { DateTime } from "luxon";
 import { User, UserPrivate } from "@/modules/users/model/user";
-import { WriteBatch } from "@google-cloud/firestore";
 
 export { 
   addUser,
@@ -36,7 +36,8 @@ const getUser = async function(uid) {
 }
 
 /**
- * Adds a new user record to the datastore, including private data. Only authenticated users can call this and only with their authUser instance.
+ * Adds a new user record to the datastore, including private data. 
+ * Only authenticated users can call this and only with their authUser instance.
  * 
 * @param {*} authUser as returned from firebase authentication
  * @returns the true if successful
@@ -49,29 +50,35 @@ const addUser = async function(authUser) {
     email: authUser.email,
     lastLoggedInDate: DateTime.now(),
   });
-
-  let batch = WriteBatch(db);
-  batch.set(doc(db, COLLECTION_KEY, authUser.uid), user);
-  batch.set(doc(db, COLLECTION_KEY, authUser.uid, COLLECTION_PRIVATE_KEY, DOCUMENT_PRIVATE_KEY), userPrivate);
+  
+  let batch = writeBatch(db);
+  const ref = doc(db, COLLECTION_KEY, authUser.uid).withConverter(userConverter);
+  const refPrivate = doc(db, COLLECTION_KEY, authUser.uid, COLLECTION_PRIVATE_KEY, DOCUMENT_PRIVATE_KEY).withConverter(userPrivateConverter);
+  
+  batch.set(ref, user);
+  batch.set(refPrivate, userPrivate);
   await batch.commit();
 
   return true;
 }
 
 /**
- * Records that a user has logged in, setting the date into the user's private collection
- * @param {*} uid 
- * @param {*} datetime a luxon date 
+ * Records that a user has logged in, updating any authUser properties into the user record and 
+ * setting the login date.
+ * @param {*} authUser user record as returns by firebase auth
  * @returns true if successful
  */
-const recordUserLogin = async function(uid, datetime) {
+const recordUserLogin = async function(uid) {
   if (uid) {
     const ref = doc(db, COLLECTION_KEY, uid, COLLECTION_PRIVATE_KEY, DOCUMENT_PRIVATE_KEY).withConverter(userPrivateConverter);
-    await setDoc(ref, { lastLoggedInDate: datetime }, { merge: true });
+    const user = new UserPrivate({lastLoggedInDate: DateTime.now()});
+    await setDoc(ref, user, { merge: true });
     return true;
   } else {
     return false;
   }
+  
+  
 }
 
 /**

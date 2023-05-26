@@ -169,7 +169,7 @@ export default defineComponent({
   flex-direction: column;
   position: relative;
   max-width: 800px;
-  min-width: 450px;
+  min-width: 400px;
   max-height: 90%;
   background-color: white;
   border-radius: 5px;

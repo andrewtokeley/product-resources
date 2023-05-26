@@ -7,8 +7,7 @@
       <div class="introduction">
         <div><h1 v-if="title">{{ title }}</h1></div>
         <div><p v-if="summary">{{ summary }}</p></div>
-        <!-- <div class="label" v-if="tagsUsed">Filter results by;</div> -->
-        <tag-selector :singleSelect="true" :tags="tagsUsed" v-model="selectedTagFilter" @tagClicked="handleTagClicked"></tag-selector>
+        <tag-selector class="tag-cloud" :singleSelect="true" :tags="tagsUsed" v-model="selectedTagFilter" @tagClicked="handleTagClicked"></tag-selector>
       </div>
       <template v-if="filteredSearchResults.length > 0 && !isLoading" >
         <book-group 
@@ -234,5 +233,12 @@ p {
 
 .noresults {
   margin-top:100px;
+}
+
+@media only screen and (max-width: 600px) {
+  
+  .tag-cloud {
+    display: none;
+  }
 }
 </style>

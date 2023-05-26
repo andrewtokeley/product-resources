@@ -1,10 +1,5 @@
-import { addUser, getUser, recordUserLogin } from '@/modules/users/services/user-services';
-import { DateTime } from 'luxon';
+import { recordUserLogin, getUser, addUser } from '@/modules/users/services/user-services';
 import { defineStore } from 'pinia'
-
-// auth.onAuthStateChanged(async (authUser) => { 
-//   await this.updateAuthUser(authUser);
-// });
 
 export const useUserStore = defineStore({
   id: 'user',
@@ -17,35 +12,46 @@ export const useUserStore = defineStore({
   }),
 
   actions: {
-    
+    async setDisplayName(displayName) {
+      this.displayName = displayName;
+    },
+
     async updateAuthUser(authUser) {
-      console.log('updateAuthUser started');
+      
+      // successful login
       if (authUser) {
-        const token = await authUser.getIdTokenResult();
+        
+        // set the state properties
         this.uid = authUser.uid;
         this.isLoggedIn = true;
         this.email = authUser.email;
+
+        // check if they're an admin
+        const token = await authUser.getIdTokenResult();
         this.isAdmin = token.claims.admin ?? false
 
+        // see if they've overridden any authuser properties (like displayName)
         let dbUser = await getUser(authUser.uid);
         if (!dbUser) {
+          // default the displayName to the authUser
           this.displayName = authUser.displayName;
-          await addUser(authUser);          
+          await addUser(authUser);
         } else {
           this.displayName = dbUser.displayName;
         }
         
-        await recordUserLogin(authUser.uid, DateTime.now());
-        console.log('updateAuthUser store updated with authenticated');
+        // record last logged in 
+        await recordUserLogin(authUser.uid);
+        
       } else {
-        // the user logged out.
+        // the user logged out, clear all state
         this.isLoggedIn = false;
         this.isAdmin = false;
         this.displayName = "";
         this.email = "";
-        console.log('updateAuthUser store updated with anon user');
+        
       }
-      console.log('updateAuthUser ended');
+      
     },
   },
 })

@@ -1,6 +1,5 @@
 import { Timestamp } from "firebase/firestore";
 const { DateTime } = require("luxon");
-import { validateUrl } from "@/core/model/validation";
 import Result from "@/core/model/Result";
 
 export { User, UserPrivate, userConverter, userPrivateConverter };
@@ -9,7 +8,6 @@ class User {
   constructor(config) {
     this.uid = config?.uid;
     this.displayName = config?.displayName;
-    this.website = config?.website;
   }
  
   static default() {
@@ -21,13 +19,6 @@ class User {
    */
   get schema() {
     return {
-      website: (value) => {
-        // first do mandatory check
-        if (!value || value.length == 0) {
-          return Result.failure("Must enter url.");
-        }
-        return validateUrl(value);        
-      },
       displayName: (value) => {
         if (!value || value.length == 0) {
           return Result.failure("Must enter display name.");
@@ -53,8 +44,6 @@ var userConverter = {
   toFirestore: function (user) {
     const result = {};
     if (user.displayName) { result.displayName = user.displayName }
-    if (user.website) { result.website = user.website; }
-    
     return result;
   },
 

@@ -1,6 +1,6 @@
 <template>
   <div class="app">
-    <header-bar v-show="!($route.meta.hideHeader ?? false)"></header-bar>
+    <header-bar class="header" v-show="!($route.meta.hideHeader ?? false)"></header-bar>
     <div class="page">
       <router-view :key="$route.fullPath" />
     </div>
@@ -43,13 +43,11 @@ body,
 }
 
 .page {
-  /* width: 80%; */
-  /* width: 900px; */
   max-width: 900px;
   margin: 0 auto;
-  /* display: flex;
-  flex-direction: column;
-  justify-content: center; */
+  margin-bottom: 100px;
+  padding: 0px 10px;
 }
+
 </style>
 
