@@ -36,7 +36,7 @@ export default {
 <style scoped>
 .review-widget {
   margin-top: 20px;  
-  min-width: 200px;
+  /* min-width: 200px; */
   max-width: 500px;
   text-align: center;
 }
