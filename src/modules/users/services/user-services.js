@@ -5,6 +5,7 @@ import { userConverter, userPrivateConverter } from '@/modules/users/model/user'
 // import { userConverter, userPrivateConverter } from '@/modules/users/model/user'
 import { DateTime } from "luxon";
 import { User, UserPrivate } from "@/modules/users/model/user";
+import FirestoreKeys from "@/core/services/firebaseKeys";
 
 export { 
   addUser,
@@ -13,9 +14,9 @@ export {
   updateUser,
 }
 
-const COLLECTION_KEY = "users";
-const COLLECTION_PRIVATE_KEY = "private";
-const DOCUMENT_PRIVATE_KEY = 'secure';
+const COLLECTION_KEY = FirestoreKeys.UsersCollection.key;
+const COLLECTION_PRIVATE_KEY = FirestoreKeys.UsersPrivateCollection.key;
+const DOCUMENT_PRIVATE_KEY = FirestoreKeys.UsersPrivateDocument.key;
 const db = getFirestore(app);
 
 /**

@@ -3,7 +3,7 @@
     <textarea
       ref="textArea"
       :disabled="disabled"
-      @input="$emit('update:modelValue', $event.target.value)"
+      @input="validate"
       @blur="$emit('blur')"
       v-model="value"
       :maxLength="_options.maximumLength"
@@ -12,7 +12,7 @@
       :placeholder="_options.placeholder"
       class="base-multiline-text__textarea"
       :class="{
-        'base-multiline-text__textarea--has-error': errorMessage?.length > 0,
+        'base-multiline-text__textarea--has-error': errorMessage_?.length > 0,
         'base-multiline-text__textarea--disabled': disabled,
       }"
     />
@@ -26,7 +26,7 @@
       {{ characterCount }}
     </div>
     
-    <div v-if="_options.inlineErrors" class="base-multiline-text__errorMessage">{{ errorMessage }}</div>
+    <div v-if="_options.inlineErrors" class="base-multiline-text__errorMessage">{{ errorMessage_ }}</div>
   </div>
 </template>
 
@@ -92,7 +92,7 @@ export default {
       validationDelayTimer: Object,
       validationMessage: "",
       lastValue: null,
-      // errorMessage: "",
+      errorMessage_: "",
     };
   },
 
@@ -101,7 +101,11 @@ export default {
       setTimeout(() => { this.$refs.textArea?.focus() }, 300)
     }
   },
-
+  watch: {
+    errorMessage(value) {
+      this.errorMessage_ = value;
+    }
+  },
   computed: {
     _options() {
       return {
@@ -133,30 +137,33 @@ export default {
 
   methods: {
     validate(event) {
-      // const vm = this;
+      
+      const vm = this;
       const newValue = event.target.value;
 
       // set a timer to delay the check - this allows a number of keys to be pressed before we call validation callback
       if (this.validation) {
         clearTimeout(this.validationDelayTimer);
-
-        // this.validationDelayTimer = setTimeout(function () {
-        //   // only bother validating if the value is different.
-        //   if (newValue != vm.lastValue) {
-        //     vm.validation
-        //       .callback(newValue)
-        //       .then(() => {
-        //         vm.lastValue = newValue;
-        //         vm.errorMessage = "";
-        //         vm.$emit("update:modelValue", newValue);
-        //       })
-        //       .catch((error) => {
-        //         vm.errorMessage = error;
-        //       });
-        //   } else {
-        //     console.log("nothing");
-        //   }
-        // }, this.validation.delay);
+        
+        this.validationDelayTimer = setTimeout(function () {
+          // only bother validating if the value is different.
+        
+          if (newValue != vm.lastValue) {
+            vm.validation
+              .callback(newValue)
+                .then(() => {
+                  vm.lastValue = newValue;
+                  vm.errorMessage_ = "";
+                  vm.$emit("update:modelValue", newValue);
+                })
+                .catch((error) => {
+                  console.log(error);
+                  vm.errorMessage_ = error;
+                });
+          } else {
+            console.log("nothing");
+          }
+        }, this.validation.delay);
       } else {
         this.$emit("update:modelValue", newValue);
       }

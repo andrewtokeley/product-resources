@@ -20,7 +20,13 @@
               placeholder: 'Select Type'}"
           ></base-select>
         </div>
-        <div></div>
+        <div>
+          <div></div>
+          <base-check-box 
+            v-model="editResource.isFavourite"
+            :leftAlign="true"
+            label="Display on home page as a favourite."></base-check-box>
+        </div>
       </div>
 
       <div class="label tight">Display</div>
@@ -133,6 +139,7 @@ import ModalDialog from '@/core/components/ModalDialog.vue';
 import { addResource, getResource, updateResource } from '@/modules/resources/services/resource-service';
 import { validateObject, validateProperty } from '@/core/model/validation';
 import { getPersistentLink } from '@/core/services/imageStorageService'
+import BaseCheckBox from '@/core/components/BaseCheckBox.vue';
 
 export default {
   components: { 
@@ -143,6 +150,7 @@ export default {
     TagSelector,
     AuthorsList,
     ModalDialog,
+    BaseCheckBox,
   },
   name: "edit-resource",
   emits: ['close', 'saved', 'added'],

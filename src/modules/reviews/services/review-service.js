@@ -1,9 +1,10 @@
 
 import { Review, reviewConverter } from '@/modules/reviews/model/review';
 import { app } from "@/core/services/firebaseInit"
-import { documentId, updateDoc, getFirestore, collection, doc, getDoc,getDocs, query, where, addDoc, setDoc, deleteDoc, limit, getCountFromServer } from "firebase/firestore"; 
+import { documentId, increment, getFirestore, collection, doc, getDoc,getDocs, query, where, addDoc, setDoc, limit, getCountFromServer, writeBatch } from "firebase/firestore"; 
 const { DateTime } = require("luxon");
 import { Timestamp } from "firebase/firestore";
+import FirestoreKeys from '@/core/services/firebaseKeys';
 
 const db = getFirestore(app);
 
@@ -24,8 +25,7 @@ export { getReview,
   deleteUnlinkedReviewsForRecommendation,
 }
 
-const COLLECTION_KEY = "reviews";
-
+const COLLECTION_KEY = FirestoreKeys.ReviewsCollection.key;
 
 const getReviewsByUser = async function (uid) {
   const q = query(collection(db, COLLECTION_KEY).withConverter(reviewConverter), 
@@ -214,10 +214,6 @@ const addReview = async function(review) {
   return doc.id;
 }
 
-const deleteReview = async function(id) {
-  const ref = doc(db, COLLECTION_KEY, id).withConverter(reviewConverter);
-  return await deleteDoc(ref);
-}
 
 /**
  * Deletes any reviews that are associated with a recommendation but have not been linked to a resource yet.
@@ -239,14 +235,55 @@ const deleteUnlinkedReviewsForRecommendation = async function(recommendationId) 
   return true;
 }
 
-const setReviewApprove = async function(id, approve) {
+/**
+ * Deletes a review and deprecates the corresponding resource reviewCount, if it exists.
+ * 
+ * This is one of only two methods that maintains the reviewCount. The other method is setReviewApprove.
+ */
+const deleteReview = async function(review) {
+  let batch = writeBatch(db);
   
-  if (id) {    
-    const ref = doc(db, COLLECTION_KEY, id).withConverter(reviewConverter);
-    return await updateDoc(ref, { 
-      approved: approve,
-      dateApproved: approve ? Timestamp.fromDate(new Date()) : null });
-  } else {
-    return null;
+  // if this review has been approved it will have been included in the reviewCount on the resource.
+  // If this is the case, decrement reviewCount.
+  if (review.approved && review.resourceId) {
+    const resourceRef = doc(db, FirestoreKeys.ResourcesCollection.key, review.resourceId);
+    batch.update(resourceRef, 'reviewCount', increment(-1));
   }
+  const ref = doc(db, COLLECTION_KEY, review.id).withConverter(reviewConverter);
+  batch.delete(ref);
+
+  await batch.commit();
+}
+
+/**
+ * Sets the approved field value and updates the corresponding resource reviewCount, if it exists.
+ * 
+ * Note, you can't approve/unapprove a review if it's not linked to a resource.
+ * 
+ * @param {} review 
+ * @param {*} approve 
+ * @returns 
+ */
+const setReviewApprove = async function(review, approve) {  
+  // you can't approve/unapprove a review if it's not linked to a resource
+  if (!review.resourceId || !review.id) return false;
+
+  let batch = writeBatch(db);
+  
+  const ref = doc(db, COLLECTION_KEY, review.id).withConverter(reviewConverter);
+  batch.update(ref, { 
+    approved: approve,
+    dateApproved: approve ? Timestamp.fromDate(new Date()) : null }
+  );
+  
+  const resourceRef = doc(db, FirestoreKeys.ResourcesCollection.key, review.resourceId);
+  if (approve) {
+    // increment reviewCount
+    batch.update(resourceRef, "reviewCount", increment(1));
+  } else {
+    // decrement reviewCount
+    batch.update(resourceRef, "reviewCount", increment(-1));
+  }
+
+  return await batch.commit();
 }

@@ -79,7 +79,6 @@ export default {
 } 
 
 .login__ui {
-  margin-top: 100px;
   height: 100%;
   display: flex;
   justify-content: center;

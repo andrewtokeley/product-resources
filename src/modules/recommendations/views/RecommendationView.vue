@@ -4,7 +4,7 @@
     <div v-else class="content" >
       
       <template v-if="isRecommendation">
-        <h1>Recommend a New Resource</h1>
+        <h1>{{ title }}</h1>
         <p>Thank you so much for recommending a new resource! </p>
       </template>
       <template v-else>
@@ -16,15 +16,14 @@
         <div class="label tight">Where can people find it?</div> 
         <base-input 
           v-model="recommendation.resourceUrl" 
-          :hasFocus="true"
           @blur="validateRecommendation('resourceUrl')"
+          :hasFocus="true"
           :errorMessage="errorMessage['resourceUrl']"
           :options="{ placeholder: 'Link to Resource', readOnly: isSaving, inlineErrors: false }">
         </base-input>
         <div class="label">Anything you'd like to share about the resource to help us categorise it and understand why you're recommending it?</div>
         <base-multiline-text 
           v-model="recommendation.comment"
-          @blur="validateReview('comment')"
           :errorMessage="errorMessage['comment']"
           :options="{ numberOfLines: 5, 
             maximumLength: 500, 
@@ -42,9 +41,9 @@
         <div class="textarea-wrap">
           <base-multiline-text 
             v-model="review.reason"
-            @blur="validateReview('reason')"
-            :errorMessage="errorMessage['reason']"
+            :validation="{ delay: 200, callback: validateReviewReason}"
             :hasFocus="!isRecommendation"
+            :errorMessage="errorMessage['reason']"
             :options="{ numberOfLines: 5, 
               maximumLength: 500, 
               inlineErrors: false,
@@ -57,11 +56,9 @@
         </div>
       </div>
       
-      
-
       <div class="buttons">
         <base-button :isSecondary="true" @click="$router.back()">Cancel</base-button>
-        <base-button :showSpinner="isSaving" :disabled="!isValid" @click="handleSubmit">Submit</base-button>
+        <base-button :showSpinner="isSaving" @click="handleSubmit">Submit</base-button>
       </div>
 
     </div>
@@ -85,6 +82,8 @@ import { getResource } from '@/modules/resources/services/resource-service'
 import { useUserStore } from '@/core/state/userStore'
 import { getUser, updateUser } from '@/modules/users/services/user-services'
 
+import ResourceTypeEnum from '@/modules/resources/model/resourceTypeEnum'
+
 export default {
 name: "recommend-view",
 components: { 
@@ -106,12 +105,18 @@ data() {
     review: Review.default(),
     resource: null,
     errorMessage: [],
+    title: "Recommendation Something New"
   }
 },
 async mounted() {
   this.isLoading = true;
   
   if (this.isRecommendation) {    
+    const resourceTypeId = this.$route.params.typeId;
+    if (resourceTypeId) {
+      // we're recommending a new resource of a specific type
+      this.title = "Recommend a New " + ResourceTypeEnum.fromKey(resourceTypeId).singular;
+    }
     // we're reviewing a new (unapproved) recommended resource
     // this.recommendation.resourceType = this.$route.params.typeId ?? 'books';
     this.recommendation.recommendedByUid = this.userStore.uid;
@@ -130,7 +135,7 @@ async mounted() {
       this.review.resourceName = this.resource.displayName;
     }
   }
-
+  console.log('reading displayname')
   this.review.reviewedByUid = this.userStore.uid;
   this.review.reviewedByName = this.userStore.displayName;
 
@@ -140,17 +145,8 @@ computed: {
   userStore() {
     return useUserStore();
   },
-  validationErrors() {
-    const errorsRecommendations = this.recommendation.validate();
-    const errorsReviews = this.review.validate();
-    const errors = [...errorsRecommendations, ...errorsReviews];
-    if (errors.length > 0) {
-      return errors.map( e => e.propertyName + ":" + e.errorMessage );
-    }
-    return null;
-  },
+  
   isValid() {
-    
     if (this.isRecommendation) {
       // both the rec and review need to be valid
       return this.recommendation.isValid && this.review.isValid;
@@ -166,31 +162,48 @@ computed: {
 methods: {
   
   async handleSubmit() {
-    const _this = this;
-    this.isSaving = true;
-    if (this.isRecommendation) {
-      const recommendationId = await addRecommendation(this.recommendation);
-      this.review.recommendationId = recommendationId;
-    } 
-    
-    // add the review
-    await addReview(this.review);
-
-    // update the user's display name if they've updated it for this review
-    if (this.review.reviewedByName != this.userStore.displayName) {
-      this.userStore.setDisplayName(this.review.reviewedByName);
-      const user = await getUser(this.userStore.uid);
-      user.displayName = this.review.reviewedByName;
-      await updateUser(user);
-    }
-
-    setTimeout(function () {
-      _this.isSaving = false;
-      _this.$router.push({ path: '/recommend/confirm', query: {'action': _this.isRecommendation ? "recommendation" : "review"}});
+    this.validate()
+    if (this.isValid) {
+      const _this = this;
+      this.isSaving = true;
+      if (this.isRecommendation) {
+        const recommendationId = await addRecommendation(this.recommendation);
+        this.review.recommendationId = recommendationId;
+      } 
       
-    }, 2000);
+      // add the review
+      await addReview(this.review);
+
+      // update the user's display name if they've updated it for this review
+      if (this.review.reviewedByName != this.userStore.displayName) {
+        this.userStore.setDisplayName(this.review.reviewedByName);
+        const user = await getUser(this.userStore.uid);
+        user.displayName = this.review.reviewedByName;
+        await updateUser(user);
+      }
+
+      setTimeout(function () {
+        _this.isSaving = false;
+        _this.$router.push({ path: '/recommend/confirm', query: {'action': _this.isRecommendation ? "recommendation" : "review"}});
+        
+      }, 2000);
+    } else {
+      console.log("not valid")
+    }
   },
 
+  validate() {
+    const errorsRecommendations = this.recommendation.validate();
+    errorsRecommendations.forEach( e => {
+      this.errorMessage[e.propertyName] = e.errorMessage;
+    }) 
+    const errorsReviews = this.review.validate();
+    errorsReviews.forEach( e => {
+      this.errorMessage[e.propertyName] = e.errorMessage;
+    })
+    return (errorsRecommendations.length + errorsReviews.length) == 0;
+  },
+  
   validateRecommendation(prop) {
     let result = this.recommendation.validateProperty(prop);
     this.errorMessage[prop] = result.errorMessage;
@@ -203,16 +216,19 @@ methods: {
     }
   },
 
-  validateReview(prop) {
-    let result = this.review.validateProperty(prop);
-    this.errorMessage[prop] = result.errorMessage;
-    if (result.data) {
-      this.review[prop] = result.data;
-    }
-  }
-   
+  validateReviewReason(newValue) {
+    this.review.reason = newValue;
+    return new Promise( (resolve, reject) => {
+      let result = this.review.validateProperty('reason');
+      if (result.success) {
+        resolve(true);
+      } else {
+        reject(result.errorMessage);
+      }
+    })
+  },
 }
-}
+}  
 </script>
 
 <style scoped>

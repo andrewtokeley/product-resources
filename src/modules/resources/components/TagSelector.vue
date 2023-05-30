@@ -2,22 +2,17 @@
   <div class="tag-selector">
     <div v-for="tagGroup in tagGroups" :key="tagGroup.groupName" class="tag-group">
       <span v-if="showCategoryHeading(tagGroup)" class="tag-group-label">{{ tagGroup.groupName }}:</span>
-      <ul class="tag-list">
+      <ul class="tag-list" :class="{ column: singleColumn }">
         <li v-for="tag in tagGroup.tags" :key="tag.key" >
           <tag-button 
             :enableHoverEffect="singleSelect ? true :false" 
-            :selected="isSelected(tag.key)" 
-            @click="toggleSelection(tag.key)">
+            :selected="isSelected(tag.key)"
+            @click.stop="toggleSelection(tag.key)">
             {{tag.value}}
           </tag-button>
         </li>
       </ul>
     </div>
-      <!-- <ul>
-        <li v-for="tag in m_tags" :key="tag.key" >
-          <tag-button :enableHoverEffect="singleSelect ? true :false" :selected="isSelected(tag.key)" @click="toggleSelection(tag.key)">{{tag.value}}</tag-button>
-        </li>
-      </ul> -->
   </div>
 </template>
 
@@ -28,7 +23,7 @@ import { useLookupStore } from "@/core/state/lookupStore"
 
 export default {
   name: "tag-selector",
-  emits: ['tagClicked', 'update:modelValue'],
+  emits: ['click', 'update:modelValue'],
   components: {
     TagButton,
   },
@@ -51,6 +46,10 @@ export default {
       default: () => {[]}
     },
     singleSelect: {
+      type: Boolean,
+      default: false,
+    },
+    singleColumn: {
       type: Boolean,
       default: false,
     }
@@ -81,7 +80,7 @@ export default {
         // add to selected array. Remove previously selected if singleSelect
         if (this.singleSelect) {
           if (this.selectedTagKeys.length == 1) {
-            this.$emit('tagClicked', this.selectedTagKeys[0], false);
+            this.$emit('click', this.selectedTagKeys[0], false);
             this.selectedTagKeys = [];
           }
         }
@@ -89,7 +88,7 @@ export default {
         isOn = true;
       }
       // send complete selected array back to client
-      this.$emit('tagClicked', key, isOn);
+      this.$emit('click', key, isOn);
       this.$emit('update:modelValue', this.selectedTagKeys);
     },
 
@@ -104,9 +103,11 @@ export default {
 </script>
 
 <style scoped>
-
+.tag-selector {
+  overflow-y:scroll;
+}
 .tag-list {
-  display: inline;
+  display: flex;
   width: 100%;
   flex-direction: row;
   flex-wrap: wrap;
@@ -114,13 +115,12 @@ export default {
   box-sizing: border-box;
 }
 
-.tag-group {
-  /* display: flex;
-  flex-direction: row; */
+.tag-list.column {
+  flex-direction: column;
 }
+
 .tag-group-label {
   font-size: var(--prr-font-size-normal);
-  overflow: hidden;
   margin-left:10px;
 }
 
@@ -136,11 +136,4 @@ ul.tag-list {
   display: inline-block;
 }
 
-/* .tag-group h2 {
-  font-size: var(--prr-font-size-normal);
-  font-weight: 800;
-  margin-bottom: 5px;
-  color: var(--prr-darkgrey);
-  
-} */
 </style>

@@ -173,13 +173,13 @@ export default {
       this.sortedBy = propName;
 
       // if no order is provided toggle from last ordering
-      const toggle = (order == undefined)
+      const toggle = (order == undefined || order == null)
       if (toggle) {  
         // reverse the order
-        if (this.sortedByOrder[propName] == 'desc') {
-          order = 'asc'
-        } else if (this.sortedByOrder[propName] == 'asc') {
+        if (this.sortedByOrder[propName] == 'asc') {
           order = 'desc'
+        } else {
+          order = 'asc'
         }
       }
 
@@ -194,8 +194,10 @@ export default {
 
     },
 
-    setApproval(review, approve) {
-      setReviewApprove(review.id, approve);
+    async setApproval(review, approve) {
+      const result = await setReviewApprove(review, approve);
+      if (!result) return;
+
       const index = this.visibleReviews.indexOf(review);
       if (index >= 0) {
         this.visibleReviews[index].approved = approve;
@@ -253,7 +255,7 @@ export default {
     async doDelete() {
       try {
         this.isDeleting = true;
-        await deleteReview(this.selectedReview.id);
+        await deleteReview(this.selectedReview);
         let index = this.visibleReviews.indexOf(this.selectedReview);
         if (index >= 0) {
           this.visibleReviews.splice(index,1);

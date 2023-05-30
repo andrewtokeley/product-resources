@@ -20,7 +20,7 @@ export const useUserStore = defineStore({
       
       // successful login
       if (authUser) {
-        
+        console.log('auth start')
         // set the state properties
         this.uid = authUser.uid;
         this.isLoggedIn = true;
@@ -39,7 +39,7 @@ export const useUserStore = defineStore({
         } else {
           this.displayName = dbUser.displayName;
         }
-        
+        console.log('set displayname')
         // record last logged in 
         await recordUserLogin(authUser.uid);
         

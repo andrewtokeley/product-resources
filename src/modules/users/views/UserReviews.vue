@@ -4,10 +4,14 @@
     <div v-else class="content">
       <h1>{{userName}}'s Reviews</h1>
       <div class="cards">
-        <featured-card v-for="review in reviews" :key="review.id" 
-          :review="review"
-          @click="handleClick">
-        </featured-card>
+        <div v-for="review in reviews" :key="review.id" >
+          <featured-card
+            :showImage="true"
+            :review="review"
+            @click="handleClick">
+          </featured-card>
+          <hr class="divider" />
+        </div>
       </div>
     </div>
     <resource-detail v-if="selectedResource != null" :resource="selectedResource" @close="handleClose"></resource-detail>
@@ -72,5 +76,10 @@ export default {
   display:flex;
   flex-direction: row;
   flex-wrap: wrap;
+  justify-content: space-around;
+}
+
+h1 {
+  text-align: center;
 }
 </style>

@@ -3,6 +3,8 @@ import { Recommendation, recommendationConverter } from '../model/recommendation
 import { app } from "@/core/services/firebaseInit"
 import { deleteUnlinkedReviewsForRecommendation, getReviewForRecommendation } from '@/modules/reviews/services/review-service';
 import { updateDoc, getFirestore, collection, doc, getDoc,getDocs, query, where, addDoc, setDoc, deleteDoc, limit, getCountFromServer } from "firebase/firestore"; 
+import FirestoreKeys from '@/core/services/firebaseKeys';
+
 const { DateTime } = require("luxon");
 
 const db = getFirestore(app);
@@ -20,7 +22,7 @@ export { getRecommendation,
   unlinkRecommendationFromResource
 }
 
-const COLLECTION_KEY = "recommendations";
+const COLLECTION_KEY = FirestoreKeys.RecommendationsCollection.key;
 
 /**
  * Return a recommendation record

@@ -1,5 +1,10 @@
 <template>
-  <button :class="{'enable-hover': enableHoverEffect, selected: selected}"><slot></slot></button>
+  <button 
+    :class="{small: isSmall, 'enable-hover': enableHoverEffect, selected: selected}">
+    <span class="button-content">
+      <slot></slot>
+    </span>
+  </button>
 </template>
 
 <script>
@@ -12,6 +17,10 @@ export default {
       default: true,
     },
     selected: {
+      type: Boolean,
+      default: false,
+    },
+    isSmall: {
       type: Boolean,
       default: false,
     },
@@ -32,9 +41,13 @@ export default {
     color: var(--prr-blue);
     background: var(--prr-extralightgrey);
     white-space: nowrap;
-    transition: 400ms;
+    transition: background 400ms;
   }
 
+  button.small {
+    font-size: var(--prr-font-size-small);
+    font-weight: bold;
+  }
   button:hover.enable-hover {
     background: var(--prr-green);
   }
@@ -43,4 +56,10 @@ export default {
     background: var(--prr-green);
   }
   
+  .button-content {
+    display:flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+  }
 </style>

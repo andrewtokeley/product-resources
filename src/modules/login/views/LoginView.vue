@@ -1,21 +1,26 @@
 <template>
   <div class="login-view">
     <h1>{{  heading }}</h1>
-    <p v-if="explanation">{{  explanation }}</p>
+    <h2 v-if="explanation">{{  explanation }}</h2>
     <div v-if="error">{{ error }}</div>
     <login-widget v-if="redirectUrl" 
       :redirectUrl="redirectUrl"
       @error="handleError(error)" 
       @success="handleSuccess">
     </login-widget>
+    <p>
+      Signing in will create a new account for first time users. Our website will only be given access to your name and email address.
+    </p>
+    <base-button :isSecondary="true" @click="$router.go(-1)">No Thanks!</base-button>
   </div>
 </template>
 
 <script>
+import BaseButton from '@/core/components/BaseButton.vue';
 import LoginWidget from '../components/LoginWidget.vue';
 
 export default {
-  components: { LoginWidget },
+  components: { LoginWidget, BaseButton },
   name: "login-view",
 
   data() {
@@ -34,10 +39,10 @@ export default {
     const action = this.$route.query.action?.toLowerCase();
     if (action) {
       if (action == 'review') {
-        this.explanation = "Before you make that review..."
+        this.explanation = "Before you can make that review..."
       }
       if (action == 'recommendation') {
-        this.explanation = "Before you make that recommendation..."
+        this.explanation = "Before you can make that recommendation..."
       }
     }
   },
@@ -56,16 +61,19 @@ export default {
 
 </script>
 
-<style>
-/* .firebaseui-title {
-  display: none;
-} */
-</style>
-
 <style scoped>
 
-h1, p {
+.login-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* justify-content: center; */
+}
+h1, h2, p {
   text-align: center;
+}
+h2 {
+  color: var(--prr-mediumgrey)
 }
 
 

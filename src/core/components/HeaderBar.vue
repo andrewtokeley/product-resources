@@ -1,63 +1,74 @@
 <template>
   <div class="header">
-    
-    <div class="left-nav">
+    <div class="header-top">
       
-      <ul class="desktop">
-        <li v-for="nav in navLinks" :key="nav.path">
-          <router-link 
-            :class="{ selected: isSelected(nav)}" 
-            :to="nav.path"
-          >
-          {{nav.title}}
-          </router-link>
-        </li>
-        <li class="nav-with-submenu">
-          <a>CATEGORIES</a>    
-          <div ref="submenuDiv" class="submenu">
-            <div v-for="tagGroup in tagGroups" :key="tagGroup.groupName" class="submenu-group">
-              <h2 v-if="showCategoryHeading(tagGroup)">{{ tagGroup.groupName.toUpperCase() }}</h2>
-              <ul>
-                <li v-for="tag in tagGroup.tags" :key="tag.key" >
-                  <tag-button :enableHoverEffect="true" @click="$router.push(`/tag/${tag.key}`)">{{tag.value}}</tag-button>
-                </li>
-              </ul>
+      <div class="left-nav">
+        <div class="mobile">
+          <span 
+            class="material-symbols-outlined"
+            @click="$router.push('/')">home</span>
+        </div>
+        <ul class="desktop">
+          <li v-for="nav in navLinks" :key="nav.path">
+            <router-link 
+              :class="{ selected: isSelected(nav)}" 
+              :to="nav.path"
+            >
+            {{nav.title}}
+            </router-link>
+          </li>
+          <li class="nav-with-submenu">
+            <a>CATEGORIES</a>    
+            <div ref="submenuDiv" class="submenu">
+              <div v-for="tagGroup in tagGroups" :key="tagGroup.groupName" class="submenu-group">
+                <h2 v-if="showCategoryHeading(tagGroup)">{{ tagGroup.groupName.toUpperCase() }}</h2>
+                <ul>
+                  <li v-for="tag in tagGroup.tags" :key="tag.key" >
+                    <tag-button :enableHoverEffect="true" @click="$router.push(`/tag/${tag.key}`)">{{tag.value}}</tag-button>
+                  </li>
+                </ul>
+              </div>
             </div>
-          </div>
-        </li>
-      </ul>
-    
-      <div class="mobile">
-        <side-bar></side-bar>
+          </li>
+        </ul>
       </div>
-    </div>
-    
-    <div class="spacer"></div>
+      
+      <div class="spacer"></div>
 
-    <div class="header__right">
-      <base-button class="desktop" @click="$router.push('/recommend')" >Recommend...</base-button>
-      <search-input 
-        class="desktop"
-        v-model="searchTerm" 
-        @search="$router.push(`/search/${searchTerm}`)" 
-        @mouseover="showCategories=false">
-      </search-input>
-      <div>
-        <base-icon :menu="menuOptions">menu</base-icon>
-        <badge-count v-if="todoCount > 0" class="badge" :count="todoCount"></badge-count>
+      <div class="header__right">
+        <base-button class="desktop" @click="$router.push('/recommend')" >Recommend...</base-button>
+        <search-input 
+          class="desktop"
+          v-model="searchTerm" 
+          @search="$router.push(`/search/${searchTerm}`)" 
+          @mouseover="showCategories=false">
+        </search-input>
+        <div>
+          <base-icon :menu="menuOptions">settings</base-icon>
+          <badge-count v-if="todoCount > 0 && useUserStore.isAdmin" class="badge" :count="todoCount"></badge-count>
+        </div>
       </div>
     </div>
-    
+    <div>
+      <div class="mobile">
+        <div class="mobile-nav2">
+          <mobile-nav></mobile-nav>
+        </div>
+      </div>
+    </div>
     <resource-detail 
       :resource="resourceFromQueryString"
       v-if="showResourceDialog" 
       @close="showResourceDialog = false" 
       ></resource-detail>
+
+      <side-bar v-if="showSideBar" @close="showSideBar = false"></side-bar>
   </div>
 </template>
 
 <script>
 import BaseIcon from '@/core/components/BaseIcon.vue'
+import MobileNav from '@/core/components/MobileNav.vue';
 import SearchInput from './SearchInput.vue'
 import TagButton from '@/modules/resources/components/TagButton.vue'
 import BaseButton from './BaseButton.vue'
@@ -75,6 +86,7 @@ import { ref } from 'vue';
 import { useLookupStore } from '@/core/state/lookupStore';
 import { getUnapprovedReviewsCount } from '@/modules/reviews/services/review-service'
 import { getUnlinkedRecommendationsCount } from '@/modules/recommendations/services/recommendation-service'
+import ResourceTypeEnum from '@/modules/resources/model/resourceTypeEnum'
 
 export default {
   name: 'HeaderBar',
@@ -86,6 +98,7 @@ export default {
     ResourceDetail,
     BadgeCount,
     SideBar,
+    MobileNav,
   },
   setup() {
     const lookupStore = ref(null);
@@ -110,6 +123,7 @@ export default {
       resourceFromQueryString: Resource,
       numberOfUnapprovedReviews: 0,
       numberOfRecommendations: 0,
+      showSideBar: false,
     }
   },
   
@@ -117,10 +131,10 @@ export default {
     this.searchTerm = this.$route.params.searchTerm;
     this.navLinks = [
       {id: 'home', path:'/', title:'HOME'},
-      {id: 'books', path:'/type/books', title:'BOOKS'},
-      {id: 'podcasts', path:'/type/podcasts', title:'PODCASTS'},
-      {id: 'websites', path:'/type/websites', title:'WEB'},
-      {id: 'people', path:'/type/people', title:'PEOPLE'},
+      {id: 'books', path:`/type/${ResourceTypeEnum.Books.key}`, title:'BOOKS'},
+      {id: 'podcasts', path:`/type/${ResourceTypeEnum.Podcasts.key}`, title:'PODCASTS'},
+      {id: 'websites', path:`/type/${ResourceTypeEnum.Websites.key}`, title:'WEB'},
+      {id: 'people', path:`/type/${ResourceTypeEnum.People.key}`, title:'PEOPLE'},
     ];
 
     this.tagGroups = await groupTags(this.lookupStore.tags);
@@ -144,9 +158,11 @@ export default {
   methods: {
 
     handleLogout() {
-      auth.signOut();
+      auth.signOut().then ( () => {
+        this.$router.push("/");
+      });
     },
-
+    
     isSelected(nav) {
       return nav.path === this.$route.path;
     },
@@ -231,7 +247,7 @@ export default {
             }
           },
           {
-            name: "LogIn",
+            name: "Sign In",
             show: !this.useUserStore.isLoggedIn,
             iconName: "login",
             action: () => {
@@ -256,18 +272,20 @@ export default {
 
 <style scoped>
 .header {
-  padding: 0px 10px;
-  font-size: var(--prr-font-size-medium);
-  display:flex;
-  flex-direction: row;
-  /* width: 100%; */
-  height: 70px;
   min-width: 1100px;
   max-width: 2000px;
   z-index: 10;
 }
 
-.header .spacer {
+.header-top {
+  padding: 0px 10px;
+  font-size: var(--prr-font-size-medium);
+  display:flex;
+  flex-direction: row;
+  height: 70px;
+}
+
+.header-top .spacer {
   flex-grow: 1;
 }
 
@@ -276,10 +294,15 @@ export default {
   flex-direction: row;
   align-items: center;
 }
+
 .left-nav .nav-with-submenu a {
   padding: 20px 60px 40px 10px;
   font-weight: var(--prr-font-weight);
 }
+
+/* .mobile-nav {
+  background: red;
+} */
 .nav-with-submenu:hover .submenu {
   visibility: visible;
   display: block;
@@ -323,6 +346,7 @@ export default {
 
 ul {
   list-style-type: none;
+  padding-left: 0px;
 }
 li {
   padding: 0px;
@@ -356,7 +380,7 @@ li {
   display: flex;
   flex-direction: row;
   align-items: center;
-  margin-right:20px;
+  /* margin-right:20px; */
 }
 
 .badge {
@@ -369,6 +393,14 @@ li {
   display: none;
 }
 
+.mobile-nav2 {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap:3px;
+  align-items: center;
+  margin-bottom: 15px;
+}
 @media only screen and (max-width: 600px) {
   .desktop {
     display: none;

@@ -7,7 +7,13 @@
       <div class="introduction">
         <div><h1 v-if="title">{{ title }}</h1></div>
         <div><p v-if="summary">{{ summary }}</p></div>
-        <tag-selector class="tag-cloud" :singleSelect="true" :tags="tagsUsed" v-model="selectedTagFilter" @tagClicked="handleTagClicked"></tag-selector>
+        
+        <tag-selector 
+          class="tag-cloud" 
+          :singleSelect="true" 
+          :tags="tagsUsed" 
+          v-model="selectedTagFilter"
+          @click="handleTagClicked" ></tag-selector>
       </div>
       <template v-if="filteredSearchResults.length > 0 && !isLoading" >
         <book-group 
@@ -19,7 +25,8 @@
         </book-group>
       </template>
       <div v-if="filteredSearchResults.length == 0 && !isLoading" class="noresults">
-        We couldn't find anything matching, <i>{{ searchTerm }}</i>
+        <p>Doesn't look like we've got any <b>{{ this.title.toLowerCase() }}</b> under the category <b>{{ selectedTagName }}</b>.</p>
+        <p>If you think we're missing a great reasource, <router-link to="/recommend">let us know</router-link>.</p>
       </div>
     </div>
     <resource-detail 
@@ -35,13 +42,13 @@ import LoadingSymbol from "@/core/components/LoadingSymbol.vue";
 import BookGroup from '@/modules/resources/components/BookGroup.vue';
 import TagSelector from "../components/TagSelector.vue";
 
-import { searchByResourceTypes, searchByTagKey, searchByText, getTagsForResources } from "@/modules/resources/services/resource-service";
-
+import { getTagsForResources, searchByResourceTypes } from "@/modules/resources/services/resource-service";
 import { useLookupStore } from '@/core/state/lookupStore';
 import { ref } from 'vue'
 
+
 export default {
-  name: 'ResourcesSearch',
+  name: 'resource-types',
 
   components: {
     LoadingSymbol,
@@ -71,6 +78,7 @@ export default {
       clickedResource: null,
       tagsUsed: [],
       selectedTagFilter: [],
+      selectedTagName: null,
       bookResources: {
         type: Array,
         default: [{}]
@@ -85,112 +93,146 @@ export default {
   },
   methods: {
     async handleTagClicked(key, isOn) {
-      console.log('changed ' + key + ' ' + isOn);
+      
       if (isOn) {
+        // this.selectedTagFilter = [tag.key];
+        // add to query string
+        history.pushState(
+          {},
+          null,
+          this.$route.path + '/' + key
+        );
         this.filteredSearchResults = this.searchResults.filter( r => r.tags.includes(key));
       } else {
+        // this.selectedTagFilter = [];
         this.filteredSearchResults = this.searchResults;
+        history.pushState(
+          {},
+          null,
+          `/type/${this.$route.params.typeId}`
+        );
       }
     },
     handleOpenPreview(resource) {
       this.clickedResource = resource;
       this.showDetail = true; 
     },
+    /**
+     * initial load of the page
+     */
     async loadSearchResults() {
       this.isLoading = true;
-      if (this.$route.params.typeId) {
-        await this.loadResourcesByType(this.$route.params.typeId);
-      } else if (this.$route.params.tagId) {
-        await this.loadResourcesByTag(this.$route.params.tagId)
-      } else if (this.$route.params.searchTerm) {
-        await this.loadResourcesByTextSearch(this.$route.params.searchTerm);
-      }
+      const typeId = this.$route.params.typeId;
+      
+      // always load everything for the given type - this won't scale but for now fine
+      this.searchResults = await this.getResourceByType(typeId);
       this.tagsUsed = await getTagsForResources(this.searchResults);
       this.filteredSearchResults = this.searchResults;
+      
+      // apply tag filter 
+      const tagId = this.$route.params.tagId;
+      if (tagId) {
+      
+        this.selectedTagFilter = [tagId];
+        this.filteredSearchResults = this.searchResults.filter ( r => r.tags.includes(this.$route.params.tagId));
+
+        const store = useLookupStore();
+        const tag = store.tags.find( t => t.key == tagId );
+        if (tag) {
+          this.selectedTagName = tag.value;
+        } else {
+          this.selectedTagName = tagId;
+        }
+      }
+      
       this.isLoading = false;
     },
 
-    async loadResourcesByType(typeKey) {
-      var typeKeys = [typeKey];
+    async getResourceByType(type) {
+      var typeKeys = [type];
 
       // always load episodes with podcast series
-      if (typeKey == 'podcasts') {
+      if (type == 'podcasts') {
         typeKeys.push('episodes');
       }
       // and broaden web too
-      if (typeKey == 'websites') {
+      if (type == 'websites') {
         typeKeys.push('posts');
         typeKeys.push('videos');
       }
 
       // get the description for the selected type
-      let item = this.lookupStore.resourceTypes.find( r => r.key == typeKey );
+      let item = this.lookupStore.resourceTypes.find( r => r.key == type );
       if (item) {
-        this.title = item.value.toUpperCase();
+        if (type == 'websites') {
+          this.title = "Web";
+        } else {
+          this.title = item.value.toUpperCase();
+        }
         this.summary = item.description;
       }
-      this.searchResults = await searchByResourceTypes(typeKeys);
+      return await searchByResourceTypes(typeKeys);
     },
 
-    async loadResourcesByTag(tagKey) {
-      // let item = this.tagsLookup.items.find( k => k.key == tagKey);
-      // let tagKeyValue = { key: item.key, value: item.value };
-      // if (tagKeyValue) {
-        this.searchResults = await searchByTagKey(tagKey);
+    // async loadResourcesByTag(tagKey) {
+    //   // let item = this.tagsLookup.items.find( k => k.key == tagKey);
+    //   // let tagKeyValue = { key: item.key, value: item.value };
+    //   // if (tagKeyValue) {
+    //     this.searchResults = await searchByTagKey(tagKey);
 
-        let item = this.tags.find( t => t.key == tagKey);
-        this.title = item.value.toUpperCase();
-        this.summary = item.description;
-    },
+    //     let item = this.tags.find( t => t.key == tagKey);
+    //     this.title = item.value.toUpperCase();
+    //     this.summary = item.description;
+    // },
     
-    async loadResourcesByTextSearch(term) {
-      this.searchResults = await searchByText(term);
-    },
+    // async loadResourcesByTextSearch(term) {
+    //   this.searchResults = await searchByText(term);
+    // },
 
-    resourcesByType(key) {
-      const results = this.searchResults.filter ( resource => resource.resourceType == key )
-      if (results) {
-        return results;
-      }
-      return [];
-    },
+    // resourcesByType(key) {
+    //   const results = this.searchResults.filter ( resource => resource.resourceType == key )
+    //   if (results) {
+    //     return results;
+    //   }
+    //   return [];
+    // },
 
   },
 
   computed: {
     
-    books() {
-      const results = this.resourcesByType('books')
-      return results.length>0 ? results : null
-    },
-    podcasts() {
-      const podcasts = this.resourcesByType('podcasts')
-      return podcasts.length>0 ? podcasts : null
-    },
-    web() {
-      const results = this.resourcesByType('websites')
-      return results.length>0 ? results : null
-    },
-    video() {
-      const results = this.resourcesByType('video')
-      return results.length>0 ? results : null
-    },
-    episodes() {
-      const results = this.resourcesByType('episodes')
-      return results.length>0 ? results : null
-    },
-    posts() {
-      const results = this.resourcesByType('posts')
-      return results.length>0 ? results : null
-    },
-    people() {
-      const results = this.resourcesByType('people')
-      return results.length>0 ? results : null
-    },
-    videos() {
-      const results = this.resourcesByType('videos')
-      return results.length>0 ? results : null
-    }
+    // books() {
+    //   const results = this.resourcesByType(ResourceTypeEnum.Books.key)
+    //   return results.length>0 ? results : null
+    // },
+    // podcasts() {
+    //   const podcasts = this.resourcesByType(ResourceTypeEnum.Podcasts.key)
+    //   return podcasts.length>0 ? podcasts : null
+    // },
+    // web() {
+    //   const results = this.resourcesByType(ResourceTypeEnum.Websites.key)
+    //   return results.length>0 ? results : null
+    // },
+    // video() {
+    //   const results = this.resourcesByType(ResourceTypeEnum.Videos.key)
+    //   return results.length>0 ? results : null
+    // },
+    // episodes() {
+    //   const results = this.resourcesByType(ResourceTypeEnum.PodcastEpisodes.key)
+    //   return results.length>0 ? results : null
+    // },
+    // posts() {
+    //   const results = this.resourcesByType(ResourceTypeEnum.Articles.key)
+    //   return results.length>0 ? results : null
+    // },
+    // people() {
+    //   const results = this.resourcesByType(ResourceTypeEnum.People.key)
+    //   return results.length>0 ? results : null
+    // },
+    // videos() {
+    //   const results = this.resourcesByType(ResourceTypeEnum.Videos.key)
+    //   return results.length>0 ? results : null
+    // }
     
   }
 }
@@ -228,16 +270,20 @@ h1 {
 }
 
 p {
-  margin: 0px 10px;
+  margin: 10px 10px;
 }
 
 .noresults {
-  margin-top:100px;
+  margin-top:50px;
 }
 
 @media only screen and (max-width: 600px) {
   
   .tag-cloud {
+    display: none;
+  }
+
+  .introduction {
     display: none;
   }
 }

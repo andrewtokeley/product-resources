@@ -60,8 +60,9 @@ import LoadingSymbol from '@/core/components/LoadingSymbol.vue';
 import { Splide, SplideSlide } from '@splidejs/vue-splide';
 import '@splidejs/vue-splide/css';
 
-import { searchByResourceTypes, getRecentlyAdded } from '@/modules/resources/services/resource-service';
+import { getPopularByType, getRecentlyAdded } from '@/modules/resources/services/resource-service';
 import { reviewStore } from "@/modules/reviews/store/reviewStore";
+import ResourceTypeEnum from '@/modules/resources/model/resourceTypeEnum';
 
 export default {
   name: 'resources-home',
@@ -92,19 +93,25 @@ export default {
         perPage: 1,
         autoplay: true,
         interval: 5000,
+        classes: {
+          arrows: 'splide__arrows carousel-class-arrows',
+          arrow : 'splide__arrow carousel-class-arrow',
+          prev  : 'splide__arrow--prev carousel-class-prev',
+          next  : 'splide__arrow--next carousel-class-next',
+        },
       }
     }
   },
 
   async mounted() {
     this.isLoading = true;
-    this.topBooks = await searchByResourceTypes(['books'], 5);
-    this.topPodcasts = await searchByResourceTypes(['podcasts'], 5);
+    this.topBooks = await getPopularByType(ResourceTypeEnum.Books.key);
+    this.topPodcasts = await getPopularByType(ResourceTypeEnum.Podcasts.key);
     this.recentlyAdded = await getRecentlyAdded(5);
 
     // will get some featured reviews if none have been defined for this session yet.
     let store = reviewStore()
-    store.fetchFeatured();
+    await  store.fetchFeatured();
     this.featured = store.featuredReviews;
     console.log(store.featuredReviews.length);
 
@@ -120,6 +127,13 @@ export default {
 }
 </script>
 
+<style>
+
+.carousel-class-prev, .carousel-class-next  {
+  width: 4em;
+  height: 4em;
+}
+</style>
 <style scoped>
 .splide__pagination__page.is-active {
   background: var(--prr-green) !important;
@@ -157,6 +171,5 @@ section.featured {
 section.featured.clear-background {
   background: transparent;
 }
-
 
 </style>

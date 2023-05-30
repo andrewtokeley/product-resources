@@ -32,10 +32,9 @@ export default [
   
   // show all resources of a type 
   {path: '/type/:typeId', component:ResourceTypes},
+  {path: '/type/:typeId/:tagId', component:ResourceTypes},
 
-  // recommend something
   {path: '/recommend', component: RecommendationView, meta: { requiresAuth: true }},
-  // recommend a resource of a given type
   {path: '/recommend/:typeId', component: RecommendationView, meta: { requiresAuth: true }},
   {path: '/recommend/confirm', component: RecommendationConfirmation },
 
@@ -49,6 +48,6 @@ export default [
 
   {path: '/admin/reviews', component:ManageReviews, meta: { requiresAuth: true, requiresAdmin: true } },
 
-  {path: '/admin/tags', component:ManageLookups, meta: { requiresAuth: true } },
+  {path: '/admin/tags', component:ManageLookups, meta: { requiresAuth: true, requiresAdmin: true } },
 
 ]

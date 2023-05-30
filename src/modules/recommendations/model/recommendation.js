@@ -1,6 +1,7 @@
 import { Timestamp } from "firebase/firestore";
 const { DateTime } = require("luxon");
 import { isObjectValid, validateProperty, validateObject, validateUrl, validateMandatoryProperty } from "@/core/model/validation";
+import ResourceTypeEnum from "@/modules/resources/model/resourceTypeEnum";
 export { Recommendation, recommendationConverter };
 
 class Recommendation {
@@ -26,7 +27,7 @@ class Recommendation {
   static default() {
     // returns a default instance with some defaults
     return new Recommendation({ 
-      resourceType: 'books',
+      resourceType: ResourceTypeEnum.Books.key,
       approved: false
     });
   }

@@ -6,6 +6,7 @@ import { getFirestore, orderBy, query, collection, doc, getDocs, getDoc, where, 
 import { useLookupStore } from '@/core/state/lookupStore';
 import { linkRecommendationReviewToResource, unlinkReviewsFromResource } from '@/modules/reviews/services/review-service';
 import { linkRecommendationToResource, unlinkRecommendationFromResource } from '@/modules/recommendations/services/recommendation-service';
+import FirestoreKeys from "@/core/services/firebaseKeys";
 
 const { DateTime } = require('luxon');
 
@@ -13,10 +14,12 @@ const db = getFirestore(app);
 
 export { 
   getResource, 
+  getResources,
   getTagsForResources, 
   getRelatedResources,
   getRecentlyAdded,
   getPendingResources,
+  getPopularByType,
   approveResource, 
   unapproveResource, 
   searchByResourceTypes,
@@ -25,27 +28,20 @@ export {
   updateResource, 
   addResource, 
   deleteResource,
+  // incrementReviewCount,
+  // decrementReviewCount,
 }
 
-const COLLECTION_KEY = "resources";
+const COLLECTION_KEY = FirestoreKeys.ResourcesCollection.key;
 
-// /**
-//  * Returns resources of a given type
-//  * 
-//  * @param {*} type - the key of a resource
-//  * @param {*} resultLimit - optional result set limit
-//  */
-// const getResourcesFull = async function(type, resultLimit) {
-//   if (!resultLimit) { resultLimit = 100 }
-//   // get all, including the un-approved
-//   var resources = await searchByResourceTypes([type], resultLimit, false);
-//   var recommendations = await getAllRecommendations()
-//   for (var i = 0; i<resources.length; i++) {
-//     let resource = resources[i];
-//     resource.recommendations = recommendations.filter( r => r.resourceId == resource.id );
-//     resource.numberOfRecommendations = resource.recommendations.length;
-//   }
-//   return resources;
+// const incrementReviewCount = async function(resourceId) {
+//   const ref = doc(db, COLLECTION_KEY, resourceId).withConverter(resourceConverter);
+//   await updateDoc(ref, { reviewCount: increment(1) });
+// }
+
+// const decrementReviewCount = async function(resourceId) {
+//   const ref = doc(db, COLLECTION_KEY, resourceId).withConverter(resourceConverter);
+//   await updateDoc(ref, { reviewCount: increment(-1) });
 // }
 
 const getRecentlyAdded = async function(resultLimit) {
@@ -67,6 +63,19 @@ const getPendingResources = async function(resultLimit) {
   if (!resultLimit) { resultLimit = 50 }
   const q =query(collection(db, COLLECTION_KEY).withConverter(resourceConverter), 
   where("approved", "==", false),
+  );
+  const querySnapshot = await getDocs(q);
+  const result = [];
+  querySnapshot.forEach((doc) => {
+    result.push(new Resource(doc.data()));
+  });
+  return result
+}
+
+const getPopularByType = async function(resourceType) {
+  const q =query(collection(db, COLLECTION_KEY).withConverter(resourceConverter), 
+  where("resourceType", "==", resourceType),
+  where("isFavourite", "==", true)
   );
   const querySnapshot = await getDocs(q);
   const result = [];
@@ -105,6 +114,35 @@ const searchByResourceTypes = async function(keys, resultLimit, approval) {
     where("approved", "==", approval),
     limit(resultLimit));
   
+  const querySnapshot = await getDocs(q);
+  const result = [];
+  querySnapshot.forEach((doc) => {
+    result.push(new Resource(doc.data()));
+  });
+  return result
+};
+
+/**
+ * Returns resources matching the typeS and, optionlly, tag.
+ * @param {*} type id of the resource type
+ * @param {*} tag if of the tag
+ * @param {*} resultLimit 
+ * @returns 
+ */
+const getResources = async function(types, tag, resultLimit) {
+  if (types == null || types.length == 0) return [];
+  if (!resultLimit) { resultLimit = 50 }
+  let q;
+  if (tag) {
+    q = query(collection(db, COLLECTION_KEY).withConverter(resourceConverter), 
+    where("resourceType", "in", types), 
+    where("tags", "array-contains", tag),
+    limit(resultLimit));
+  } else {
+    q = query(collection(db, COLLECTION_KEY).withConverter(resourceConverter), 
+      where("resourceType", "in", types), 
+      limit(resultLimit));
+  }
   const querySnapshot = await getDocs(q);
   const result = [];
   querySnapshot.forEach((doc) => {

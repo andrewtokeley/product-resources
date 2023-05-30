@@ -24,7 +24,6 @@ export default defineComponent({
     // load up some data into the state stores
     let store = useLookupStore();
     await store.fetchLookups();
-    console.log("store loaded")
   }
 });
 </script>
@@ -46,7 +45,7 @@ body,
   max-width: 900px;
   margin: 0 auto;
   margin-bottom: 100px;
-  padding: 0px 10px;
+  padding: 0px 20px;
 }
 
 </style>

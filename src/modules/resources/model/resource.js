@@ -2,6 +2,7 @@ import { Timestamp } from "firebase/firestore";
 const { DateTime } = require("luxon");
 import { isObjectValid, validateObject, validateProperty, validateUrl } from "@/core/model/validation";
 import Result from "@/core/model/Result";
+import ResourceTypeEnum from "./resourceTypeEnum";
 
 export { Resource, resourceConverter };
 
@@ -16,7 +17,6 @@ class Resource {
     this.description = config.description;
     this.createdDate = config.createdDate;
     this.publishedDate = config.publishedDate;
-    this.audioLengthInSeconds = config.audioLengthInSeconds;
     this.imageStorageName = config.imageStorageName;
     this.imageUrl = config.imageUrl;
     this.authors = config.authors;
@@ -26,9 +26,9 @@ class Resource {
     this.parentResourceName = config.parentResourceName;
     this.parentResourceImageUrl = config.parentResourceImageUrl;
     this.relatedResources = config.relatedResources;
-    this.source = config.source;
     this.approved = config.approved;
     this.isFavourite = config.isFavourite;
+    this.reviewCount = config.reviewCount;
   }
 
   static fromRecommendation(recommendation) {
@@ -41,12 +41,13 @@ class Resource {
       resourceUrl: recommendation.resourceUrl,
       isFavourite: false,
       approved: false,
+      reviewCount: 0,
     })
   }
 
   static default(type) {
     // returns a default instance where all the fields, and their child properties are available.
-    if (!type) { type = 'books'}
+    if (!type) { type = ResourceTypeEnum.Books.key}
     return new Resource({ 
       id: null,
       approved: false,
@@ -55,6 +56,7 @@ class Resource {
       createdDate: DateTime.now(),
       authors: [], 
       isFavourite: false,
+      reviewCount: 0,
       tags: [] });
       
   }
@@ -213,6 +215,7 @@ var resourceConverter = {
     if (resource.parentResourceId != null) { result.parentResourceId = resource.parentResourceId }
     if (resource.parentResourceName != null) { result.parentResourceName = resource.parentResourceName }
     if (resource.parentResourceImageUrl != null) { result.parentResourceImageUrl = resource.parentResourceImageUrl }
+    if (resource.reviewCount != null) { result.reviewCount = resource.reviewCount }
     return result;
   },
 
@@ -252,6 +255,7 @@ var resourceConverter = {
       parentResourceImageUrl: data.parentResourceImageUrl,
       approved: data.approved ?? false,
       isFavourite: data.isFavourite ?? false,
+      reviewCount: data.reviewCount ?? 0,
     }
     return new Resource(config);
   }

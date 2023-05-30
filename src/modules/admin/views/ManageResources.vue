@@ -59,10 +59,10 @@
     <table v-if="activeTab == 'recommendations' && !isLoading && visibleRecords?.length > 0">
       <thead>
         <tr>
-          <th style="width: 200px;"><a @click="sortBy('resourceUrl')" class="sortHeading" :class="sortHeadingClasses('resourceUrl')">Url</a></th>
+          <th style="width: 200px;">Url</th>
           <th style="width: 200px;"><a @click="sortBy('dateCreated')" class="sortHeading" :class="sortHeadingClasses('dateCreated')">Created</a></th>
           <th style="width: 200px;"><a @click="sortBy('recommendedByName')" class="sortHeading" :class="sortHeadingClasses('recommendedByName')">Recommended By</a></th>
-          <th>Action</th>
+          <th></th>
         </tr>
       </thead>
       <tbody class="body-hover" v-for="recommendation in visibleRecords" :key="recommendation.id">
@@ -176,17 +176,20 @@ export default {
       { key:'approved', value: 'Approved'} ,
       { key:'draft', value: 'Pending'} ,
     ];
+
     const resourceId = this.$route.query.edit;
     if (resourceId) {
       this.selectedResource = await getResource(resourceId);
       if (this.selectedResource) {
         this.selectedResourceType = this.selectedResource.resourceType;
-        this.filterByStatus('approved');
+        await this.filterByStatus('approved');
         this.showEdit = true;
       }
     } else {
-      this.filterByStatus('recommendations');
+      await this.filterByStatus('recommendations');
     }
+
+    this.sortBy('dateCreated', 'desc');
   },
   watch: {
     selectedResourceType() {
@@ -263,18 +266,17 @@ export default {
       return classes;
     },
 
-    sortBy(propName, toggle) {
-      console.log('stop')
+    sortBy(propName, order) {
       this.sortedBy = propName;
-      let _toggle = toggle ?? true;
 
-      var order = this.sortedByOrder[propName] ?? 'asc';
-      if (_toggle) {  
+      // if no order is provided toggle from last ordering
+      const toggle = (order == undefined || order == null)
+      if (toggle) {  
         // reverse the order
-        if (this.sortedByOrder[propName] == 'desc') {
-          order = 'asc'
-        } else if (this.sortedByOrder[propName] == 'asc') {
+        if (this.sortedByOrder[propName] == 'asc') {
           order = 'desc'
+        } else {
+          order = 'asc'
         }
       }
 
@@ -282,10 +284,8 @@ export default {
       this.sortedByOrder[propName] = order;
 
       this.visibleRecords.sort( (a,b) => { 
-        if (a[propName] == null) a[propName] = '';
-        if (b[propName] == null) b[propName] = '';
         if(a[propName] < b[propName]) { return order == 'asc' ? -1 : 1; }
-        if(a[propName] > b[propName]) { return order == 'desc' ? -1 : 1; }
+        if(a[propName] > b[propName]) { return order == 'asc' ? 1 : -1; }
         return 0;
       })
     },
@@ -321,7 +321,7 @@ export default {
         }
       }
       this.visibleRecords = results;
-      console.log(this.visibleRecords.length);
+      // console.log(this.visibleRecords.length);
       this.isLoading = false;
     },
 

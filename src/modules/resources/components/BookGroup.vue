@@ -13,7 +13,8 @@
         </book-card>
         <div v-if="showAddRecommendation" >
           <book-card 
-            :resource="blankResource" 
+            v-if="group.resources.length > 0"
+            :resource="group.resources[0]" 
             :showAddPlaceholder="true"
             @addRecommend="handleAddRecommendation(group.key)"></book-card>
         </div>
@@ -26,9 +27,10 @@
 <script>
 import BookCard from "@/modules/resources/components/BookCard.vue"
 import RowHeader from '@/modules/resources/components/RowHeader.vue';
-import { Resource } from '@/modules/resources/model/resource'
+// import { Resource } from '@/modules/resources/model/resource'
 import { ref } from 'vue';
 import { useLookupStore } from "@/core/state/lookupStore";
+// import ResourceTypeEnum from '../model/resourceTypeEnum';
 
 export default {
   name: "book-group",
@@ -105,15 +107,6 @@ export default {
         return singleType;
       }
     },
-
-    blankResource() {
-      if (this.resources.length > 0) {
-        let type = this.resources[0].resourceType
-        return Resource.default(type);
-      } else {
-        return Resource.default('books');
-      }
-    },
     _heading() {
       if (this.heading) {
         var heading = this.heading;
@@ -129,6 +122,15 @@ export default {
     }
   },
   methods: {
+    // blankResourceOfType() {
+    //   if (this.resources.length > 0) {
+    //     let type = this.resources[0].resourceType
+    //     console.log('blank type ' + type);
+    //     return Resource.default(type);
+    //   } else {
+    //     return Resource.default(ResourceTypeEnum.Books.key);
+    //   }
+    // },
     typeLink(key) {
       return `/type/${key}`;
     },

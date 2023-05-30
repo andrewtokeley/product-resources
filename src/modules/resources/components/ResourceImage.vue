@@ -1,7 +1,8 @@
 <template>
   <div class="resource-image" :class="{landscape: isLandscape, square: isSquare, preview: preview }" >
-      <div class="placeholder" v-if="showAddPlaceholder" @click="$emit('addRecommend', resource)" >
-        <div>Recommend...</div>
+      <div v-if="showAddPlaceholder" class="placeholder" @click="$emit('addRecommend', resource)" >
+        <span class="material-symbols-outlined">add_circle</span>
+        <!-- <div>{{ recommendText }}</div> -->
       </div>
       <template v-else>
         <div class="missing-image-mask" v-if="showMissingImageMask">Resource Image</div>  
@@ -18,7 +19,7 @@
 
 <script>
 import { Resource } from "@/modules/resources/model/resource";
-
+// import ResourceTypeEnum from "../model/resourceTypeEnum";
 export default {
   name: "resource-image",
   emits: ['click','addRecommend'],
@@ -39,6 +40,10 @@ export default {
     }
   },
   computed: {
+    // recommendText() {
+    //   console.log(this.resource.displayName + ", " + this.resource.resourceType);
+    //   return ResourceTypeEnum.fromKey(this.resource.resourceType)?.singular
+    // },
     isSquare(){
       return this.resource.imageShape == 'square';
     },
@@ -56,8 +61,8 @@ export default {
 
 .resource-image {
   position: relative;
-  height:185px;
-  width: 124px;
+  height:160px;
+  width: 100px;
   margin-bottom: 5px;
   overflow: hidden;
   border: 1px solid var(--prr-lightgrey);
@@ -72,7 +77,7 @@ export default {
 
 .resource-image.landscape {
   height:124px;
-  width: 175px;
+  width: 160px;
 }
 .resource-image.landscape.preview {
   height:75px;

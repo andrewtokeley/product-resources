@@ -20,6 +20,7 @@ let router = createRouter({
 router.beforeEach((to) => {
   console.log('beforeEachRoute')
   const store = useUserStore();
+  console.log("BEFOREROUTE " + store.isLoggedIn);
   if (to.meta.requiresAuth) {
     if (!store.isLoggedIn) {
       if (to.meta.requiresAdmin) {
@@ -40,23 +41,27 @@ router.beforeEach((to) => {
 let app;
 let storeUser;
 auth.onAuthStateChanged(async (authUser) => {
+  if (storeUser) {
+    await storeUser.updateAuthUser(authUser);  
+  }
+  
   if (!app) {
     
     app = createApp(App);
     
     // cache lookups in state
     app.use(pinia);
-    storeUser = useUserStore();
     const lookupStore = useLookupStore();
     await lookupStore.fetchLookups();
     
+    // update state with user
+    storeUser = useUserStore();
+    await storeUser.updateAuthUser(authUser); 
+
     app.use(router);
     app.mount('#app');
   }
-  // update state with user
-  if (storeUser) {
-    await storeUser.updateAuthUser(authUser);  
-  }
+  
 })
 
 

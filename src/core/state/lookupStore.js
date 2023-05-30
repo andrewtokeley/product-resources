@@ -4,7 +4,11 @@ import { getResourceTypes, getTags } from '@/modules/resources/services/lookup-s
 export const useLookupStore = defineStore( {
   id: 'lookup',
   state: () => ({
+    /**
+     * Array of tag instances
+     */
     tags: [],
+    
     resourceTypes: [],
   }),
 
