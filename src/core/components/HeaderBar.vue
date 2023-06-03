@@ -43,7 +43,7 @@
           @search="$router.push(`/search/${searchTerm}`)" 
           @mouseover="showCategories=false">
         </search-input>
-        <div>
+        <div class="icon">
           <base-icon :menu="menuOptions">settings</base-icon>
           <badge-count v-if="todoCount > 0 && useUserStore.isAdmin" class="badge" :count="todoCount"></badge-count>
         </div>
@@ -384,10 +384,13 @@ li {
   /* margin-right:20px; */
 }
 
+.icon {
+  position:relative;
+}
 .badge {
   position: absolute;
-  right: 15px;
-  top: 15px;
+  right: 0px;
+  top: 0px;
 }
 
 .mobile {
