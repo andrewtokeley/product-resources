@@ -8,16 +8,19 @@
       @error="handleError(error)" 
       @success="handleSuccess">
     </login-widget>
-    <p>
-      Signing in will create a new account for first time users. Our website will only be given access to your name and email address.
-    </p>
-    <base-button :isSecondary="true" @click="$router.go(-1)">No Thanks!</base-button>
+    <div class="closing" v-if="!userStore.isLoggedIn">
+      <p>
+        Signing in will create a new account for first time users. Our website will only be given access to your name and email address.
+      </p>
+      <base-button :isSecondary="true" @click="$router.go(-1)">No Thanks!</base-button>
+    </div>
   </div>
 </template>
 
 <script>
 import BaseButton from '@/core/components/BaseButton.vue';
 import LoginWidget from '../components/LoginWidget.vue';
+import { useUserStore } from '@/core/state/userStore';
 
 export default {
   components: { LoginWidget, BaseButton },
@@ -28,14 +31,17 @@ export default {
       error: null,
       redirectUrl: null,
       heading: 'Sign In',
-      explanation: '',
+      explanation: ''
     }
   },
-
+  computed: {
+    userStore() {
+      const store = useUserStore();
+      return store;
+    }
+  },
   mounted() {
-    
     this.redirectUrl = this.$route.query.redirect ?? "/";
-    console.log('loginview: ' + this.redirectUrl);
     const action = this.$route.query.action?.toLowerCase();
     if (action) {
       if (action == 'review') {
@@ -48,6 +54,10 @@ export default {
   },
 
   methods: {
+    // handleUIChanged(from, to) {
+    //   this.isLoggingIn
+    //   console.log(to);
+    // },
     handleError(error){
       this.error = error;
     },
@@ -76,6 +86,9 @@ h2 {
   color: var(--prr-mediumgrey)
 }
 
+.closing {
+  text-align: center;
+}
 
 </style>
 

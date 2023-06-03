@@ -10,26 +10,17 @@
     <div class="content"> 
       <h2>General</h2>
       
-      <div class="double-line">
-        <div>
-          <div class="label tight">Resource Type</div>
-          <base-select
-            v-model="editResource.resourceType"
-            :selectOptions="resourceTypes"
-            :options="{ 
-              placeholder: 'Select Type'}"
-          ></base-select>
-        </div>
-        <div>
-          <div></div>
-          <base-check-box 
-            v-model="editResource.isFavourite"
-            :leftAlign="true"
-            label="Display on home page as a favourite."></base-check-box>
-        </div>
+      <div>
+        <div class="label tight">Resource Type</div>
+        <base-select
+          v-model="editResource.resourceType"
+          :selectOptions="resourceTypes"
+          :options="{ 
+            placeholder: 'Select Type'}"
+        ></base-select>
       </div>
-
-      <div class="label tight">Display</div>
+      
+      <div class="label">Display</div>
       <base-input
         :hasFocus="true"
         @blur="setTitle"
@@ -40,13 +31,21 @@
           placeholder: 'Add title'}"
       ></base-input>
 
+      <div>
+        <div></div>
+        <base-check-box 
+          v-model="editResource.isFavourite"
+          :leftAlign="true"
+          label="Display on home page as a favourite."></base-check-box>
+      </div>
+
       <div class="double-line">
         <div>
-          <div class="label tight">Authors</div>
+          <div class="label">Authors</div>
           <authors-list v-model="editResource.authors"></authors-list>
         </div>
         <div>
-          <div class="label tight">Published Date</div>
+          <div class="label">Published Date</div>
           <date-picker v-model="editResource.publishedDate" :options="{ placeholder: 'Published Date' }"></date-picker>
         </div>
       </div>
@@ -96,7 +95,10 @@
           :options="{ 
             readOnly: true}"
         ></base-input>
-      <div class="label">Parent ID</div>
+      <div class="label">Review Count</div>
+      <base-input
+          v-model="editResource.reviewCount"
+        ></base-input>
       <div class="label">Recommendation ID</div>
       <base-input
           v-model="editResource.recommendationId"

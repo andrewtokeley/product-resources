@@ -2,9 +2,11 @@
   <div v-if="resource" class="container">
     <div class="featured-card" @click="$emit('click', resource)">
       <resource-image v-if="showImage && resource" class="image" :resource="resource"></resource-image>
-      <div class="heading"><h1>{{resource.displayName}}</h1></div>
-      <h2>{{resource.authorsList}}</h2>
-      <review-widget class="quote" :short="true" :review="review"></review-widget>
+      <div>
+        <div class="heading"><h1>{{resource.displayName}}</h1></div>
+        <h2>{{resource.authorsList}}</h2>
+        <review-widget class="quote" :short="true" :review="review"></review-widget>
+      </div>
     </div>
   </div>
 </template>
@@ -65,8 +67,10 @@ h1 {
   margin: 15px 0px 0px 0px;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-align: center;
 }
 h2 {
+  text-align: center;
   font-size: var(--prr-font-size-medium);
   color: var(--prr-mediumgrey);
   margin: 5px 0px;
@@ -91,7 +95,8 @@ h2 {
   overflow: hidden;
 }
 .quote {
-  margin-left: 20px;
+  margin-left: auto;
+  margin-right: auto;
 }
 .image {
   float: left;

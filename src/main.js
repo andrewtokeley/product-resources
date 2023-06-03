@@ -13,6 +13,9 @@ const pinia = createPinia();
 let router = createRouter({
   history: createWebHistory(),
   routes: routes,
+  scrollBehavior () {
+    window.scrollTo(0,0);
+  }
 })
 
 // refresh lookups in the store

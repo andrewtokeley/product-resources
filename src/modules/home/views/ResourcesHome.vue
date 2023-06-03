@@ -5,7 +5,7 @@
     </div>
     <div v-else>
       
-      <splide :options="splideOptions" aria-label="Vue Splide Example">
+      <splide v-if="featured.length > 0" :options="splideOptions" aria-label="Vue Splide Example">
         <SplideSlide v-for="review in featured" :key="review.id">
           <featured-card :review="review" @click="handleViewDetail"></featured-card>
         </SplideSlide>
@@ -19,6 +19,7 @@
         :resources="recentlyAdded" 
         :includeItemCount="false" 
         :singleRow="true"
+        :showMore="true"
         @click="handleViewDetail"></book-group>
       </section>
 
@@ -60,7 +61,7 @@ import LoadingSymbol from '@/core/components/LoadingSymbol.vue';
 import { Splide, SplideSlide } from '@splidejs/vue-splide';
 import '@splidejs/vue-splide/css';
 
-import { getPopularByType, getRecentlyAdded } from '@/modules/resources/services/resource-service';
+import { getPopularResources, getRecentlyAdded } from '@/modules/resources/services/resource-service';
 import { reviewStore } from "@/modules/reviews/store/reviewStore";
 import ResourceTypeEnum from '@/modules/resources/model/resourceTypeEnum';
 
@@ -105,9 +106,10 @@ export default {
 
   async mounted() {
     this.isLoading = true;
-    this.topBooks = await getPopularByType(ResourceTypeEnum.Books.key);
-    this.topPodcasts = await getPopularByType(ResourceTypeEnum.Podcasts.key);
-    this.recentlyAdded = await getRecentlyAdded(5);
+    const favourites = await getPopularResources([ResourceTypeEnum.Books.key, ResourceTypeEnum.Podcasts.key]);
+    this.topBooks = favourites.filter ( r => r.resourceType == ResourceTypeEnum.Books.key)
+    this.topPodcasts = favourites.filter ( r => r.resourceType == ResourceTypeEnum.Podcasts.key)
+    this.recentlyAdded = await getRecentlyAdded(10);
 
     // will get some featured reviews if none have been defined for this session yet.
     let store = reviewStore()
@@ -166,6 +168,7 @@ section.featured {
   justify-content: space-around;
   gap:20px;
   flex-wrap: wrap;
+  box-sizing: border-box;
 }
 
 section.featured.clear-background {

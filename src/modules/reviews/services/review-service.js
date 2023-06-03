@@ -1,10 +1,11 @@
 
 import { Review, reviewConverter } from '@/modules/reviews/model/review';
 import { app } from "@/core/services/firebaseInit"
-import { documentId, increment, getFirestore, collection, doc, getDoc,getDocs, query, where, addDoc, setDoc, limit, getCountFromServer, writeBatch } from "firebase/firestore"; 
+import { increment, getFirestore, collection, doc, getDoc,getDocs, query, where, addDoc, setDoc, limit, getCountFromServer, writeBatch } from "firebase/firestore"; 
 const { DateTime } = require("luxon");
 import { Timestamp } from "firebase/firestore";
 import FirestoreKeys from '@/core/services/firebaseKeys';
+// import { getResource } from '@/modules/resources/services/resource-service';
 
 const db = getFirestore(app);
 
@@ -55,6 +56,8 @@ const unlinkReviewsFromResource = async function(resourceId) {
 };
 
 const linkRecommendationReviewToResource = async function(recommendationId, resourceId) {
+  //const resource = await getResource(resourceId);
+
   const q = query(collection(db, COLLECTION_KEY).withConverter(reviewConverter), 
     where("recommendationId", "==", recommendationId),
   );
@@ -168,34 +171,46 @@ const getReviewsByApproval = async function(approved) {
 
 const getFeaturedReviews = async function(maximum) {
   var results = [];
-  var attempts = 0;
-  // just in case you get some dupicates we have a few goes at getting unique set
-  var maxAttempts = 3;
-  if (!maximum) { maximum = 2 }
+  
+  const q = query(collection(db, COLLECTION_KEY).withConverter(reviewConverter), 
+    where('isFeatured', "==", true),
+    where('approved', "==", true),
+    limit(maximum));
+  
+  const querySnapshot = await getDocs(q);
+  querySnapshot.forEach((doc) => {
+    results.push(new Review(doc.data()));
+  });
+  return results;
 
-  while (results.length < maximum && attempts < maxAttempts) {
-    let randomKey = doc(collection(db, COLLECTION_KEY)).id;
-    const q = query(collection(db, COLLECTION_KEY).withConverter(reviewConverter), 
-      where(documentId(), ">=", randomKey),
-      where('approved', "==", true),
-      limit(1));
-    const querySnapshot = await getDocs(q);
-    console.log(randomKey);
-    if (querySnapshot.size == 1) {
-      querySnapshot.forEach((doc) => {
-        let review = new Review(doc.data());
-        // ensure they are for different resources
-        if (results.find( r => r.id == review.id)) {
-          attempts += 1;
-        } else {
-          results.push(review);
-        }
-      });
-    } else {
-      attempts += 1;
-    }
-  }
-  return results; 
+  // var attempts = 0;
+  // // just in case you get some dupicates we have a few goes at getting unique set
+  // var maxAttempts = 3;
+  // if (!maximum) { maximum = 2 }
+
+  // while (results.length < maximum && attempts < maxAttempts) {
+  //   let randomKey = doc(collection(db, COLLECTION_KEY)).id;
+  //   const q = query(collection(db, COLLECTION_KEY).withConverter(reviewConverter), 
+  //     where(documentId(), ">=", randomKey),
+  //     where('approved', "==", true),
+  //     limit(1));
+  //   const querySnapshot = await getDocs(q);
+  //   console.log(randomKey);
+  //   if (querySnapshot.size == 1) {
+  //     querySnapshot.forEach((doc) => {
+  //       let review = new Review(doc.data());
+  //       // ensure they are for different resources
+  //       if (results.find( r => r.id == review.id)) {
+  //         attempts += 1;
+  //       } else {
+  //         results.push(review);
+  //       }
+  //     });
+  //   } else {
+  //     attempts += 1;
+  //   }
+  // }
+  
 }
 
 const updateReview = async function(review) {
@@ -267,6 +282,9 @@ const deleteReview = async function(review) {
 const setReviewApprove = async function(review, approve) {  
   // you can't approve/unapprove a review if it's not linked to a resource
   if (!review.resourceId || !review.id) return false;
+
+  // don't re-approve or re-unapprove
+  if (review.approved == approve) return false;
 
   let batch = writeBatch(db);
   

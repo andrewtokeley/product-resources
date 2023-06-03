@@ -19,7 +19,7 @@ export {
   getRelatedResources,
   getRecentlyAdded,
   getPendingResources,
-  getPopularByType,
+  getPopularResources,
   approveResource, 
   unapproveResource, 
   searchByResourceTypes,
@@ -72,16 +72,20 @@ const getPendingResources = async function(resultLimit) {
   return result
 }
 
-const getPopularByType = async function(resourceType) {
-  const q =query(collection(db, COLLECTION_KEY).withConverter(resourceConverter), 
-  where("resourceType", "==", resourceType),
-  where("isFavourite", "==", true)
-  );
-  const querySnapshot = await getDocs(q);
+const getPopularResources = async function(resourceTypes) {
   const result = [];
-  querySnapshot.forEach((doc) => {
-    result.push(new Resource(doc.data()));
-  });
+  if (resourceTypes && resourceTypes.length > 0) {
+
+    const q =query(collection(db, COLLECTION_KEY).withConverter(resourceConverter), 
+    where("resourceType", "in", resourceTypes),
+    where("isFavourite", "==", true)
+    );
+    const querySnapshot = await getDocs(q);
+    
+    querySnapshot.forEach((doc) => {
+      result.push(new Resource(doc.data()));
+    });
+  }
   return result
 }
 

@@ -8,5 +8,45 @@ service cloud.firestore {
     match /tempoAssignClaim/{tempoDoc} {
       allow read, write: if false;
     }
+
+    // Anyone can read a users public profile
+    // Only authenticated users can only write their own record
+	  match /users/{uid} {
+  		allow write: if request.auth != null && request.auth.uid == uid;
+      allow read: if true; 
+      
+      // Only authenticated users can read/write their own private data
+      match /private/{secure} {
+        allow read, write: if request.auth != null && request.auth.uid == uid;
+      }
+    }
+
+    // Anyone can read all lookup data
+    // Only admins can write
+    match /lookups/{document=**} {
+  		allow read: if true;
+		  allow write: if request.auth.token.admin == true;
+  	}
+
+    // Anyone can read all resources
+    // Only admins can write
+    match /resources/{resource} {
+      allow read: if true;
+		  allow write: if request.auth.token.admin == true;
+    }
+
+    // Only authenticated users can write a recommendation
+    // Only admins can read them
+    match /recommendations/{recommendation} {
+      allow read: if request.auth.token.admin == true;
+      allow write: if request.auth != null;
+    }
+
+    // Anyone can write a recommendation
+    // Only admins can read them    
+    match /reviews/{recommendation} {
+      allow read: if request.auth.token.admin == true;
+      allow write: if request.auth != null;
+    }
   }
 }

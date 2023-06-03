@@ -135,7 +135,7 @@ export default {
   left: 0px;
 }
 
-/* On mouse-over, add a grey background color */
+/* On hover, add a grey background color */
 .base-check-box:hover input ~ .base-check-box__background {
   background-color: var(--prr-lightgrey);  
 }

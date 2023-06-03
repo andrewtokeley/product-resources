@@ -49,6 +49,7 @@
             <div class="actions">
               <base-button v-if="!resource.approved" :disabled="!resource.canApprove" @click.stop="setApproval(resource, true)">Approve</base-button>
               <base-button v-else @click.stop="setApproval(resource, false)" :isSecondary="true">Un-Approve</base-button>
+              <base-icon @click="handlePreviewClick(resource)">visibility</base-icon>
               <base-icon :menu="menuItems(resource)">more_vert</base-icon>
             </div>
           </td>
@@ -617,6 +618,6 @@ tbody.body-hover:hover .actions {
   height: 40px;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: flex-start;
 }
 </style>

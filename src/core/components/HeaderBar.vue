@@ -239,7 +239,7 @@ export default {
             show: this.useUserStore.isAdmin,
           },
           {
-            name: "Logout",
+            name: "Sign Out",
             show: this.useUserStore.isLoggedIn,
             iconName: "logout",
             action: () => {
@@ -249,6 +249,7 @@ export default {
           {
             name: "Sign In",
             show: !this.useUserStore.isLoggedIn,
+            subText: "to review/recommend...",
             iconName: "login",
             action: () => {
               this.$router.push('/login');

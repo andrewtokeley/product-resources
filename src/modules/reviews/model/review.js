@@ -16,6 +16,7 @@ class Review {
     this.dateCreated = config.dateCreated;
     this.dateApproved = config.dateApproved;
     this.approved = config.approved;
+    this.isFeatured = config.isFeatured;
   }
 
   static default() {
@@ -117,7 +118,7 @@ var reviewConverter = {
       result.dateApproved = null;
     }
     if (review.approved != null) result.approved = review.approved;
-    
+    if (review.isFeatured != null) result.isFeatured = review.isFeatured;
     return result;
   },
 
@@ -135,6 +136,7 @@ var reviewConverter = {
       dateCreated: data.dateCreated ? DateTime.fromJSDate(data.dateCreated.toDate()) : null,
       dateApproved: data.dateApproved ? DateTime.fromJSDate(data.dateApproved.toDate()) : null,
       approved: data.approved ?? false,
+      isFeatured: data.isFeatured ?? false,
     }
     return new Review(config);
   }

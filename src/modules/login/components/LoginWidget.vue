@@ -15,7 +15,7 @@ var ui = new firebaseui.auth.AuthUI(auth);
 
 export default {
   name: "login-widget",
-  emits: ['error', 'success'],
+  emits: ['error', 'success', 'uiChanged'],
   props: {
     redirectUrl: {
       type: String,
@@ -55,6 +55,9 @@ export default {
           signInFailure: function (error) {
             vm.$emit('error', error);
           },
+          uiChanged: function(fromPageId, toPageId) {
+            vm.$emit('uiChanged', fromPageId, toPageId);
+          }
         },
       };
     },

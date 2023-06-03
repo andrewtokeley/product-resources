@@ -4,6 +4,7 @@
     <div class="page">
       <router-view :key="$route.fullPath" />
     </div>
+    <footer-bar></footer-bar>
   </div>
 </template>
 
@@ -11,9 +12,10 @@
 import { defineComponent } from "vue";
 import HeaderBar from "./core/components/HeaderBar.vue";
 import { useLookupStore } from "@/core/state/lookupStore"
+import FooterBar from "./core/components/FooterBar.vue";
 
 export default defineComponent({
-  components: { HeaderBar },
+  components: { HeaderBar, FooterBar },
   name: "App",
   data() {
     return {
@@ -43,9 +45,11 @@ body,
 
 .page {
   max-width: 900px;
+  min-height: 500px;
   margin: 0 auto;
   margin-bottom: 100px;
   padding: 0px 20px;
+
 }
 
 </style>

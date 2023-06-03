@@ -42,6 +42,7 @@ class Resource {
       isFavourite: false,
       approved: false,
       reviewCount: 0,
+      tags: [],
     })
   }
 

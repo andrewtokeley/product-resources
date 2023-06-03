@@ -1,7 +1,7 @@
 <template>
   <modal-dialog 
     title="Edit Review"
-    :fullscreen="false" 
+    :fullscreen="true" 
     :isLoading="isWorking"
     @close="$emit('close')" 
     @buttonClick="handleButtonClick"
@@ -15,16 +15,22 @@
       <base-input
         v-model="editReview.reviewedByName">
       </base-input>
-      ID: {{ editReview.reviewedByUid }}
+      <base-input
+        v-model="editReview.reviewedByUid">
+      </base-input>
       <hr class="divider" />
       
       <div class="label">Review</div>
       <base-multiline-text
         v-model="editReview.reason">
       </base-multiline-text>
-
+      <base-check-box 
+        v-model="editReview.isFeatured"
+        label="Feature on Home Page"
+        :leftAlign="true"></base-check-box>
       <hr class="divider" />
       <div class="label">Linked To</div>
+      <p class="link-broken" v-if="isLinkBroken">Link broken</p>
       <base-input
         v-model="editReview.resourceId">
       </base-input>
@@ -39,17 +45,19 @@
 import BaseMultilineText from "@/core/components/BaseMultilineText.vue";
 import ModalDialog from '@/core/components/ModalDialog.vue';
 import BaseInput from '@/core/components/BaseInput.vue';
-
+import BaseCheckBox from "@/core/components/BaseCheckBox.vue";
 import { Review } from '@/modules/reviews/model/review';
 import { cloneDeep } from 'lodash';
 import { validateProperty } from '@/core/model/validation';
 import { updateReview } from '@/modules/reviews/services/review-service';
+import { getResource } from '@/modules/resources/services/resource-service';
 
 export default {
   components: { 
     BaseMultilineText,
     ModalDialog,
     BaseInput,
+    BaseCheckBox,
   },
   name: "edit-review",
   emits: ['close', 'saved'],
@@ -57,6 +65,7 @@ export default {
     return {
       editReview: Review,
       isWorking: true,
+      isLinkBroken: false,
       errorMessage: [],
     }
   },
@@ -69,6 +78,7 @@ export default {
     this.isWorking = true;
     this.editReview =  cloneDeep(this.review);
     this.isWorking = false;
+    this.checkLink();
   },
   
   computed: {
@@ -89,6 +99,20 @@ export default {
   },
 
   methods: {
+    checkLink() {
+      const this_ = this;
+      if (this.review.resourceId) {
+        console.log('check')
+        getResource(this.review.resourceId).then( (resource) => {
+          if (resource) {
+            this_.isLinkBroken = false;
+            this_.editReview.resourceName = resource.displayName;
+          } else {
+            this_.isLinkBroken = true;
+          }
+        });
+      }
+    },
     validate(prop) {
       let result = validateProperty(this.editReview, this.editReview.schema, prop);
       this.errorMessage[prop] = result.errorMessage;
@@ -138,4 +162,7 @@ margin-bottom: 5px;
 margin-top: 0px;
 }
 
+.link-broken {
+  color: var(--prr-red);
+}
 </style>

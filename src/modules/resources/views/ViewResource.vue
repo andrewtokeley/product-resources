@@ -28,7 +28,7 @@
       </div>
       <div class="related" v-if="relatedResources?.length > 0">
         <hr class="divider" />
-        <h2>Recommended {{ childDescription }}</h2>
+        <h2>Related</h2>
         <div v-for="resource in relatedResources" :key="resource.id" @click="$emit('changeResource',resource)">
           <book-card :resource="resource" :preview="true" :showTitle="false" :showDescription="true"></book-card>  
         </div>
