@@ -61,12 +61,12 @@ export default {
 
 .resource-image {
   position: relative;
-  height:160px;
+  height:145px;
   width: 100px;
   margin-bottom: 5px;
   overflow: hidden;
   border: 1px solid var(--prr-lightgrey);
-  border-radius: 15px;
+  border-radius: 5px;
 }
 
 .resource-image.preview {

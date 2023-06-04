@@ -15,10 +15,10 @@ export const useLookupStore = defineStore( {
   actions: {    
     async fetchLookups() {
       const tagLookup = await getTags();
-      this.tags = tagLookup.items;
+      this.tags = tagLookup?.items ?? [];
 
       const resourceTypeLookup = await getResourceTypes();
-      this.resourceTypes = resourceTypeLookup.items;
+      this.resourceTypes = resourceTypeLookup?.items ?? [];
     },
   },
 })

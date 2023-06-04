@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "prod-reader"
-  }
+    "default": "prod-reader",
+    "production": "top-product-resources"
+  },
+  "targets": {},
+  "etags": {}
 }

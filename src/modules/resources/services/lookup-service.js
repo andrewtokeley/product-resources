@@ -12,6 +12,7 @@ export {
   addLookupItem,
   deleteLookupItem,
   groupTags,
+  updateDefaultResourceTypes,
 }
 
 const COLLECTION_KEY = "lookups";
@@ -48,23 +49,16 @@ export const LookUpKey = {
 //   return lookup;
 // }
 
-// const refreshResourceTypes = async function() {
-//   await deleteLookup(LookUpKey.resourceTypes);
-//   const lookup = new Lookup({id:LookUpKey.resourceTypes, items:[
-//     {key:'books', value:'Books', description: 'Who doesn\'t like a great product book!', icon: "import_contacts"},
-//     {key:'podcasts', value:'Podcasts', icon: "podcasts", description: "On your commute or on the run, podcasts are a great way to catch up on what's new."},
-//     {key:'episodes', value:'Episodes', icon: "podcasts"},
-//     {key:'posts', value:'Posts', icon: "feed"},
-//     {key:'websites', value:'Websites', icon: "language", description: "A collection of hand-picked blog posts, articles and videos."},
-//     {key:'videos', value:'Videos', icon: "videocam"},
-//     {key:'people', value:'People', description: 'A few people stand out as having something to say and not being afraid to share it!', icon: "person"},
-//   ]})
-//   await addLookup(lookup)
+const updateDefaultResourceTypes = async function() {
 
-//   // update all resource.resourceType.value entries too
-
-//   return lookup;
-// }
+  await addLookupItem(LookUpKey.resourceTypes, {key:'books', value:'Books', order: 20, description: 'Who doesn\'t like a great product book!', icon: "import_contacts"});
+  await addLookupItem(LookUpKey.resourceTypes, {key:'podcasts', value:'Podcasts', order: 30, icon: "podcasts", description: "On your commute or on the run, podcasts are a great way to catch up on what's new."});
+  await addLookupItem(LookUpKey.resourceTypes, {key:'episodes', value:'Episodes',  order: 40, icon: "podcasts"});
+  await addLookupItem(LookUpKey.resourceTypes, {key:'posts', value:'Posts',  order: 50, icon: "feed"});
+  await addLookupItem(LookUpKey.resourceTypes, {key:'websites', value:'Websites',  order: 60, icon: "language", description: "A collection of hand-picked blog posts, articles and videos."});
+  await addLookupItem(LookUpKey.resourceTypes, {key:'videos', value:'Videos',  order: 70, icon: "videocam"});
+  await addLookupItem(LookUpKey.resourceTypes, {key:'people', value:'People',  order: 10, description: 'A few people stand out as having something to say and not being afraid to share it!', icon: "person"});
+}
 
 // const addLookup = async function(lookup) {
 //   const ref = doc(db, COLLECTION_KEY, lookup.id).withConverter(lookupConverter);

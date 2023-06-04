@@ -35,21 +35,29 @@ export default {
         }
       }
     },
-    readOnly: Boolean,
+    readOnly: {
+      type: Boolean,
+      default: false,
+    },
+    enableTime: {
+      type: Boolean,
+      default: false,
+    }
+
   },
 
-  data() {
-    return {
-      // Configuration for the flatPickr
-      pickerConfig: {
-        dateFormat: "Y-m-d",
-        altFormat: "F j, Y",
-        altInput: true,
-        clickOpens: !this.readOnly,
-        disableMobile: "true",
-      }
-    }
-  },
+  // data() {
+  //   return {
+  //     // Configuration for the flatPickr
+  //     pickerConfig: {
+  //       dateFormat: "Y-m-d",
+  //       altFormat: "F j, Y",
+  //       altInput: true,
+  //       clickOpens: !this.readOnly,
+  //       disableMobile: "true",
+  //     }
+  //   }
+  // },
   
   methods: {
     clearDate() {
@@ -61,15 +69,25 @@ export default {
     },
   },
 
-  watch: {
-    readOnly() {
-      this.pickerConfig.clickOpens = !this.readOnly;
-      //console.log("readonly");
-    }
-  },
+  // watch: {
+  //   readOnly() {
+  //     // this.pickerConfig.clickOpens = !this.readOnly;
+  //     //console.log("readonly");
+  //   }
+  // },
 
   computed: {
-
+    pickerConfig() {
+      return {
+        dateFormat: "Z",
+        altInput: true,
+        altFormat: this.enableTime ? 'd M, Y h:iK' : 'd M, Y',
+        time_24hr: true,
+        clickOpens: !this.readOnly,
+        disableMobile: true,
+        enableTime: this.enableTime,
+      }
+    },
     _options() {
       return {
         centred: this.options.centred ?? false,
@@ -86,14 +104,20 @@ export default {
 
     value: {
       get() {
+        // convert Luxon date into a JS date
         if (this.modelValue) {
-          return this.modelValue.toISODate();
+          console.log('v-model:' + this.modelValue);
+          console.log('flatpkr value:' + this.modelValue.toISODate());
+          return this.enableTime ? this.modelValue.toISO() : this.modelValue.toISODate();
         } else {
           return null;
         }
       },
       set(value) {
-        this.$emit('update:modelValue', DateTime.fromISO(value));
+        // convert back to Luxon date
+        const date = DateTime.fromISO(value);
+        console.log('set date to ' + date + ' from ' + value);
+        this.$emit('update:modelValue', date);
       }
     }
   }

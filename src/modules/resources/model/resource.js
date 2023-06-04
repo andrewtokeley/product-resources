@@ -59,7 +59,6 @@ class Resource {
       isFavourite: false,
       reviewCount: 0,
       tags: [] });
-      
   }
 
   get canApprove() {
@@ -82,7 +81,7 @@ class Resource {
 
   get dateCreatedFormatted() {
     if (this.createdDate && this.createdDate.isValid) {
-      return this.createdDate.toLocaleString(DateTime.DATE_FULL);
+      return this.createdDate.toLocaleString(DateTime.DATETIME_MED);
     }
     return null;
   }
@@ -197,7 +196,8 @@ var resourceConverter = {
     if (resource.resourceType != null) { result.resourceType = resource.resourceType }
     if (resource.resourceUrl != null) { result.resourceUrl = resource.resourceUrl }
     if (resource.displayName != null) { result.displayName = resource.displayName }
-    if (resource.createDate != null && resource.createDate.isValid) { 
+    console.log(resource.createdDate);
+    if (resource.createdDate != null && resource.createdDate.isValid) { 
       result.createdDate = Timestamp.fromDate(resource.createdDate.toJSDate()); 
     } else {
       result.createdDate = null;

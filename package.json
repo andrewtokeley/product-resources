@@ -5,6 +5,12 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build --mode development",
+    "prebuildproduction": "firebase use production",
+    "buildproduction": "vue-cli-service build",
+    "postbuildproduction": "firebase use default",
+    "predeployproduction": "firebase use production",
+    "deployproduction": "firebase deploy",
+    "postdeployproduction": "firebase use default",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {

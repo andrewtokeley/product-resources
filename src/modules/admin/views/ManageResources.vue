@@ -30,7 +30,7 @@
         <tr>
           <th></th>
           <th><a @click="sortBy('displayName')" class="sortHeading" :class="sortHeadingClasses('displayName')">Name</a></th>
-          <th><a @click="sortBy('dateCreated')" class="sortHeading" :class="sortHeadingClasses('dateCreated')">Created</a></th>
+          <th><a @click="sortBy('createdDate')" class="sortHeading" :class="sortHeadingClasses('createdDate')">Created</a></th>
           <th v-if="activeTab == 'approved'" ><a @click="sortBy('isFavourite')" class="sortHeading" :class="sortHeadingClasses('isFavourite')">Favourite</a></th>
           <th v-else ><a @click="sortBy('approved')" class="sortHeading" :class="sortHeadingClasses('approved')">Status</a></th>
           <th></th>

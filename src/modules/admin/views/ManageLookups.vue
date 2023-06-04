@@ -11,6 +11,7 @@
         <base-select v-model="selectedLookupId" :selectOptions="lookupOptions"></base-select>
       </div>
       <div class="action-items">
+        <!-- <base-button :disabled="isLoading" :isSecondary="true" @click="loadDefaultResourceTypes">Load Defaults</base-button> -->
         <base-button :disabled="isLoading" @click="handleAddItem">New Item</base-button>
       </div>
     </div>
@@ -113,23 +114,28 @@ export default {
       this.isLoading = true;
       this.sortedBy = null;
       getLookup(lookupId).then ( (result) => {
-        this.lookup = result
-        // get default sort order
-        if (!this.sortedBy) {
-          if (result.items.find( r => r.order && r.order.length > 0)) {
-            this.sortedBy = 'order'
-          } else {
-            this.sortedBy = 'key'
+        if (result) {
+          this.lookup = result
+          // get default sort order
+          if (!this.sortedBy) {
+            if (result.items.find( r => r.order && r.order.length > 0)) {
+              this.sortedBy = 'order'
+            } else {
+              this.sortedBy = 'key'
+            }
           }
+          this.sortBy(this.sortedBy, false);
         }
-        this.sortBy(this.sortedBy, false);
         this.isLoading = false;
       })
     }
   },
 
   methods: {
-    
+    // async loadDefaultResourceTypes() {
+    //   console.log('load')
+    //   await updateDefaultResourceTypes();
+    // },
     sortHeadingClasses(propName) {
       var classes = {
         sorted: false,

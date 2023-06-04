@@ -1,4 +1,18 @@
 
+/**
+ * These cloud functions are used to assign the admin role to a given user.
+ *
+ * Steps to assign new user admin role;
+ * 1. login in to site = this will create a new user in the users collection.
+ * 2. Copy the user's UID into the assignAdminClaim function at the end of this
+ *  file
+ * 3. Re-deploy the app
+ * 4. Create a new firestore collection called "tempoAssignClaim"
+ * 5. Create a new document in the collection with id equal to the users UID.
+ * 6. This will trigger the assignAdminClaim cloud function and assign the
+ * user as an admin
+ */
+
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const FieldValue = require("firebase-admin").firestore.FieldValue;
@@ -141,5 +155,6 @@ exports.assignAdminClaim = functions.firestore
 
       // andrewtokeley@gmail.com
       return admin.auth()
-          .setCustomUserClaims("FY7Cci1CCYglbGUGQftmCJplsEW2", claims);
+          .setCustomUserClaims("ETscmyGrhXMGZvuJDGmwCKn4HJk1", claims);
+      // .setCustomUserClaims("FY7Cci1CCYglbGUGQftmCJplsEW2", claims);
     });
