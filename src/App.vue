@@ -1,8 +1,10 @@
 <template>
-  <div class="app">
-    <header-bar class="header" v-show="!($route.meta.hideHeader ?? false)"></header-bar>
-    <div class="page">
-      <router-view :key="$route.fullPath" />
+  <div class="outer">
+    <div class="app">
+      <header-bar class="header" v-show="!($route.meta.hideHeader ?? false)"></header-bar>
+      <div class="page">
+        <router-view :key="$route.fullPath" />
+      </div>
     </div>
     <footer-bar></footer-bar>
   </div>
@@ -31,13 +33,8 @@ export default defineComponent({
 </script>
 
 <style>
-html,
-body,
+
 .app {
-  /* display: flex;
-  flex-direction: column;
-  align-items: center;
-   */
   max-width: 2000px;
   min-height: 100%;
   margin: 0 auto;
