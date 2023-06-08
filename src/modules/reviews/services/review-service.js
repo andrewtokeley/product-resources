@@ -303,5 +303,6 @@ const setReviewApprove = async function(review, approve) {
     batch.update(resourceRef, "reviewCount", increment(-1));
   }
 
-  return await batch.commit();
+  await batch.commit();
+  return true;
 }

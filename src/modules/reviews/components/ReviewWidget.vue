@@ -6,6 +6,7 @@
     <div class="by">
       <a v-if="review.reviewedByUid" @click="handleUserClick(review.reviewedByUid)">{{ review.reviewedByName }}</a>
       <span v-else>{{ review.reviewedByName ?? 'Anon'}}</span>
+      <div class="jobtitle" v-if="review.reviewedByJobTitle">{{ review.reviewedByJobTitle }}</div>
     </div>
     <hr/>
   </div>
@@ -40,7 +41,6 @@ export default {
 <style scoped>
 .review-widget {
   margin-top: 5px;  
-  /* min-width: 200px; */
   max-width: 500px;
   text-align: center;
 }
@@ -66,8 +66,12 @@ export default {
 }
 .by {
   padding-top: 5px;
-  font-style: normal;
+  font-weight: bold;
   font-size: var(--prr-font-size-medium);
+}
+
+.by .jobtitle {
+  font-weight: normal;
 }
 
 hr {

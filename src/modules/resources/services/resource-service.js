@@ -280,12 +280,18 @@ const unapproveResource = async function(id) {
  * @returns 
  */
 const getTagsForResources = function(resources) {
-  var tags = resources.map( r => r.tags );
+
+  // get the tag keys being used
+  let tags = resources.map( r => r.tags );
+  // strip out any empties 
+  tags = tags.filter( t => t != null && t != undefined && t.length > 0 )
   tags = new Set(tags.flat());
   
-  // get full tags
+  // get full tag lookup item
   const store = useLookupStore()
-  const allFullTags = [...tags].map( t => store.tags.find ( st => st.key == t ));
+  let allFullTags = [...tags].map( t => store.tags.find ( st => st.key == t ));
 
+  // remove any resource tags that don't exist in the master tag list anymore
+  allFullTags = allFullTags.filter ( t => t != undefined );
   return allFullTags;
 }

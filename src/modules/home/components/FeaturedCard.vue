@@ -2,7 +2,7 @@
   <div v-if="resource" class="container">
     <div class="featured-card" @click="$emit('click', resource)">
       <resource-image v-if="showImage && resource" class="image" :resource="resource"></resource-image>
-      <div>
+      <div class="review">
         <div class="heading"><h1>{{resource.displayName}}</h1></div>
         <h2>{{resource.authorsList}}</h2>
         <review-widget class="quote" :short="true" :review="review"></review-widget>
@@ -79,33 +79,34 @@ h2 {
 }
 
 .container {
-  /* background: blanchedalmond; */
-  margin: 0px 50px;
+  margin-left: 70px;
+  margin-right: 70px;
+  /* display:flex;
+  flex-direction: row;
+  justify-content: center; */
+
 }
 .featured-card {
   background: transparent;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  /* margin: 0px 20px; */
-  /* margin: 0px auto; */
-  /* max-width: 600px; */
-  cursor: pointer; 
+  flex-direction: row;
+  margin: 0px 20px;
+  max-width: 600px;
+  cursor: pointer;
   gap: 0px;
   overflow: hidden;
+}
+
+.review {
+  flex-grow: 2;
 }
 .quote {
   margin-left: auto;
   margin-right: auto;
 }
-.image {
+/* .image {
   float: left;
   vertical-align: middle;
-}
+} */
 
-@media only screen and (max-width: 600px) {
-  .container {
-    margin: 0px 45px;
-  }
-}
 </style>

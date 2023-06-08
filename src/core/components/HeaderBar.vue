@@ -1,14 +1,18 @@
 <template>
   <div class="header">
-    <div class="header-top">
+    <div class="header-top-strip">
+      <router-link class="header-link" to="/">
+        <img class="header-image" src="@/assets/logo-long.svg"/>
+      </router-link>
+      <div class="icon">
+        <base-icon :menu="menuOptions">settings</base-icon>
+        <badge-count v-if="todoCount > 0 && useUserStore.isAdmin" class="badge" :count="todoCount"></badge-count>
+      </div>
+    </div>
+    <div class="header-top desktop">
       
       <div class="left-nav">
-        <div class="mobile">
-          <span 
-            class="material-symbols-outlined"
-            @click="$router.push('/')">home</span>
-        </div>
-        <ul class="desktop">
+        <ul >
           <li v-for="nav in navLinks" :key="nav.path">
             <router-link 
               :class="{ selected: isSelected(nav)}" 
@@ -17,14 +21,14 @@
             {{nav.title}}
             </router-link>
           </li>
-          <li class="nav-with-submenu">
-            <a>CATEGORIES</a>    
+          <li ref="nav_with_submenu" class="nav-with-submenu">
+            <a :class="{ selected: isCategoriesSelected }">CATEGORIES</a>    
             <div ref="submenuDiv" class="submenu">
               <div v-for="tagGroup in tagGroups" :key="tagGroup.groupName" class="submenu-group">
                 <h2 v-if="showCategoryHeading(tagGroup)">{{ tagGroup.groupName.toUpperCase() }}</h2>
                 <ul>
                   <li v-for="tag in tagGroup.tags" :key="tag.key" >
-                    <tag-button :enableHoverEffect="true" @click="$router.push(`/tag/${tag.key}`)">{{tag.value}}</tag-button>
+                    <tag-button :enableHoverEffect="true" @click="handleTagClick(tag)">{{tag.value}}</tag-button>
                   </li>
                 </ul>
               </div>
@@ -43,10 +47,6 @@
           @search="$router.push(`/search/${searchTerm}`)" 
           @mouseover="showCategories=false">
         </search-input>
-        <div class="icon">
-          <base-icon :menu="menuOptions">settings</base-icon>
-          <badge-count v-if="todoCount > 0 && useUserStore.isAdmin" class="badge" :count="todoCount"></badge-count>
-        </div>
       </div>
     </div>
     <div>
@@ -119,7 +119,6 @@ export default {
       navLinks: [],
       showRecommendDialog: false,
       showResourceDialog: false,
-      tagGroups: [],
       resourceFromQueryString: Resource,
       numberOfUnapprovedReviews: 0,
       numberOfRecommendations: 0,
@@ -130,14 +129,13 @@ export default {
   async mounted() {
     this.searchTerm = this.$route.params.searchTerm;
     this.navLinks = [
-      {id: 'home', path:'/', title:'HOME'},
+      // {id: 'home', path:'/', title:'HOME'},
       {id: 'books', path:`/type/${ResourceTypeEnum.Books.key}`, title:'BOOKS'},
       {id: 'podcasts', path:`/type/${ResourceTypeEnum.Podcasts.key}`, title:'PODCASTS'},
       {id: 'websites', path:`/type/${ResourceTypeEnum.Websites.key}`, title:'WEB'},
       {id: 'people', path:`/type/${ResourceTypeEnum.People.key}`, title:'PEOPLE'},
     ];
 
-    this.tagGroups = await groupTags(this.lookupStore.tags);
     this.numberOfUnapprovedReviews = await getUnapprovedReviewsCount();
     this.numberOfRecommendations = await getUnlinkedRecommendationsCount();
 
@@ -152,17 +150,30 @@ export default {
           this.showResourceDialog = true;
         }
       }
-    }   
+    }
+    
+    const categoryNav = this.$refs.nav_with_submenu;
+    if (categoryNav) {
+      categoryNav.addEventListener("mouseover", function () {
+        
+          categoryNav.classList.add("hover-enabled");
+      })
+    }
   },
   
   methods: {
-
+    handleTagClick(tag) {
+      const categoryNav = this.$refs.nav_with_submenu;
+      if (categoryNav) {
+        categoryNav.classList.remove("hover-enabled");
+      }
+      this.$router.push(`/tag/${tag.key}`);
+    },
     handleLogout() {
       auth.signOut().then ( () => {
         this.$router.push("/");
       });
     },
-    
     isSelected(nav) {
       return nav.path === this.$route.path;
     },
@@ -173,6 +184,12 @@ export default {
   },
 
   computed: {
+    tagGroups() {
+      return groupTags(this.lookupStore.tags);
+    },
+    isCategoriesSelected() {
+      return this.$route.path.includes('/tag/');
+    },
     todoCount() {
       return this.numberOfRecommendations + this.numberOfUnapprovedReviews;
     },
@@ -273,11 +290,28 @@ export default {
 
 <style scoped>
 .header {
-  min-width: 1100px;
+  min-width: 1000px;
   max-width: 2000px;
   z-index: 10;
 }
 
+.header-top-strip {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin-right: 35px;
+  margin-left: 15px;
+  margin-top:20px;
+}
+
+.header-image {
+  /* width: 400px; */
+  height: 40px;
+  margin: auto;
+  vertical-align: middle;
+  display: inline-block;
+}
 .header-top {
   padding: 0px 10px;
   font-size: var(--prr-font-size-medium);
@@ -301,16 +335,14 @@ export default {
   font-weight: var(--prr-font-weight);
 }
 
-/* .mobile-nav {
-  background: red;
-} */
-.nav-with-submenu:hover .submenu {
+.nav-with-submenu.hover-enabled:hover .submenu {
   visibility: visible;
   display: block;
 }
 .submenu {
   position: absolute;
-  top:70px;
+  /* header height (70) + image (40) + image margin-top (20) */
+  top:130px; 
   left:0px;
   right:0px;
   display:none;
@@ -417,5 +449,9 @@ li {
     min-width: 100%;
     max-width: 100%;
   }
+
+  /* .header-image {
+    display: none;
+  } */
 }
 </style>

@@ -4,6 +4,7 @@
     <div v-else class="content">
       <h1>{{userName}}'s Reviews</h1>
       <p>Here's what {{ userName }} has reviewed.</p>
+
       <div class="cards">
         <div v-for="review in reviews" :key="review.id" >
           <featured-card
@@ -73,14 +74,14 @@ export default {
 
 <style scoped>
 
-.cards {
+/* .cards {
   display:flex;
   flex-direction: row;
   flex-wrap: wrap;
   justify-content: space-around;
-}
+} */
 
-.content {
+/* .content {
   text-align: center;
-}
+} */
 </style>

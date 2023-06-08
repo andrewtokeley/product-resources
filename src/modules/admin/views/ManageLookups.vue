@@ -189,6 +189,12 @@ export default {
     async handleAdded(item) {
       this.selectedItem = item;
       this.lookup.items.unshift(item);
+
+      // refresh the lookup state, this will ensure the rest of the app have access to the latest changes
+      console.log('add');
+      let store = useLookupStore()
+      store.fetchLookups();
+
       this.showEdit = false;
     },
 
@@ -231,6 +237,10 @@ export default {
         if (index >= 0) {
           this.lookup.items.splice(index,1);
         }
+
+        // refresh store
+        let store = useLookupStore()
+        store.fetchLookups();
         
       } catch (error) {
         this.isDeleting = false;

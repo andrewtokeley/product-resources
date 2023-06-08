@@ -12,6 +12,7 @@ class Review {
     this.recommendationId = config.recommendationId;
     this.reviewedByUid = config.reviewedByUid;
     this.reviewedByName = config.reviewedByName;
+    this.reviewedByJobTitle = config.reviewedByJobTitle;
     this.reason = config.reason;
     this.dateCreated = config.dateCreated;
     this.dateApproved = config.dateApproved;
@@ -104,6 +105,7 @@ var reviewConverter = {
     if (review.reviewedByUid != null) result.reviewedByUid = review.reviewedByUid;
     if (review.reviewedByName != null) result.reviewedByName = review.reviewedByName;
     if (review.resourceName != null) result.resourceName = review.resourceName;
+    if (review.reviewedByJobTitle != null) result.reviewedByJobTitle = review.reviewedByJobTitle;
     if (review.resourceId != null) result.resourceId = review.resourceId;
     if (review.reason != null) result.reason = review.reason;
     
@@ -130,6 +132,7 @@ var reviewConverter = {
       recommendationId: data.recommendationId,
       reviewedByUid: data.reviewedByUid,
       reviewedByName: data.reviewedByName,
+      reviewedByJobTitle: data.reviewedByJobTitle,
       reason: data.reason,
       resourceId: data.resourceId ?? null,
       resourceName: data.resourceName,

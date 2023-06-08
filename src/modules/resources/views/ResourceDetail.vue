@@ -100,7 +100,7 @@ export default {
       return [
         {
           id: 'view',
-          title: "Check it Out",
+          title: this.viewResource.resourceType == 'people' ? "Get in Touch" : "Check it Out",
           iconName: "open_in_new",
           isPrimary: true,
         },

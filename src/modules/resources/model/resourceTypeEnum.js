@@ -9,7 +9,7 @@ export default class ResourceTypeEnum {
   static Articles = new ResourceTypeEnum("posts", "Post")
   static Websites = new ResourceTypeEnum("websites", "Website")
   static Videos = new ResourceTypeEnum("videos", "Video")
-  static People = new ResourceTypeEnum("people", "Person")
+  static People = new ResourceTypeEnum("people", "Product Person")
 
   static all() {
     return [

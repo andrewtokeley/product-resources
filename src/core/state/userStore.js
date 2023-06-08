@@ -7,8 +7,9 @@ export const useUserStore = defineStore({
     uid: "",
     isLoggedIn: false,
     isAdmin: false,
-    displayName: "",
-    email: "",
+    displayName: null,
+    jobTitle: null,
+    email: null,
   }),
 
   actions: {
@@ -16,11 +17,15 @@ export const useUserStore = defineStore({
       this.displayName = displayName;
     },
 
+    async setJobTitle(jobTitle) {
+      this.jobTitle = jobTitle;
+    },
+
     async updateAuthUser(authUser) {
       
       // successful login
       if (authUser) {
-        console.log('auth start')
+        
         // set the state properties
         this.uid = authUser.uid;
         this.isLoggedIn = true;
@@ -38,17 +43,20 @@ export const useUserStore = defineStore({
           await addUser(authUser);
         } else {
           this.displayName = dbUser.displayName;
+          this.jobTitle = dbUser.jobTitle;
         }
-        console.log('set displayname')
+
         // record last logged in 
         await recordUserLogin(authUser.uid);
         
       } else {
+        
         // the user logged out, clear all state
         this.isLoggedIn = false;
         this.isAdmin = false;
-        this.displayName = "";
-        this.email = "";
+        this.displayName = null;
+        this.jobTitle = null;
+        this.email = null;
         
       }
       

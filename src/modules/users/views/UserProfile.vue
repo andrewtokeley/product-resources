@@ -4,8 +4,10 @@
     
     <div class="label">This is the name that will be displayed with your reviews.</div>
     <base-input v-model="user.displayName" :errorMessage="errorMessage['displayName']" @blur="validate('displayName')" :options="{placeholder: 'Display name'}"></base-input>
-    <!-- <h2>Your Recommendations</h2>
-    <h2>Your Reviews</h2> -->
+
+    <div class="label">Optional job title, also displayed with your recommendations/reviews.</div>
+    <base-input v-model="user.jobTitle" :errorMessage="errorMessage['jobTitle']" @blur="validate('jobTitle')" :options="{placeholder: 'Job title'}"></base-input>
+
     <div class="actions">
       <base-button :isSecondary="true" @click="$router.go(-1)">Close</base-button>
       <base-button :isPrimary="true" :disabled="!isValid" :showSpinner="isSaving" @click="handleSave">Save</base-button>
@@ -64,9 +66,10 @@ export default {
       
       // save and update state with user's updated displayName
       const store = useUserStore();
-      if (this.user.displayName != store.displayName) {
+      if (this.user.displayName != store.displayName || this.user.jobTitle != store.jobTitle) {
         await updateUser(this.user);
         store.setDisplayName(this.user.displayName);
+        store.setJobTitle(this.user.jobTitle);
       }
       
       this.isSaving = false;

@@ -4,8 +4,8 @@
     <div v-else class="content" >
       
       <template v-if="isRecommendation">
-        <h1>{{ title }}</h1>
-        <p>Thank you so much for recommending a new resource!</p>
+        <h1>Recommend</h1>
+        <p>Thank you so much for recommending a new {{ resourceTypeName.toLowerCase() }}!</p>
       </template>
       <template v-else>
         <h1>Write a Review</h1>
@@ -13,15 +13,15 @@
       </template>
 
       <div v-if="isRecommendation">
-        <div class="label tight">Where can people find it?</div> 
+        <div class="label tight">{{  whereText }}</div> 
         <base-input 
           v-model="recommendation.resourceUrl" 
           @blur="validateRecommendation('resourceUrl')"
           :hasFocus="true"
           :errorMessage="errorMessage['resourceUrl']"
-          :options="{ placeholder: 'Link to Resource', readOnly: isSaving, inlineErrors: false }">
+          :options="{ placeholder: 'Link', readOnly: isSaving, inlineErrors: false }">
         </base-input>
-        <div class="label">Anything you'd like to share about the resource to help us categorise it and understand why you're recommending it?</div>
+        <div class="label">Anything you'd like to share to help us categorise and learn more about your recommendation?</div>
         <base-multiline-text 
           v-model="recommendation.comment"
           :errorMessage="errorMessage['comment']"
@@ -51,8 +51,9 @@
               placeholder: 'Your Review',
               readOnly: isSaving}">
           </base-multiline-text>
-          <div class="label tight">Feel free to update the name that will appear with your review</div>
+          <div class="label tight">Feel free to update the name and job title that will appear with your review</div>
           <base-input v-model="review.reviewedByName"></base-input>
+          <base-input v-model="review.reviewedByJobTitle"></base-input>
           <p>Once submitted, we'll get it published as soon as possibe.</p>
         </div>
       </div>
@@ -107,7 +108,6 @@ data() {
     review: Review.default(),
     resource: null,
     errorMessage: [],
-    title: "Recommendation Something New",
     resourceImage: "menu",
   }
 },
@@ -115,11 +115,6 @@ async mounted() {
   this.isLoading = true;
   
   if (this.isRecommendation) {    
-    const resourceTypeId = this.$route.params.typeId;
-    if (resourceTypeId) {
-      // we're recommending a new resource of a specific type
-      this.title = "Recommend a New " + ResourceTypeEnum.fromKey(resourceTypeId).singular;
-    }
     // we're reviewing a new (unapproved) recommended resource
     // this.recommendation.resourceType = this.$route.params.typeId ?? 'books';
     this.recommendation.recommendedByUid = this.userStore.uid;
@@ -140,13 +135,39 @@ async mounted() {
       this.review.resourceName = this.resource.displayName;
     }
   }
-  console.log('reading displayname')
   this.review.reviewedByUid = this.userStore.uid;
   this.review.reviewedByName = this.userStore.displayName;
+  this.review.reviewedByJobTitle = this.userStore.jobTitle;
 
   this.isLoading = false;
 },  
 computed: {
+  whereText() {
+    const resourceTypeId = this.$route.params.typeId;
+    let text = "Where can people find out more about ";
+    if (resourceTypeId) {
+      if (resourceTypeId == ResourceTypeEnum.People.key) {
+        text += "them?"
+      } else {
+        const typeEnum = ResourceTypeEnum.fromKey(resourceTypeId);
+        if (typeEnum) {
+          text += `the ${typeEnum.singular.toLowerCase()}?`;
+        } else {
+          text += "the resource?";
+        }        
+      }
+    } else {
+      text += "the resource or product person?"
+    }
+    return text;
+  },
+  resourceTypeName() {
+    const resourceTypeId = this.$route.params.typeId;
+    if (resourceTypeId) {
+      return ResourceTypeEnum.fromKey(resourceTypeId).singular
+    }
+    return "resource or person";    
+  },
   userStore() {
     return useUserStore();
   },

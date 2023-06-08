@@ -66,7 +66,7 @@ export default {
   margin-bottom: 5px;
   overflow: hidden;
   border: 1px solid var(--prr-lightgrey);
-  border-radius: 5px;
+  border-radius: 10px;
 }
 
 .resource-image.preview {
@@ -101,10 +101,10 @@ export default {
   visibility: visible;
 }
 .resource-image img {
-  max-height: 100%;
+  height: 100%;
+  width: 100%;
   object-fit: cover;
   margin-right: 20px;
-  scale: 1.05;
   cursor: pointer;
 }
 .resource-image.preview img {
@@ -141,7 +141,7 @@ export default {
   top: 0;
   width: 100%;
   height: 100%;
-  border-radius: 5px;
+  border-radius: 10px;
   background: var(--prr-lightgrey);
   color: white;
 }
@@ -152,7 +152,7 @@ export default {
   align-items: center;
   justify-content: center;
   height: 100%;
-  border-radius: 15px;
+  border-radius: 10px;
   background: var(--prr-extralightgrey);
   cursor: pointer;
   text-align: center;

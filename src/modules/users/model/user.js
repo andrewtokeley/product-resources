@@ -8,6 +8,7 @@ class User {
   constructor(config) {
     this.uid = config?.uid;
     this.displayName = config?.displayName;
+    this.jobTitle = config?.jobTitle;
   }
  
   static default() {
@@ -22,6 +23,14 @@ class User {
       displayName: (value) => {
         if (!value || value.length == 0) {
           return Result.failure("Must enter display name.");
+        } else if (value.length > 100) {
+          return Result.failure("Display name too long.");
+        }
+        return Result.success(value);
+      },
+      jobTitle: (value) => {
+        if (value && value.length >= 100) {
+          return Result.failure("Job title too long.");
         }
         return Result.success(value);
       }
@@ -44,6 +53,7 @@ var userConverter = {
   toFirestore: function (user) {
     const result = {};
     if (user.displayName) { result.displayName = user.displayName }
+    if (user.jobTitle) { result.jobTitle = user.jobTitle }
     return result;
   },
 
@@ -52,7 +62,7 @@ var userConverter = {
     const config = {
       uid: snapshot.id,
       displayName: data.displayName,
-      website: data.website,
+      jobTitle: data.jobTitle,
     }
 
     return new User(config);

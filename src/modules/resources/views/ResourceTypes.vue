@@ -21,7 +21,7 @@
           @click="handleOpenPreview" 
           :showMore="false"
           :showAddRecommendation="true" 
-          :isGrouped="true" 
+          :isGrouped="isGrouped" 
           :resources="filteredSearchResults">
         </book-group>
       </template>
@@ -46,6 +46,7 @@ import TagSelector from "../components/TagSelector.vue";
 import { getTagsForResources, searchByResourceTypes } from "@/modules/resources/services/resource-service";
 import { useLookupStore } from '@/core/state/lookupStore';
 import { ref } from 'vue'
+import ResourceTypeEnum from '../model/resourceTypeEnum';
 
 
 export default {
@@ -66,6 +67,11 @@ export default {
     }
   },
   computed: {
+    isGrouped() {
+      const typeId = this.$route.params.typeId;
+      console.log(typeId);
+      return (typeId == ResourceTypeEnum.Websites.key || typeId == ResourceTypeEnum.Podcasts.key);
+    },
     recommendLink() {
       const typeId = this.$route.params.typeId;
       if (typeId) {
@@ -135,7 +141,7 @@ export default {
       
       // always load everything for the given type - this won't scale but for now fine
       this.searchResults = await this.getResourceByType(typeId);
-      this.tagsUsed = await getTagsForResources(this.searchResults);
+      this.tagsUsed = getTagsForResources(this.searchResults);
       this.filteredSearchResults = this.searchResults;
       
       // apply tag filter 

@@ -136,6 +136,7 @@ export default {
 <style scoped>
 .mobile-nav {
   height: 40px;
+  margin-top: 30px;
   margin-left: 10px;
   width: 100%;
   display:flex;

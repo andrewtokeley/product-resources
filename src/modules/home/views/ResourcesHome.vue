@@ -5,7 +5,7 @@
     </div>
     <div v-else>
       
-      <splide v-if="featured.length > 0" :options="splideOptions" aria-label="Vue Splide Example">
+      <splide v-if="featured.length > 0" :options="splideOptions" aria-label="Top Reviews">
         <SplideSlide v-for="review in featured" :key="review.id">
           <featured-card :review="review" @click="handleViewDetail"></featured-card>
         </SplideSlide>

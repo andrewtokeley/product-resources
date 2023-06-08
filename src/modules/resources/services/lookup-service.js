@@ -115,9 +115,10 @@ const getTags = async function() {
  * @returns array of objects for each group, with properties groupName, tags, where tags is the 
  * full Lookup instance.
  */
-const groupTags = async function(tags) {
+const groupTags = function(tags) {
+  
   let allGroups = tags.map ( t => {
-    if (t.groups) {
+    if (t?.groups && t?.groups.length > 0) {
       return t.groups.split(',')
     }
     return '_General';
@@ -127,6 +128,7 @@ const groupTags = async function(tags) {
   groups.forEach( g => {
     var tagsInGroup = [];
     if (g == '_General') {
+      // include everything that doesn't have a group defined.
       tagsInGroup = tags.filter(t => !(t.groups));
     } else {
       tagsInGroup = tags.filter(t => t.groups?.includes(g) ?? false);
