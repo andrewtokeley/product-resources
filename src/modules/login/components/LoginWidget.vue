@@ -22,7 +22,7 @@ export default {
       default: '/',
     }
   },
-  computed: {    
+  computed: {  
     uiConfig() {
       const vm = this;
       return {
