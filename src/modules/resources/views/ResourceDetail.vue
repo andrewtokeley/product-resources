@@ -34,6 +34,7 @@ import { useLookupStore } from '@/core/state/lookupStore'
 import { getResource } from '../services/resource-service';
 import { Resource } from "@/modules/resources/model/resource"
 import { ref } from 'vue';
+import { logResourceSelect } from '@/core/services/analytics';
 
 export default {
   name: 'resource-detail',
@@ -138,13 +139,13 @@ export default {
     },
 
     async handleIconClick(action) {
-      console.log(action);
       if (action.id == 'edit') {
         this.$router.push(`/admin/resources?edit=${this.viewResource.id}`);
       }
     },
 
     updateHistory() {
+      logResourceSelect(this.viewResource);
       history.pushState(
         {},
         null,

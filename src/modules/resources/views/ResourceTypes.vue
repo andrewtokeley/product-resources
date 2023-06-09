@@ -47,6 +47,7 @@ import { getTagsForResources, searchByResourceTypes } from "@/modules/resources/
 import { useLookupStore } from '@/core/state/lookupStore';
 import { ref } from 'vue'
 import ResourceTypeEnum from '../model/resourceTypeEnum';
+import { logPageViewFromRouteLocation } from '@/core/services/analytics';
 
 
 export default {
@@ -112,14 +113,19 @@ export default {
       if (isOn) {
         // this.selectedTagFilter = [tag.key];
         // add to query string
+        const routePath = `/type/${this.$route.params.typeId}/${key}` //this.$route.path + '/' + key;
+
+        // log as if new page view
+        logPageViewFromRouteLocation(this.$route);
+
         history.pushState(
           {},
           null,
-          this.$route.path + '/' + key
+          routePath
         );
         this.filteredSearchResults = this.searchResults.filter( r => r.tags.includes(key));
       } else {
-        // this.selectedTagFilter = [];
+        
         this.filteredSearchResults = this.searchResults;
         history.pushState(
           {},

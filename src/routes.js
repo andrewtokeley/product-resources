@@ -14,40 +14,40 @@ import PrivacyView from '@/modules/about/views/PrivacyView';
 import UserReviews from '@/modules/users/views/UserReviews';
 
 export default [
-  {path: '/login', component:Login, meta: { hideHeader: false }},
+  {path: '/login', component:Login, meta: { hideHeader: false, analytics_title: 'Login' } },
   
   // home page
-  {path: '/', component:Home, meta: { clearSearch: true }},
+  {path: '/', component:Home, meta: { clearSearch: true, analytics_title: 'Home' }},
   
   // profile page
-  {path: '/profile', component:UserProfile, meta: { requiresAuth: true }},
+  {name: 'user-profile', path: '/profile', component:UserProfile, meta: { requiresAuth: true, analytics_title: 'User Profile'}},
 
-  {path: '/user/:userUid', component:UserReviews },
+  {name: 'user-review', path: '/user/:userUid', component:UserReviews, analytics_title: 'User Review' },
 
   // search across all resources
-  {path: '/search/:searchTerm', component:Search},
+  {name: 'search', path: '/search/:searchTerm', component:Search, meta: { analytics_title: 'Search Keyword' }},
   
   // show all resources in a category
-  {path: '/tag/:tagId', component:Search, meta: { clearSearch: true }},
+  {name: 'search-tag', path: '/tag/:tagId', component:Search, meta: { clearSearch: true, analytics_title: 'Search Tag' }},
   
   // show all resources of a type 
-  {path: '/type/:typeId', component:ResourceTypes},
-  {path: '/type/:typeId/:tagId', component:ResourceTypes},
+  {path: '/type/:typeId', component:ResourceTypes, meta: { analytics_title: 'Resource Type'}},
+  {path: '/type/:typeId/:tagId', component:ResourceTypes, meta: { analytics_title: 'Resource Type' }},
 
-  {path: '/recommend', component: RecommendationView, meta: { requiresAuth: true }},
-  {path: '/recommend/:typeId', component: RecommendationView, meta: { requiresAuth: true }},
-  {path: '/recommend/confirm', component: RecommendationConfirmation },
+  {path: '/recommend', component: RecommendationView, meta: { requiresAuth: true, meta: { analytics_title: 'Recommend'} }},
+  {path: '/recommend/:typeId', component: RecommendationView, meta: { requiresAuth: true, analytics_title: 'Recommend' }},
+  {path: '/recommend/confirm', component: RecommendationConfirmation, meta: {  analytics_title: 'Recommend'}},
 
-  {path: '/review/:resourceId', component: RecommendationView, meta: { requiresAuth: true }},
+  {path: '/review/:resourceId', component: RecommendationView, meta: { requiresAuth: true, analytics_title: 'Review' }},
   
-  {path: '/about', component:About},
-  {path: '/terms', component:TermsOfService},
-  {path: '/privacy', component:PrivacyView},
+  {path: '/about', component:About, meta: { analytics_title: 'About'} },
+  {path: '/terms', component:TermsOfService, meta: { analytics_title: 'Terms'} },
+  {path: '/privacy', component:PrivacyView, meta: { analytics_title: 'Privacy'} },
 
-  {path: '/admin/resources/', component:ManageResources, meta: { requiresAuth: true, requiresAdmin: true } },
+  {path: '/admin/resources/', component:ManageResources, meta: { requiresAuth: true, requiresAdmin: true, analytics_title: 'Admin Resources' } },
 
-  {path: '/admin/reviews', component:ManageReviews, meta: { requiresAuth: true, requiresAdmin: true } },
+  {path: '/admin/reviews', component:ManageReviews, meta: { requiresAuth: true, requiresAdmin: true, analytics_title: 'Admin Reviews' } },
 
-  {path: '/admin/tags', component:ManageLookups, meta: { requiresAuth: true, requiresAdmin: true } },
+  {path: '/admin/tags', component:ManageLookups, meta: { requiresAuth: true, requiresAdmin: true, analytics_title: 'Admin Lookups'} },
 
 ]

@@ -7,6 +7,7 @@ import { createPinia } from "pinia";
 import { auth } from '@/core/services/firebaseInit'
 import { useUserStore } from "@/core/state/userStore"
 import { useLookupStore } from "@/core/state/lookupStore"
+import { logPageViewFromRouteLocation } from "./core/services/analytics"
 
 const pinia = createPinia();
 
@@ -21,9 +22,10 @@ let router = createRouter({
 // refresh lookups in the store
 
 router.beforeEach((to) => {
-  console.log('beforeEachRoute')
+  // log page view to GA
+  logPageViewFromRouteLocation(to);
+
   const store = useUserStore();
-  console.log("BEFOREROUTE " + store.isLoggedIn);
   if (to.meta.requiresAuth) {
     if (!store.isLoggedIn) {
       if (to.meta.requiresAdmin) {
@@ -35,7 +37,6 @@ router.beforeEach((to) => {
       }
     } 
   } 
-
   // just continue to the destination
   return true;
 
