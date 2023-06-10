@@ -20,7 +20,7 @@ export default [
   {path: '/', component:Home, meta: { clearSearch: true, analytics_title: 'Home' }},
   
   // profile page
-  {name: 'user-profile', path: '/profile', component:UserProfile, meta: { requiresAuth: true, analytics_title: 'User Profile'}},
+  {name: 'user-profile', path: '/profile', component:UserProfile, meta: { requiresAuth: true, analytics_title: 'User Profile', hideNavigation: true}},
 
   {name: 'user-review', path: '/user/:userUid', component:UserReviews, analytics_title: 'User Review' },
 
@@ -40,7 +40,7 @@ export default [
 
   {path: '/review/:resourceId', component: RecommendationView, meta: { requiresAuth: true, analytics_title: 'Review' }},
   
-  {path: '/about', component:About, meta: { analytics_title: 'About'} },
+  {path: '/about', component:About, meta: { analytics_title: 'About', hideNavigation: true} },
   {path: '/terms', component:TermsOfService, meta: { analytics_title: 'Terms'} },
   {path: '/privacy', component:PrivacyView, meta: { analytics_title: 'Privacy'} },
 

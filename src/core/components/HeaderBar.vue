@@ -9,53 +9,56 @@
         <badge-count v-if="todoCount > 0 && useUserStore.isAdmin" class="badge" :count="todoCount"></badge-count>
       </div>
     </div>
-    <div class="header-top desktop">
-      
-      <div class="left-nav">
-        <ul >
-          <li v-for="nav in navLinks" :key="nav.path">
-            <router-link 
-              :class="{ selected: isSelected(nav)}" 
-              :to="nav.path"
-            >
-            {{nav.title}}
-            </router-link>
-          </li>
-          <li ref="nav_with_submenu" class="nav-with-submenu">
-            <a :class="{ selected: isCategoriesSelected }">CATEGORIES</a>    
-            <div ref="submenuDiv" class="submenu">
-              <div v-for="tagGroup in tagGroups" :key="tagGroup.groupName" class="submenu-group">
-                <h2 v-if="showCategoryHeading(tagGroup)">{{ tagGroup.groupName.toUpperCase() }}</h2>
-                <ul>
-                  <li v-for="tag in tagGroup.tags" :key="tag.key" >
-                    <tag-button :enableHoverEffect="true" @click="handleTagClick(tag)">{{tag.value}}</tag-button>
-                  </li>
-                </ul>
+    <div v-if="showNavigation" class="nav">
+      <div class="header-top desktop">
+        
+        <div class="left-nav">
+          <ul >
+            <li v-for="nav in navLinks" :key="nav.path">
+              <router-link 
+                :class="{ selected: isSelected(nav)}" 
+                :to="nav.path"
+              >
+              {{nav.title}}
+              </router-link>
+            </li>
+            <li ref="nav_with_submenu" class="nav-with-submenu">
+              <a :class="{ selected: isCategoriesSelected }">CATEGORIES</a>    
+              <div ref="submenuDiv" class="submenu">
+                <div v-for="tagGroup in tagGroups" :key="tagGroup.groupName" class="submenu-group">
+                  <h2 v-if="showCategoryHeading(tagGroup)">{{ tagGroup.groupName.toUpperCase() }}</h2>
+                  <ul>
+                    <li v-for="tag in tagGroup.tags" :key="tag.key" >
+                      <tag-button :enableHoverEffect="true" @click="handleTagClick(tag)">{{tag.value}}</tag-button>
+                    </li>
+                  </ul>
+                </div>
               </div>
-            </div>
-          </li>
-        </ul>
-      </div>
-      
-      <div class="spacer"></div>
+            </li>
+          </ul>
+        </div>
+        
+        <div class="spacer"></div>
 
-      <div class="header__right">
-        <base-button class="desktop" @click="$router.push('/recommend')" >Recommend...</base-button>
-        <search-input 
-          class="desktop"
-          v-model="searchTerm" 
-          @search="$router.push(`/search/${searchTerm}`)" 
-          @mouseover="showCategories=false">
-        </search-input>
+        <div class="header__right">
+          <base-button class="desktop" @click="$router.push('/recommend')" >Recommend...</base-button>
+          <search-input 
+            class="desktop"
+            v-model="searchTerm" 
+            @search="$router.push(`/search/${searchTerm}`)" 
+            @mouseover="showCategories=false">
+          </search-input>
+        </div>
       </div>
-    </div>
-    <div>
-      <div class="mobile">
-        <div class="mobile-nav2">
-          <mobile-nav></mobile-nav>
+      <div>
+        <div class="mobile">
+          <div class="mobile-nav2">
+            <mobile-nav></mobile-nav>
+          </div>
         </div>
       </div>
     </div>
+
     <resource-detail 
       :resource="resourceFromQueryString"
       v-if="showResourceDialog" 
@@ -184,6 +187,9 @@ export default {
   },
 
   computed: {
+    showNavigation() {
+      return !this.$route.meta.hideNavigation ?? true;
+    },
     tagGroups() {
       return groupTags(this.lookupStore.tags);
     },

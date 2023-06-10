@@ -34,6 +34,7 @@ body {
   box-sizing: border-box;
   overscroll-behavior-y: contain;
   line-height: 1.5;
+  margin: 0px;
 }
 
 body.modal-open {
@@ -57,4 +58,14 @@ hr {
 
 .splide__pagination__page.is-active {
   background: var(--prr-green) !important;
+}
+
+::-moz-selection { /* Code for Firefox */
+  color: black;
+  background: var(--prr-green);
+}
+
+::selection {
+  color: black;
+  background: var(--prr-green);
 }

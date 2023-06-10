@@ -12,7 +12,7 @@
       <p>
         Signing in will create a new account for first time users. Our website will only be given access to your name and email address.
       </p>
-      <base-button :isSecondary="true" @click="$router.go(-1)">No Thanks!</base-button>
+      <base-button :isSecondary="true" @click="handleCancel">No Thanks!</base-button>
     </div>
   </div>
 </template>
@@ -64,7 +64,11 @@ export default {
     handleSuccess() {
       console.log('success');
       // this.$router.push(this.redirectUrl ?? '/');
-    }
+    },
+    handleCancel() {
+      // check
+      this.$router.go(-1);
+    },
   }
 
 };
