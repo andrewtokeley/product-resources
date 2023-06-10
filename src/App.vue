@@ -33,7 +33,9 @@ export default defineComponent({
 </script>
 
 <style>
-
+body { 
+  margin: 0px;
+}
 .app {
   max-width: 2000px;
   min-height: 100%;
