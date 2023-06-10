@@ -1,3 +1,3 @@
 <template>
-  <h1>Privacy</h1>
+  <h1 class="giant">Privacy</h1>
 </template>

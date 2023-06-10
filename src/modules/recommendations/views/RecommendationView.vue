@@ -35,7 +35,7 @@
       </div>
       
       <div class="review">
-        <h2 v-if="resource"><span class="material-symbols-outlined">{{resourceImage}}</span>{{ resource.displayName }}</h2>
+        <!-- <h2 v-if="resource"><span class="material-symbols-outlined">{{resourceImage}}</span>{{ resource.displayName }}</h2> -->
         <resource-image v-if="resource" class="image" :resource="resource"></resource-image>
         <div class="label tight" v-if="isRecommendation">We think it's important for all recommendations to include a public review.</div>
         <div class="textarea-wrap">
@@ -260,26 +260,11 @@ methods: {
 </script>
 
 <style scoped>
-/* .page {
-  display: flex;
-  justify-content: center;
-} */
-
-/* .content {
-  width: 600px;
-} */
-
-h2 {
-  margin-bottom: 0px;
-}
 
 .material-symbols-outlined {
   margin-right: 10px;
 }
-.subtitle {
-  color: var(--prr-lightgrey);
-  margin:0px;
-}
+
 .double-line{
   width: 100%;
   display: flex;

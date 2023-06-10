@@ -161,26 +161,15 @@ h1 {
   align-content: center;
   justify-content: flex-start;
   overflow: scroll;
-  gap: 10px;
+  gap: 25px;
 }
-
-/* .row::-webkit-scrollbar {
-    background-color: #f5f5f5;
-    border-radius: 10px;
-    width: 100%;
-    height: 2px;
-}
-.row::-webkit-scrollbar-thumb {
-    background-color: #000000;
-    border-radius: 10px;
-} */
 
 .row.singleRow {
   flex-wrap: nowrap;
   justify-content: flex-start;
 }
 
-.add-resource-card {
+/* .add-resource-card {
   display:flex;
   flex-direction: column;
   justify-content: center;
@@ -188,12 +177,13 @@ h1 {
   width: 140px;
   height: 205px;
   background: var(--prr-extralightgrey);
-}
+} */
 
 @media only screen and (max-width: 600px) {
 
   .row {
     justify-content: space-around;
+    gap: 10px;
   }
   
 }

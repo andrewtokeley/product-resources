@@ -1,3 +1,3 @@
 <template>
-  <h1>Terms of Service</h1>
+  <h1 class="giant">Terms of Service</h1>
 </template>

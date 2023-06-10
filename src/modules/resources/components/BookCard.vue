@@ -1,22 +1,15 @@
 <template>
   <div class="resource">
-    <figure>
-      <resource-image 
-        :preview="showDescription" 
-        :resource="resource" 
-        :showAddPlaceholder="showAddPlaceholder" 
-        @click="$emit('click', resource)"
-        @addRecommend="$emit('addRecommend', resource)">
-      </resource-image>
-      <figcaption v-if="showTitle && !showAddPlaceholder" >
-        <h1 :title="resource.displayName">{{ resource.displayName }}</h1>
-        <h2>{{ authorsDisplay }}</h2>
-      </figcaption>
-    </figure>
+    <resource-image 
+      :preview="showDescription" 
+      :resource="resource" 
+      :showTitle="true"
+      :showAddPlaceholder="showAddPlaceholder" 
+      @click="$emit('click', resource)"
+      @addRecommend="$emit('addRecommend', resource)">
+    </resource-image>
     <div v-if="showDescription" class="description" @click="$emit('click', resource)">
-      <h1 :title="resource.displayName">{{ resource.displayName }}</h1>
-      <h2>{{ authorsDisplay }}</h2>
-      <p class="description">{{ summary }}</p>
+      {{ summary }}
     </div>
     <!-- <resource-detail v-if="showDetails" :resource="resource" @close="showDetails = false"></resource-detail> -->
   </div>
@@ -83,37 +76,6 @@ export default {
   margin-bottom: 20px;
 }
 
-figure {
-  display: table;
-  margin: 0px;
-  margin-right: 15px;
-  height: fit-content;
-}
-
-figcaption {
-  display:table-caption;
-  caption-side:bottom;
-}
-
-h1 {
-  font-size: var(--prr-font-size-small);
-  font-weight: 500;
-  margin: 0px 0px 5px 0px;
-  padding-bottom: 0px;
-  overflow: hidden;
-   display: -webkit-box;
-   -webkit-line-clamp: 2; /* number of lines to show */
-           line-clamp: 2; 
-   -webkit-box-orient: vertical;
-}
-
-h2 {
-  font-size: var(--prr-font-size-small);
-  margin: 5px 0px 5px 0px;
-  font-weight: 400;
-  color: var(--prr-mediumgrey)
-}
-
 .description h1 {
   font-size: var(--prr-font-size-normal);
   font-weight: 600;
@@ -134,6 +96,8 @@ h2 {
 }
 
 .description {
+  max-width: 300px;
+  margin-left: 20px;
   cursor: pointer;
   overflow: hidden;
    display: -webkit-box;

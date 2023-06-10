@@ -1,20 +1,23 @@
 <template>
-  <div class="resource-image" :class="{landscape: isLandscape, square: isSquare, preview: preview }" >
-      <div v-if="showAddPlaceholder" class="placeholder" @click="$emit('addRecommend', resource)" >
-        <span class="material-symbols-outlined">add_circle</span>
-        <!-- <div>{{ recommendText }}</div> -->
-      </div>
-      <template v-else>
-        <div class="missing-image-mask" v-if="showMissingImageMask">Resource Image</div>  
-        <img 
-          v-if="!showMissingImageMask"
-          :src="url"
-          :alt="resource.displayName"  
-          @error="showMissingImageMask = true"
-          @click="$emit('click', resource)"
-        />
-      </template>
-  </div>
+  <figure :class="{landscape: isLandscape, square: isSquare, preview: preview }" >
+    <div v-if="showAddPlaceholder" class="placeholder" @click="$emit('addRecommend', resource)" title="Recommend">
+      <span class="material-symbols-outlined">add_circle</span>
+    </div>
+    <template v-else>
+      <div class="missing-image-mask" v-if="showMissingImageMask">Resource Image</div>  
+      <img 
+        v-else
+        :src="url"
+        :alt="resource.displayName"  
+        @error="showMissingImageMask = true"
+        @click="$emit('click', resource)"
+      />
+      <figcaption v-if="showTitle && !showAddPlaceholder" >
+        <h1 :title="resource.displayName">{{ resource.displayName }}</h1>
+        <h2 :title="authorsDisplay">{{ authorsDisplay }}</h2>
+      </figcaption>
+    </template>
+    </figure>
 </template>
 
 <script>
@@ -25,6 +28,10 @@ export default {
   emits: ['click','addRecommend'],
   props: { 
     resource: Resource, 
+    showTitle: {
+      type: Boolean,
+      default: false,
+    },
     showAddPlaceholder: {
       type: Boolean,
       default: false,
@@ -40,10 +47,6 @@ export default {
     }
   },
   computed: {
-    // recommendText() {
-    //   console.log(this.resource.displayName + ", " + this.resource.resourceType);
-    //   return ResourceTypeEnum.fromKey(this.resource.resourceType)?.singular
-    // },
     isSquare(){
       return this.resource.imageShape == 'square';
     },
@@ -53,63 +56,101 @@ export default {
     url() {
       return this.resource.imageUrl ?? this.resource.parentResourceImageUrl ?? 'forecerror';
     },
+    authorsDisplay() {
+      if (this.resource.authors) {
+        return this.resource.authors.join(", ")
+      }
+      return null;
+    },
   },
 }
 </script>
 
 <style scoped>
 
-.resource-image {
-  position: relative;
-  height:145px;
-  width: 100px;
-  margin-bottom: 5px;
-  overflow: hidden;
-  border: 1px solid var(--prr-lightgrey);
-  border-radius: 10px;
+figure {
+  display: table;
+  margin: 0px;
+  height: fit-content;
 }
 
-.resource-image.preview {
+figcaption {
+  display:table-caption;
+  caption-side:bottom;
+}
+
+figure img, figure .placeholder {
+  height: 100%;
+  width: 100%;
+  height:145px;
+  width: 100px;
+  object-fit: cover;
+  /* margin-right: 20px; */
+  border: 1px solid var(--prr-lightgrey);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+figure.preview img, figure.preview .placeholder {
   height:110px;
   width: 75px;
   margin-bottom: 0px;
 }
 
-.resource-image.landscape {
+h1 {
+  font-size: var(--prr-font-size-small);
+  line-height: 15px;
+  font-weight: 500;
+  margin: 0px 0px 5px 0px;
+  padding-bottom: 0px;
+  overflow: hidden;
+   display: -webkit-box;
+   -webkit-line-clamp: 2; /* number of lines to show */
+           line-clamp: 2; 
+   -webkit-box-orient: vertical;
+}
+
+h2 {
+  font-size: var(--prr-font-size-small);
+  margin: 5px 0px 5px 0px;
+  font-weight: 400;
+  line-height: 15px;
+  color: var(--prr-mediumgrey);
+  overflow: hidden;
+  display: -webkit-box;
+   -webkit-line-clamp: 3; /* number of lines to show */
+           line-clamp: 3; 
+   -webkit-box-orient: vertical;
+}
+figure.landscape img figure.landscape .placeholder {
   height:124px;
   width: 160px;
 }
-.resource-image.landscape.preview {
+figure.landscape.preview img {
   height:75px;
   width: 110px;
   margin: 0px;
   padding: 0px;
 }
 
-.square {
+.square img, .square .placeholder{
   height:124px;
   width: 124px;
 }
-.resource-image.square.preview {
+figure.square.preview img {
   height:75px;
   width: 75px;
   margin: 0px;
   padding: 0px;
 }
 
-.resource-image:hover .action-strip {
+figure:hover .action-strip {
   visibility: visible;
 }
-.resource-image img {
-  height: 100%;
-  width: 100%;
-  object-fit: cover;
+
+/* figure.preview img {
   margin-right: 20px;
-  cursor: pointer;
-}
-.resource-image.preview img {
-  margin-right: 20px;
-}
+} */
 
 .action-strip {
   visibility: hidden;

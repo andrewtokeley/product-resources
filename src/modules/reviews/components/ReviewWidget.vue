@@ -48,7 +48,7 @@ export default {
 .quote {
   display: -webkit-box;
   padding: 0px 20px;
-  max-width: 450px;
+  max-width: 650px;
   overflow: hidden;
   white-space: pre-wrap;
   color: var(--prr-darkgrey);
@@ -82,6 +82,7 @@ hr {
 
 .link {
   text-decoration: none;
+  font-weight: 600;
 }
 .draft-heading {
   color: red;

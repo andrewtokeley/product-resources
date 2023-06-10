@@ -1,11 +1,13 @@
 <template>
   <div class="review-with-image" @click="$emit('click', resource)">
     <div class="image">
-      <resource-image v-if="showImage && resource" :resource="resource"></resource-image>
+      <resource-image 
+        v-if="resource" 
+        :show-title="true"
+        :resource="resource">
+      </resource-image>
     </div>
     <div class="review">
-      <div class="heading"><h1>{{resource?.displayName}}</h1></div>
-      <h2>{{resource?.authorsList}}</h2>
       <review-widget class="quote" :review="review"></review-widget>
     </div>
   </div>
@@ -62,10 +64,16 @@ export default {
   gap: 10px;
   overflow: hidden;
   cursor: pointer;
+  margin-top: 20px;
 }
 
+.image {
+  width: 20%;
+  min-width:180px;
+}
 .review {
-  max-width:700px;
+  /* max-width:700px; */
+  width: 80%;
 }
 .quote {
   margin-left: auto;
@@ -99,10 +107,12 @@ h2 {
 @media only screen and (max-width: 600px) {
   .review-with-image {
     flex-direction: column;
+    justify-content: center;
   }
 
-  .image {
+  .image, .review {
     display: flex;
+    width:100%;
     justify-content: center;
   }
 }

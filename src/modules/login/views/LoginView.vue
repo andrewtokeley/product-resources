@@ -1,6 +1,6 @@
 <template>
   <div class="login-view">
-    <h1>{{  heading }}</h1>
+    <h1 class="giant">{{  heading }}</h1>
     <h2 v-if="explanation">{{  explanation }}</h2>
     <div v-if="error">{{ error }}</div>
     <login-widget v-if="redirectUrl" 
