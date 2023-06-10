@@ -4,7 +4,7 @@
     <p v-if="review.reason" class="quote" :class="{ short: short}">"{{ review.reason }}"</p>
     <p v-else class="quote" >"I like this resource because..."</p>
     <div class="by">
-      <a v-if="review.reviewedByUid" @click="handleUserClick(review.reviewedByUid)">{{ review.reviewedByName }}</a>
+      <router-link class="link" v-if="review.reviewedByUid" :to="`/user/${review.reviewedByUid}`">{{ review.reviewedByName }}</router-link>
       <span v-else>{{ review.reviewedByName ?? 'Anon'}}</span>
       <div class="jobtitle" v-if="review.reviewedByJobTitle">{{ review.reviewedByJobTitle }}</div>
     </div>
@@ -66,7 +66,8 @@ export default {
 }
 .by {
   padding-top: 5px;
-  font-weight: bold;
+  font-style:normal;
+  /* font-weight: bold; */
   font-size: var(--prr-font-size-medium);
 }
 
@@ -79,6 +80,9 @@ hr {
   margin-bottom: 30px;
 }
 
+.link {
+  text-decoration: none;
+}
 .draft-heading {
   color: red;
 }

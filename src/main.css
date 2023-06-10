@@ -51,6 +51,35 @@ a:hover {
   color: var(--prr-green);
 }
 
+label {
+  font-size: var(--prr-font-size-normal);
+}
+h1 {
+  font-weight: 600;
+}
+
+h1.giant {
+  font-weight: 700;
+  font-size: 60px;
+  text-transform: uppercase;
+  margin-top: 10px;
+  line-height: 65px;
+  margin-bottom: 10px;
+}
+
+h1.giant::after {
+  content: '.';
+  color: var(--prr-green);
+}
+
+h2 {
+  font-weight: 500;
+  font-size: 25px;
+  line-height: 30px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
 hr {
   border: 0px;
   border-bottom: 1px solid var(--prr-mediumgrey);

@@ -7,7 +7,7 @@
         <base-icon class="close" @click="handleClose">close</base-icon>
         <h1>Categories</h1>
         <div class="content">
-          <tag-selector class="tag-selector" :singleColumn="true" :tags="tags_" @click="handleTagClick" :singleSelect="true"></tag-selector>
+          <tag-selector class="tag-selector" :class="{'tags-visible': isMenuOpen}" :singleColumn="true" :tags="tags_" @click="handleTagClick" :singleSelect="true"></tag-selector>
         </div>
       </div>
     </div>
@@ -134,6 +134,7 @@ sidebar-mask.open {
   bottom: 0px;
   left: 0px;
   width: 80%;
+  overflow-x: hidden;
   overflow-y: scroll;
   padding-bottom: 50px;
 }
@@ -165,5 +166,11 @@ li {
 } */
 .sidebar-inner .tag-selector {
   padding-left: 15px;
+  opacity: 0;
+  transition: opacity 1500ms;
+}
+
+.sidebar-inner .tags-visible {
+  opacity: 1;
 }
 </style>

@@ -22,7 +22,7 @@
               {{nav.title}}
               </router-link>
             </li>
-            <li ref="nav_with_submenu" class="nav-with-submenu">
+            <li ref="nav_with_submenu" class="nav-with-submenu hover-enabled">
               <a :class="{ selected: isCategoriesSelected }">CATEGORIES</a>    
               <div ref="submenuDiv" class="submenu">
                 <div v-for="tagGroup in tagGroups" :key="tagGroup.groupName" class="submenu-group">
@@ -157,8 +157,8 @@ export default {
     
     const categoryNav = this.$refs.nav_with_submenu;
     if (categoryNav) {
+      console.log('addmouseover')
       categoryNav.addEventListener("mouseover", function () {
-        
           categoryNav.classList.add("hover-enabled");
       })
     }
@@ -168,6 +168,7 @@ export default {
     handleTagClick(tag) {
       const categoryNav = this.$refs.nav_with_submenu;
       if (categoryNav) {
+        console.log('removemouseover')
         categoryNav.classList.remove("hover-enabled");
       }
       this.$router.push(`/tag/${tag.key}`);

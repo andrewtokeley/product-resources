@@ -1,12 +1,12 @@
 <template>
-  <div v-if="resource" class="featured-card">
-    <div class="container" @click="$emit('click', resource)">
-      <resource-image v-if="showImage && resource" class="image" :resource="resource"></resource-image>
-      <div class="review">
-        <div class="heading"><h1>{{resource.displayName}}</h1></div>
-        <h2>{{resource.authorsList}}</h2>
-        <review-widget class="quote" :short="true" :review="review"></review-widget>
-      </div>
+  <div class="review-with-image" @click="$emit('click', resource)">
+    <div class="image">
+      <resource-image v-if="showImage && resource" :resource="resource"></resource-image>
+    </div>
+    <div class="review">
+      <div class="heading"><h1>{{resource?.displayName}}</h1></div>
+      <h2>{{resource?.authorsList}}</h2>
+      <review-widget class="quote" :review="review"></review-widget>
     </div>
   </div>
 </template>
@@ -55,24 +55,17 @@ export default {
 
 <style scoped>
 
-.featured-card {
-  margin-left: 70px;
-  margin-right: 70px;
-}
-.container {
-  background: transparent;
+.review-with-image {
   display: flex;
   flex-direction: row;
-  margin: 0px auto;
-  max-width: 600px;
-  cursor: pointer;
-  gap: 0px;
+  justify-content: flex-start;
+  gap: 10px;
   overflow: hidden;
+  cursor: pointer;
 }
 
 .review {
-  flex-grow: 2;
-  width:100%;
+  max-width:700px;
 }
 .quote {
   margin-left: auto;
@@ -103,5 +96,15 @@ h2 {
   text-overflow: ellipsis;
 }
 
+@media only screen and (max-width: 600px) {
+  .review-with-image {
+    flex-direction: column;
+  }
+
+  .image {
+    display: flex;
+    justify-content: center;
+  }
+}
 
 </style>

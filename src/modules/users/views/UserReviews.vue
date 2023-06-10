@@ -2,16 +2,16 @@
   <div class="user-reviews">
     <loading-symbol v-if="isLoading"></loading-symbol>
     <div v-else class="content">
-      <h1>{{userName}}'s Reviews</h1>
-      <p>Here's what {{ userName }} has reviewed.</p>
+      <h1 class="giant">Reviews</h1>
+      <h2><span>by </span>{{userName}}</h2>
 
       <div class="cards">
         <div v-for="review in reviews" :key="review.id" >
-          <featured-card
+          <review-with-image
             :showImage="true"
             :review="review"
             @click="handleClick">
-          </featured-card>
+          </review-with-image>
           <hr class="divider" />
         </div>
       </div>
@@ -24,13 +24,13 @@
 import { getReviewsByUser } from '@/modules/reviews/services/review-service'
 import { getUser } from '@/modules/users/services/user-services';
 import LoadingSymbol from '@/core/components/LoadingSymbol.vue';
-import FeaturedCard from '@/modules/home/components/FeaturedCard.vue';
 import ResourceDetail from '@/modules/resources/views/ResourceDetail.vue';
+import ReviewWithImage from '@/modules/reviews/components/ReviewWithImage.vue';
 
 export default {
   name: 'user-reviews',
 
-  components: { LoadingSymbol, FeaturedCard, ResourceDetail },
+  components: { LoadingSymbol, ReviewWithImage, ResourceDetail },
 
   data() {
     return {
@@ -74,14 +74,11 @@ export default {
 
 <style scoped>
 
-/* .cards {
-  display:flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: space-around;
-} */
+.cards {
+  margin-top: 40px;
+}
 
-/* .content {
-  text-align: center;
-} */
+h2 span {
+  color: var(--prr-mediumgrey);
+}
 </style>

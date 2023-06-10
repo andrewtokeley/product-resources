@@ -1,47 +1,42 @@
 <template>
-  <h1>About.</h1>
-  <p>
-    <i>Recommended by the community, for the community</i>
-  </p>
-  <p>
-    Product people are a generous bunch, regularly sharing their latest good read, podcast episode
-    or article. Having a home for these recommendations, is the inspiration for creating this site 
-    and what keeps it alive, relevant and supportive of the growing number of professional product
-    leaders around the world.
-  </p>
-  
-  <figure>
-    <img src="@/assets/product_community.jpeg"/>
-    <figcaption>Fig.1 - Trulli, Puglia, Italy.</figcaption> 
-  </figure>
+  <div class="about">
+    <h1 class="giant">About</h1>
+    <h2>Recommended by the community, for the community</h2>
 
-  <p>
-    My hope is that Top Product Resources becomes a destination for both seasoned product leaders 
-    looking for inspiration and for those at the start of their product journey trying to get their 
-    head around what it's all about.
-  </p>
+    <p>
+      Product people are a generous bunch, regularly sharing their latest good read, podcast episode
+      or article. Having a home for these recommendations is the inspiration for creating this site 
+      and what keeps it alive, relevant and supportive of the growing number of professional product
+      leaders around the world.
+    </p>
+    
+    <figure>
+      <img src="@/assets/product_community.jpeg"/>
+      <figcaption>ProductTank Wellington Meetup</figcaption> 
+    </figure>
+
+    <p>
+      Thanks to all those who came along to our <a href="https://www.meetup.com/producttank-wellington" target="_blank">Wellington ProductTank Meetup</a> 
+      in April 2019 and shared their favourite product resources. Their ideas formed the start of this collection of inspiration! 
+    </p>
+    <p>
+      Our hope is that Top Product Resources becomes a destination for both seasoned product leaders 
+      looking for inspiration and for those at the start of their product journey trying to get their 
+      head around what it's all about.
+    </p>
+  </div>
   
 </template>
 
 <style scoped>
 
-.heading {
-  text-transform: uppercase;
-  font-family: Work Sans, sans-serif;
-  font-size: 60px;
-  font-weight: 700;
-  line-height: 50px;
-}
-h1 {
-  text-transform: uppercase;
-  font-family: Work Sans, sans-serif;
-  font-size: 60px;
-  font-weight: 700;
-  line-height: 50px;
-}
-figure { 
+figure {
+  margin: 0px 20px 20px 0px;
   float: left;
-  width: 50%;
+}
+figure img{ 
+  /* float: left; */
+  width: 400px;
 }
 
 figcaption {

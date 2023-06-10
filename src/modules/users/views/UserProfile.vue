@@ -1,12 +1,14 @@
 <template>
   <div class="user-profile">
-    <h1>Manage Your Profile</h1>
+    <h1 class="giant">Profile</h1>
     
-    <div class="label">This is the name that will be displayed with your reviews.</div>
+    <label>Name</label>
     <base-input v-model="user.displayName" :errorMessage="errorMessage['displayName']" @blur="validate('displayName')" :options="{placeholder: 'Display name'}"></base-input>
+    <div class="label">This is the name that will be displayed with your reviews.</div>
 
-    <div class="label">Optional job title, also displayed with your recommendations/reviews.</div>
+    <label>Job Title (optional)</label>
     <base-input v-model="user.jobTitle" :errorMessage="errorMessage['jobTitle']" @blur="validate('jobTitle')" :options="{placeholder: 'Job title'}"></base-input>
+    <div class="label">Optional job title, also displayed with your recommendations/reviews.</div>
 
     <div class="actions">
       <base-button :isSecondary="true" @click="$router.go(-1)">Close</base-button>
@@ -82,13 +84,6 @@ export default {
 </script>
 
 <style scoped>
-
-.user-profile {
-  max-width: 500px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
 .actions {
   margin-top: 30px;
   float: right;

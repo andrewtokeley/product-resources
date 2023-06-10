@@ -22,7 +22,7 @@ export default [
   // profile page
   {name: 'user-profile', path: '/profile', component:UserProfile, meta: { requiresAuth: true, analytics_title: 'User Profile', hideNavigation: true}},
 
-  {name: 'user-review', path: '/user/:userUid', component:UserReviews, analytics_title: 'User Review' },
+  {name: 'user-review', path: '/user/:userUid', component:UserReviews, meta: {analytics_title: 'User Review', hideNavigation: true }},
 
   // search across all resources
   {name: 'search', path: '/search/:searchTerm', component:Search, meta: { analytics_title: 'Search Keyword' }},
@@ -34,15 +34,15 @@ export default [
   {path: '/type/:typeId', component:ResourceTypes, meta: { analytics_title: 'Resource Type'}},
   {path: '/type/:typeId/:tagId', component:ResourceTypes, meta: { analytics_title: 'Resource Type' }},
 
-  {path: '/recommend', component: RecommendationView, meta: { requiresAuth: true, meta: { analytics_title: 'Recommend'} }},
-  {path: '/recommend/:typeId', component: RecommendationView, meta: { requiresAuth: true, analytics_title: 'Recommend' }},
-  {path: '/recommend/confirm', component: RecommendationConfirmation, meta: {  analytics_title: 'Recommend'}},
+  {path: '/recommend', component: RecommendationView, meta: { requiresAuth: true, analytics_title: 'Recommend', hideNavigation: true }},
+  {path: '/recommend/:typeId', component: RecommendationView, meta: { requiresAuth: true, analytics_title: 'Recommend', hideNavigation: true }},
+  {path: '/recommend/confirm', component: RecommendationConfirmation, meta: {  analytics_title: 'Recommend', hideNavigation: true}},
 
-  {path: '/review/:resourceId', component: RecommendationView, meta: { requiresAuth: true, analytics_title: 'Review' }},
+  {path: '/review/:resourceId', component: RecommendationView, meta: { requiresAuth: true, analytics_title: 'Review', hideNavigation: true }},
   
   {path: '/about', component:About, meta: { analytics_title: 'About', hideNavigation: true} },
-  {path: '/terms', component:TermsOfService, meta: { analytics_title: 'Terms'} },
-  {path: '/privacy', component:PrivacyView, meta: { analytics_title: 'Privacy'} },
+  {path: '/terms', component:TermsOfService, meta: { analytics_title: 'Terms', hideNavigation: true} },
+  {path: '/privacy', component:PrivacyView, meta: { analytics_title: 'Privacy', hideNavigation: true} },
 
   {path: '/admin/resources/', component:ManageResources, meta: { requiresAuth: true, requiresAdmin: true, analytics_title: 'Admin Resources' } },
 

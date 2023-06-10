@@ -1,15 +1,15 @@
 <template>
-  <div class="page">
+  <div class="recommend">
     <loading-symbol v-if="isLoading"></loading-symbol>
     <div v-else class="content" >
       
       <template v-if="isRecommendation">
-        <h1>Recommend</h1>
-        <p>Thank you so much for recommending a new {{ resourceTypeName.toLowerCase() }}!</p>
+        <h1 class="giant">RECOMMEND</h1>
+        <h2>for the community, by the community</h2>
       </template>
       <template v-else>
-        <h1>Write a Review</h1>
-        <p>Thank you so much for sharing your thoughts! </p>
+        <h1 class="giant">REVIEW</h1>
+        <h2>for the community, by the community</h2>
       </template>
 
       <div v-if="isRecommendation">
@@ -260,14 +260,14 @@ methods: {
 </script>
 
 <style scoped>
-.page {
+/* .page {
   display: flex;
   justify-content: center;
-}
+} */
 
-.content {
+/* .content {
   width: 600px;
-}
+} */
 
 h2 {
   margin-bottom: 0px;
