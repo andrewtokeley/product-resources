@@ -197,8 +197,10 @@ const searchByText = async function(text) {
   const result = [];
   querySnapshot.forEach((doc) => {
     let resource = new Resource(doc.data())
-    if (resource.description) {
-      if (resource.description.toLowerCase().includes(text.toLowerCase())) {
+    if (resource.description && resource.displayName && resource.authors) {
+      if (resource.description.toLowerCase().includes(text.toLowerCase()) ||
+          resource.displayName.toLowerCase().includes(text.toLowerCase()) ||
+          resource.authorsList.toLowerCase().includes(text.toLowerCase()) ) {
         result.push(resource);
       }
     }

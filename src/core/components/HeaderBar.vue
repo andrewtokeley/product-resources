@@ -4,9 +4,13 @@
       <router-link class="header-link" to="/">
         <img class="header-image" src="@/assets/logo-long.svg"/>
       </router-link>
-      <div class="icon">
-        <base-icon :menu="menuOptions">settings</base-icon>
-        <badge-count v-if="todoCount > 0 && useUserStore.isAdmin" class="badge" :count="todoCount"></badge-count>
+      <div class="right-top-nav">
+        <router-link to="/about">About</router-link>
+        <div v-if="useUserStore.isLoggedIn" class="icon">
+          <base-icon :menu="menuOptions">account_circle</base-icon>
+          <badge-count v-if="todoCount > 0 && useUserStore.isAdmin" class="badge" :count="todoCount"></badge-count>
+        </div>
+        <router-link v-else to="/login">Sign In</router-link>
       </div>
     </div>
     <div v-if="showNavigation" class="nav">
@@ -280,15 +284,6 @@ export default {
               this.$router.push('/login');
             }
           },
-          {
-            isDivider: true,
-          },
-          {
-            name: "About...",
-            action: () => {
-              this.$router.push('/about');
-            }
-          },
         ]
       }
     }
@@ -394,36 +389,44 @@ li {
   display: inline-block;
 }
 
-.left-nav a {
+a {
   text-decoration: none;
   padding: 0px 10px 0px 10px;
   cursor: pointer;
   color: var(--prr-darkgrey);
   font-weight: 800;
   transition: border-bottom 300ms;
+  text-transform: uppercase;
 }
 
-.left-nav a:hover, a.selected {
+.right-top-nav a {
+  font-weight: var(--prr-font-weight);
+}
+a:hover, a.selected {
   transition: border-bottom 300ms;
   color: var(--prr-green);
 }
 
-.left-nav a.selected {
+a.selected {
   font-weight: 800;
 }
-
-/* .nav a {
-  text-decoration: none;
-  margin-right: 20px;
-} */
 
 .header__right {
   display: flex;
   flex-direction: row;
   align-items: center;
-  /* margin-right:20px; */
 }
 
+.right-top-nav {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap:20px;
+}
+
+.right-top-nav a {
+
+}
 .icon {
   position:relative;
 }

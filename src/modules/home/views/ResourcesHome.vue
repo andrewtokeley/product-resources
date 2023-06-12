@@ -5,11 +5,16 @@
     </div>
     <div v-else>
       
-      <splide v-if="featured.length > 0" :options="splideOptions" aria-label="Top Reviews">
+      <h1>Recommended by the community, for the community</h1>
+      <p>Product people are a generous bunch, regularly sharing their latest good read, podcast episode or article. 
+        Having a home for these recommendations is the inspiration for creating this site and what keeps it alive, 
+        relevant and supportive of the growing number of professional product leaders around the world.</p>
+      <p>What resource or person do you <router-link to="/recommend">recommend</router-link> to your peers?</p>
+      <!-- <splide v-if="featured.length > 0" :options="splideOptions" aria-label="Top Reviews">
         <SplideSlide v-for="review in featured" :key="review.id">
           <featured-card :review="review" @click="handleViewDetail"></featured-card>
         </SplideSlide>
-      </splide>
+      </splide> -->
       
       <!-- <section class="featured ">
         <book-group   
@@ -65,14 +70,14 @@
 </template>
 
 <script>
-import FeaturedCard from "@/modules/home/components/FeaturedCard.vue";
+// import FeaturedCard from "@/modules/home/components/FeaturedCard.vue";
 import ResourceDetail from "@/modules/resources/views/ResourceDetail.vue";
 import BookGroup from '@/modules/resources/components/BookGroup.vue';
 import LoadingSymbol from '@/core/components/LoadingSymbol.vue';
 // import 'vue3-carousel/dist/carousel.css'
 // import { Carousel, Slide, Navigation } from 'vue3-carousel'
-import { Splide, SplideSlide } from '@splidejs/vue-splide';
-import '@splidejs/vue-splide/css';
+// import { Splide, SplideSlide } from '@splidejs/vue-splide';
+// import '@splidejs/vue-splide/css';
 
 import { getPopularResources, getRecentlyAdded, searchByTagKey } from '@/modules/resources/services/resource-service';
 import { reviewStore } from "@/modules/reviews/store/reviewStore";
@@ -82,12 +87,12 @@ import { getHomePageTags } from '@/modules/resources/services/lookup-service';
 export default {
   name: 'resources-home',
   components: { 
-    FeaturedCard, 
+    // FeaturedCard, 
     BookGroup, 
     LoadingSymbol, 
     ResourceDetail,
-    Splide,
-    SplideSlide,
+    // Splide,
+    // SplideSlide,
   },
   data() {
     return {
