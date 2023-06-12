@@ -20,15 +20,20 @@
               placeholder: 'Select Type'}"
           ></base-select>
         </div>
+        <div></div>
+      </div>
+      <div class="double-line">
+        <div>
+          <div class="label tight">Resourse Url</div>
+          <base-input v-model="editResource.resourceUrl" @blur="validate('resourceUrl')" :errorMessage="errorMessage['resourceUrl']" :options="{ placeholder: 'Add Resource URL'}"></base-input>
+        </div>
         <div>
           <div class="label tight">Authors</div>
           <authors-list v-model="editResource.authors"></authors-list>
         </div>
       </div>
-      
-      <div class="label tight">Display</div>
+      <div class="label tight">Title</div>
       <base-input
-        :hasFocus="true"
         @blur="setTitle"
         :errorMessage="errorMessage['displayName']"
         v-model="editResource.displayName"
@@ -37,11 +42,22 @@
           placeholder: 'Add title'}"
       ></base-input>
 
+      <div class="label tight">Description</div>
+      <base-multiline-text
+        v-model="editResource.description"
+        :errorMessage="errorMessage['description']"
+        @blur="validate('description')"
+        :options="{ 
+          placeholder: 'Add Description',
+          numberOfLines: 8,
+          maximumLength: 1000, 
+          showCharacterCount: true}"
+      ></base-multiline-text>
       
-        <base-check-box 
-          v-model="editResource.isFavourite"
-          :leftAlign="true"
-          label="Display on home page as a favourite."></base-check-box>
+      <base-check-box 
+        v-model="editResource.isFavourite"
+        :leftAlign="true"
+        label="Display on home page as a favourite."></base-check-box>
       
 
       <div class="double-line">
@@ -66,21 +82,6 @@
         </div>
       </div>
       
-      <div class="label tight">Resourse Url</div>
-      <base-input v-model="editResource.resourceUrl" @blur="validate('resourceUrl')" :errorMessage="errorMessage['resourceUrl']" :options="{ placeholder: 'Add Resource URL'}"></base-input>
-
-      
-      <div class="label tight">Description</div>
-      <base-multiline-text
-        v-model="editResource.description"
-        :errorMessage="errorMessage['description']"
-        @blur="validate('description')"
-        :options="{ 
-          placeholder: 'Add Description',
-          numberOfLines: 8,
-          maximumLength: 1000, 
-          showCharacterCount: true}"
-      ></base-multiline-text>
       <br/><br/>
       <hr class="divider"/>
       <h2>Tags</h2>

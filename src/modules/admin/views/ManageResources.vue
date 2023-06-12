@@ -178,16 +178,26 @@ export default {
       { key:'draft', value: 'Pending'} ,
     ];
 
+    // navigate to tab if supplied
+    const tab = this.$route.query.tab;
+    if (tab) {
+      await this.filterByStatus(tab);
+    }
+
+    // show edit if supplied
     const resourceId = this.$route.query.edit;
     if (resourceId) {
       this.selectedResource = await getResource(resourceId);
       if (this.selectedResource) {
         this.selectedResourceType = this.selectedResource.resourceType;
-        await this.filterByStatus('approved');
         this.showEdit = true;
       }
-    } else {
-      await this.filterByStatus('recommendations');
+    }
+
+    // show new if supplied
+    const showNew = this.$route.query.new;
+    if (showNew) {
+      this.handleAddResource();
     }
 
     this.sortBy('dateCreated', 'desc');
@@ -294,6 +304,7 @@ export default {
     async filterByStatus(status) {
       this.isLoading = true;
       this.activeTab = status;
+      
       var results = [];
       if (status == 'approved') {
         // check if we have retrieved resources for the selected resource type
@@ -317,13 +328,21 @@ export default {
           //   resource.comment = r.recommendationComment ?? "No comment";
           //   return resource;
           // });
-          console.log('lll')
           this.recommendations = results;
         }
       }
+
       this.visibleRecords = results;
-      // console.log(this.visibleRecords.length);
+      this.updateHistory(status);
       this.isLoading = false;
+    },
+
+    updateHistory(status) {
+      history.pushState(
+        {},
+        null,
+        `/admin/resources?tab=${status}`
+      );
     },
 
     async createResourceFromRecommendation(recommendation) {

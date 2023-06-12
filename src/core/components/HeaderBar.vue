@@ -237,14 +237,23 @@ export default {
             isLabel: true,
           },
           {
-            name: this.numberOfRecommendations > 0 ? `Resources (${this.numberOfRecommendations})...` : "Resources...",
+            name: "New Resource...",
             show: this.useUserStore.isAdmin,
-            badgeCount: this.numberOfRecommendations,
             iconName: "menu_book",
             action: () => {
-              this.$router.push('/admin/resources');
-              //vm.showResourceDialog = true;
-              // vm.$emit('menuAdd');
+              this.$router.push('/admin/resources?tab=draft&new=true');
+            }
+          },
+          {
+            name: this.numberOfRecommendations > 0 ? `Manage Resources (${this.numberOfRecommendations})...` : "Manage Resources...",
+            show: this.useUserStore.isAdmin,
+            badgeCount: this.numberOfRecommendations,
+            action: () => {
+              if (this.numberOfRecommendations > 0) {
+                this.$router.push('/admin/resources?tab=recommendations');
+              } else {
+                this.$router.push('/admin/resources?tab=approved');
+              }
             }
           },
           {
