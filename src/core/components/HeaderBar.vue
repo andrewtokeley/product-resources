@@ -5,7 +5,7 @@
         <img class="header-image" src="@/assets/logo-long.svg"/>
       </router-link>
       <div class="right-top-nav">
-        <router-link to="/about">About</router-link>
+        <router-link class="desktop" to="/about">About</router-link>
         <div v-if="useUserStore.isLoggedIn" class="icon">
           <base-icon :menu="menuOptions">account_circle</base-icon>
           <badge-count v-if="todoCount > 0 && useUserStore.isAdmin" class="badge" :count="todoCount"></badge-count>
@@ -304,7 +304,7 @@ export default {
   align-items: center;
   justify-content: space-between;
   margin-right: 35px;
-  margin-left: 15px;
+  margin-left: 10px;
   margin-top:20px;
 }
 
@@ -316,7 +316,7 @@ export default {
   display: inline-block;
 }
 .header-top {
-  padding: 0px 10px;
+  padding: 0px 15px;
   font-size: var(--prr-font-size-medium);
   display:flex;
   flex-direction: row;
@@ -452,6 +452,12 @@ a.selected {
   .desktop {
     display: none;
   }
+
+  .header-top-strip {
+    margin-right: 10px;
+    margin-left: 10px;
+}
+
   .mobile {
     display:block;
   }

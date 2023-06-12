@@ -29,8 +29,10 @@
       <div class="related" v-if="relatedResources?.length > 0">
         <hr class="divider" />
         <h2>Related</h2>
-        <div v-for="resource in relatedResources" :key="resource.id" @click="$emit('changeResource',resource)">
-          <book-card :resource="resource" :preview="true" :showTitle="false" :showDescription="true"></book-card>  
+        <div class="related-resources">
+          <div class="related-resources-card" v-for="resource in relatedResources" :key="resource.id" @click="$emit('changeResource',resource)">
+            <book-card :resource="resource" :preview="true" :showTitle="false" :showDescription="true"></book-card>  
+          </div>
         </div>
       </div>
       <loading-symbol v-if="isLoading" class="loader"></loading-symbol>
@@ -185,6 +187,16 @@ export default {
   flex-direction: row;
   justify-content: space-evenly;
   flex-wrap: wrap;
+}
+
+.related-resources {
+  display:flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.related-resources-card {
+  flex-basis: 50%;
 }
 .related h2{
   text-transform:capitalize;
