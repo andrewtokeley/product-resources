@@ -13,6 +13,7 @@ export {
   deleteLookupItem,
   groupTags,
   updateDefaultResourceTypes,
+  getHomePageTags,
 }
 
 const COLLECTION_KEY = "lookups";
@@ -165,4 +166,20 @@ const getLookup = async function(lookupId) {
   } else {
     return null;
   }
+}
+
+const getHomePageTags = async function() {
+  const tags = await getTags();
+  const homePageTags = tags.items.filter( i => i.showOnHomePage );
+  return homePageTags
+  // const q = query(collection(db, COLLECTION_KEY, LookUpKey.tags)
+  //   .withConverter(lookupConverter), 
+  //   where("items.showOnHomePage", "==", true)
+  // );
+  // const querySnapshot = await getDocs(q);
+  // const result = [];
+  // querySnapshot.forEach((doc) => {
+  //   result.push(doc.data());
+  // });
+  // return result
 }

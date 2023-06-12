@@ -129,7 +129,7 @@ export default {
   margin-bottom: 20px;
 }
 .topblock.tall {
-  min-height: 240px;
+  min-height: 170px;
   margin-bottom: 20px;
 }
 .topblock .image {

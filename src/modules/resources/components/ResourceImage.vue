@@ -4,7 +4,7 @@
       <span class="material-symbols-outlined">add_circle</span>
     </div>
     <template v-else>
-      <div class="missing-image-mask" v-if="showMissingImageMask">Resource Image</div>  
+      <div v-if="showMissingImageMask">Missing Image</div>  
       <img 
         v-else
         :src="url"
@@ -79,23 +79,6 @@ figcaption {
   caption-side:bottom;
 }
 
-figure img, figure .placeholder {
-  height: 100%;
-  width: 100%;
-  height:145px;
-  width: 100px;
-  object-fit: cover;
-  /* margin-right: 20px; */
-  border: 1px solid var(--prr-lightgrey);
-  border-radius: 10px;
-  cursor: pointer;
-}
-
-figure.preview img, figure.preview .placeholder {
-  height:110px;
-  width: 75px;
-  margin-bottom: 0px;
-}
 
 h1 {
   font-size: var(--prr-font-size-small);
@@ -122,7 +105,26 @@ h2 {
            line-clamp: 3; 
    -webkit-box-orient: vertical;
 }
-figure.landscape img figure.landscape .placeholder {
+
+figure img, figure .placeholder {
+  height: 100%;
+  width: 100%;
+  height:145px;
+  width: 100px;
+  object-fit: cover;
+  /* margin-right: 20px; */
+  border: 1px solid var(--prr-lightgrey);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+figure.preview img, figure.preview .placeholder {
+  height:110px;
+  width: 75px;
+  margin-bottom: 0px;
+}
+
+figure.landscape img, figure.landscape .placeholder {
   height:124px;
   width: 160px;
 }

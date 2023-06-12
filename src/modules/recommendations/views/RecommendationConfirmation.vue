@@ -1,14 +1,12 @@
 <template>
-  <div class="page">
-    <div class="content">
-      <h1>Thank You!</h1>
-      <p>We'll check out your {{ action }} and get it published as soon as possible.</p>
-      <base-button v-if="!isReview" @click="$router.push('/recommend')">Add Another...</base-button>
+  <div class="recommendation-confirmation">
+    <h1 class="giant">Thanks</h1>
+    <p>We'll check out your {{ action }} and get it published as soon as possible.</p>
+    <base-button v-if="!isReview" @click="$router.push('/recommend')">Add Another...</base-button>
 
-      <base-button v-if="isReview" 
-        @click="$router.go(-2)">OK</base-button>
-      <base-button :isSecondary="true" v-else @click="$router.go(-2)">Nah, that's all for now</base-button>
-    </div>
+    <base-button v-if="isReview" 
+      @click="$router.go(-2)">OK</base-button>
+    <base-button :isSecondary="true" v-else @click="$router.go(-2)">Nah, that's all for now</base-button>
   </div>
 </template>
 
@@ -35,17 +33,5 @@ export default {
 </script>
 
 <style scoped>
-.page {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-p {
-  margin-left:10px;
-}
-.content {
-  width: 600px;
-}
 
 </style>

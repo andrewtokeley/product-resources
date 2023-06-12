@@ -217,6 +217,7 @@ export default {
           },
           {
             name: "Profile",
+            iconName: "account_circle",
             show: this.useUserStore.isLoggedIn,
             action: () => {
               vm.$router.push('/profile');

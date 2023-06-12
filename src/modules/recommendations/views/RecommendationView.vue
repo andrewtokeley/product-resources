@@ -36,7 +36,7 @@
       
       <div class="review">
         <!-- <h2 v-if="resource"><span class="material-symbols-outlined">{{resourceImage}}</span>{{ resource.displayName }}</h2> -->
-        <resource-image v-if="resource" class="image" :resource="resource"></resource-image>
+        <resource-image v-if="resource" class="image" :resource="resource" :showTitle="true"></resource-image>
         <div class="label tight" v-if="isRecommendation">We think it's important for all recommendations to include a public review.</div>
         <div class="textarea-wrap">
           <base-multiline-text 
@@ -51,7 +51,7 @@
               placeholder: 'Your Review',
               readOnly: isSaving}">
           </base-multiline-text>
-          <div class="label tight">Feel free to update the name and job title that will appear with your review</div>
+          <div class="label tight">Feel free to update your name and job title that will appear with your review</div>
           <base-input v-model="review.reviewedByName"></base-input>
           <base-input v-model="review.reviewedByJobTitle"></base-input>
           <p>Once submitted, we'll get it published as soon as possibe.</p>
@@ -60,7 +60,7 @@
       
       <div>
         <base-button  class="buttons" :showSpinner="isSaving" @click="handleSubmit">Submit</base-button>
-        <base-button  class="buttons" :isSecondary="true" @click="$router.back()">Cancel</base-button>
+        <base-button  class="buttons" :isSecondary="true" @click="handleCancel">Cancel</base-button>
       </div>
 
     </div>
@@ -188,7 +188,13 @@ computed: {
 },
 
 methods: {
-  
+  handleCancel() {
+    if (document.referrer.indexOf(location.protocol + "//" + location.host) === 0) {
+      this.$router.back();
+    } else {
+      this.$router.push('/');
+    }
+  },
   async handleSubmit() {
     this.validate()
     if (this.isValid) {
@@ -203,10 +209,11 @@ methods: {
       await addReview(this.review);
 
       // update the user's display name if they've updated it for this review
-      if (this.review.reviewedByName != this.userStore.displayName) {
+      if (this.review.reviewedByName != this.userStore.displayName || this.review.reviewedByJobTitle != this.userStore.jobTitle) {
         this.userStore.setDisplayName(this.review.reviewedByName);
         const user = await getUser(this.userStore.uid);
         user.displayName = this.review.reviewedByName;
+        user.jobTitle = this.review.reviewedByJobTitle;
         await updateUser(user);
       }
 

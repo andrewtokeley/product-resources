@@ -53,7 +53,7 @@ var userConverter = {
   toFirestore: function (user) {
     const result = {};
     if (user.displayName) { result.displayName = user.displayName }
-    if (user.jobTitle) { result.jobTitle = user.jobTitle }
+    if (user.jobTitle != undefined) { result.jobTitle = user.jobTitle }
     return result;
   },
 

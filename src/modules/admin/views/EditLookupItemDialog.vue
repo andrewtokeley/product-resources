@@ -81,6 +81,17 @@
           {{ editItem.icon }}
         </span>
       </div>
+
+      <div class="label">Show on Home Page</div>
+      <div class="description">
+        If selected, the tag or resource type will be used as a group on the home page.
+      </div>
+      <base-check-box 
+        v-model="editItem.showOnHomePage"
+        label="Show on homepage?"
+        :leftAlign="true">
+      </base-check-box>
+
     </div>
   </modal-dialog>
 </template>
@@ -89,6 +100,7 @@
 import BaseInput from "@/core/components/BaseInput.vue";
 import BaseMultilineText from "@/core/components/BaseMultilineText.vue";
 import ModalDialog from '@/core/components/ModalDialog.vue';
+import BaseCheckBox from '@/core/components/BaseCheckBox.vue';
 
 import { cloneDeep } from 'lodash';
 import { LookUpKey, addLookupItem, updateLookupItem } from '@/modules/resources/services/lookup-service';
@@ -98,6 +110,7 @@ export default {
     BaseInput,
     BaseMultilineText,
     ModalDialog,
+    BaseCheckBox,
   },
   name: "edit-lookup-item",
   emits: ['close', 'saved', 'added'],

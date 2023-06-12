@@ -155,11 +155,15 @@ const getResources = async function(types, tag, resultLimit) {
   return result
 };
 
-const searchByTagKey = async function(tagKey) {
+const searchByTagKey = async function(tagKey, resultLimit) {
+  if (!resultLimit) {
+    resultLimit = 100;
+  }
   const q = query(collection(db, COLLECTION_KEY)
     .withConverter(resourceConverter), 
     where("tags", "array-contains", tagKey),
-    where("approved", "==", true)
+    where("approved", "==", true),
+    limit(resultLimit),
   );
   const querySnapshot = await getDocs(q);
   const result = [];

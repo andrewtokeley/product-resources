@@ -22,6 +22,7 @@
           <th><a @click="sortBy('value')" class="sortHeading" :class="sortHeadingClasses('value')">Value</a></th>
           <th><a @click="sortBy('key')" class="sortHeading" :class="sortHeadingClasses('key')">Key</a></th>
           <th ><a @click="sortBy('description')" class="sortHeading" :class="sortHeadingClasses('description')">Description</a></th>
+          <th ><a @click="sortBy('showOnHomePage')" class="sortHeading" :class="sortHeadingClasses('showOnHomePage')">Home Page</a></th>
           <th ><a :class="sortHeadingClasses('groupList')">Groups</a></th>
           <th></th>
         </tr>
@@ -33,6 +34,7 @@
           <td>{{ item.value }}</td>
           <td>{{ item.key }}</td>
           <td>{{ item.description }}</td>
+          <td>{{ item.showOnHomePage ? 'true' : '' }}</td>
           <td>{{ item.groups }}</td>
           <td>
             <div class="actions">

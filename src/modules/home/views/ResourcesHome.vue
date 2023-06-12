@@ -11,7 +11,7 @@
         </SplideSlide>
       </splide>
       
-      <section class="featured ">
+      <!-- <section class="featured ">
         <book-group   
         heading="Recently Added" 
         headingIcon="new_releases" 
@@ -21,7 +21,7 @@
         :singleRow="true"
         :showMore="true"
         @click="handleViewDetail"></book-group>
-      </section>
+      </section> -->
 
       <section class="featured">
         <book-group 
@@ -46,6 +46,19 @@
         :singleRow="true"
         @click="handleViewDetail"></book-group>
       </section>
+
+      <section class="featured" v-for="tag in homePageTags" :key="tag.key">
+        <book-group 
+        :heading="tag.value"  
+        :headingIcon="tag.icon" 
+        :headingLink="`/tag/${tag.key}`"
+        :isGrouped="false" 
+        :resources="tag.resources" 
+        :includeItemCount="false" 
+        :singleRow="true"
+        @click="handleViewDetail"></book-group>
+      </section>
+
     </div>
     <resource-detail v-if="showDetail" :resource="clickedResource" @close="showDetail = false"></resource-detail>
   </div>
@@ -61,9 +74,10 @@ import LoadingSymbol from '@/core/components/LoadingSymbol.vue';
 import { Splide, SplideSlide } from '@splidejs/vue-splide';
 import '@splidejs/vue-splide/css';
 
-import { getPopularResources, getRecentlyAdded } from '@/modules/resources/services/resource-service';
+import { getPopularResources, getRecentlyAdded, searchByTagKey } from '@/modules/resources/services/resource-service';
 import { reviewStore } from "@/modules/reviews/store/reviewStore";
 import ResourceTypeEnum from '@/modules/resources/model/resourceTypeEnum';
+import { getHomePageTags } from '@/modules/resources/services/lookup-service';
 
 export default {
   name: 'resources-home',
@@ -80,6 +94,7 @@ export default {
       featured: [],
       topBooks: [],
       topPodcasts: [],
+      homePageTags: [],
       recentlyAdded: [],
       clickedResource: null,
       isLoading: true,
@@ -110,7 +125,11 @@ export default {
     this.topBooks = favourites.filter ( r => r.resourceType == ResourceTypeEnum.Books.key)
     this.topPodcasts = favourites.filter ( r => r.resourceType == ResourceTypeEnum.Podcasts.key)
     this.recentlyAdded = await getRecentlyAdded(10);
+    this.homePageTags = await getHomePageTags();
 
+    for (let i = 0; i < this.homePageTags.length; i++) {
+      this.homePageTags[i].resources = await this.resourcesByTag(this.homePageTags[i].key);
+    }
     // will get some featured reviews if none have been defined for this session yet.
     let store = reviewStore()
     await  store.fetchFeatured();
@@ -121,6 +140,10 @@ export default {
   },
 
   methods: {
+    async resourcesByTag(tagKey) {
+      const results = await searchByTagKey(tagKey, 10);
+      return results;
+    },
     handleViewDetail(resource) {
       this.clickedResource = resource;
       this.showDetail = true;

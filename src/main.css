@@ -57,6 +57,7 @@ label {
   margin-top: 20px;
   display:inline-block;
 }
+
 h1 {
   font-weight: 600;
 }
@@ -100,4 +101,11 @@ hr {
 ::selection {
   color: black;
   background: var(--prr-green);
+}
+
+@media only screen and (max-width: 600px) {
+
+  h1.giant {
+    font-size: 40px;
+  }
 }
