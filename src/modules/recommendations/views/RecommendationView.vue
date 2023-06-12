@@ -21,17 +21,6 @@
           :errorMessage="errorMessage['resourceUrl']"
           :options="{ placeholder: 'Link', readOnly: isSaving, inlineErrors: false }">
         </base-input>
-        <div class="label">Anything you'd like to share to help us categorise and learn more about your recommendation?</div>
-        <base-multiline-text 
-          v-model="recommendation.comment"
-          :errorMessage="errorMessage['comment']"
-          :options="{ numberOfLines: 5, 
-            maximumLength: 500, 
-            inlineErrors: false,
-            showCharacterCount: true, 
-            placeholder: 'Comment (optional)',
-            readOnly: isSaving}">
-        </base-multiline-text>
       </div>
       
       <div class="review">
@@ -54,9 +43,24 @@
           <div class="label tight">Feel free to update your name and job title that will appear with your review</div>
           <base-input v-model="review.reviewedByName"></base-input>
           <base-input v-model="review.reviewedByJobTitle"></base-input>
-          <p>Once submitted, we'll get it published as soon as possibe.</p>
         </div>
       </div>
+      
+      <div v-if="isRecommendation">
+        <div class="label">Anything you'd like to share to help us categorise and learn more about your recommendation?</div>
+        <base-multiline-text 
+          v-model="recommendation.comment"
+          :errorMessage="errorMessage['comment']"
+          :options="{ numberOfLines: 5, 
+            maximumLength: 500, 
+            inlineErrors: false,
+            showCharacterCount: true, 
+            placeholder: 'Comment (optional)',
+            readOnly: isSaving}">
+        </base-multiline-text>
+      </div>
+
+      <p>Once submitted, we'll get it published as soon as possibe.</p>
       
       <div>
         <base-button  class="buttons" :showSpinner="isSaving" @click="handleSubmit">Submit</base-button>

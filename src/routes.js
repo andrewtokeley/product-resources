@@ -48,6 +48,6 @@ export default [
 
   {path: '/admin/reviews', component:ManageReviews, meta: { requiresAuth: true, requiresAdmin: true, analytics_title: 'Admin Reviews' } },
 
-  {path: '/admin/tags', component:ManageLookups, meta: { requiresAuth: true, requiresAdmin: true, analytics_title: 'Admin Lookups'} },
+  {path: '/admin/lookups', component:ManageLookups, meta: { requiresAuth: true, requiresAdmin: true, analytics_title: 'Admin Lookups'} },
 
 ]

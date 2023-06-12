@@ -1,18 +1,12 @@
 <template>
   <div class="manage-lookups">
-    <div class="header">
-      <div>
-        <h1>Manage Lookups</h1>
-      </div>
+    <div>
+      <h1 class="giant">{{title}}</h1>
     </div>
     <div class="action-strip">
-      <div class="action-items" >
-        <div class="label">Lookup: </div>
-        <base-select v-model="selectedLookupId" :selectOptions="lookupOptions"></base-select>
-      </div>
       <div class="action-items">
         <!-- <base-button :disabled="isLoading" :isSecondary="true" @click="loadDefaultResourceTypes">Load Defaults</base-button> -->
-        <base-button :disabled="isLoading" @click="handleAddItem">New Item</base-button>
+        <base-button :disabled="isLoading" @click="handleAddItem">New {{lookupName}}</base-button>
       </div>
     </div>
     <table v-if="!isLoading">
@@ -78,12 +72,11 @@ import LoadingSymbol from '@/core/components/LoadingSymbol.vue';
 import { getLookup, deleteLookupItem, LookUpKey } from '@/modules/resources/services/lookup-service';
 import { cloneDeep } from 'lodash';
 import { Lookup } from '@/modules/resources/model/lookup';
-import BaseSelect from '@/core/components/BaseSelect.vue';
 import { useLookupStore } from '@/core/state/lookupStore';
 
 export default {
   name: 'manage-lookups',
-  components: { BaseIcon, EditLookupItemDialog, BaseButton, ConfirmationDialog, LoadingSymbol, BaseSelect },
+  components: { BaseIcon, EditLookupItemDialog, BaseButton, ConfirmationDialog, LoadingSymbol },
   data() {
     return {
       // resource: Resource,
@@ -99,22 +92,25 @@ export default {
       sortedBy: null,
       sortedByOrder: {},
       selectedLookupId: '',
-      lookupOptions: [],
+      title:'',
+      lookupName:'',
     }
   },
   async mounted() {
-    // trigger watch
-    this.lookupOptions = [
-      { key: LookUpKey.tags, value: 'Tags'},
-      { key: LookUpKey.resourceTypes, value: 'Resource Types'}
-    ];
-    // this will trigger the watch event and retrieve/sort data.
-    this.selectedLookupId = LookUpKey.tags;
+    
+    const tab = this.$route.query.tab;
+    if (tab) {
+      this.showTab(tab);
+    } else {
+      this.showTab(LookUpKey.tags);
+    }
   },
-  watch: {
-    selectedLookupId(lookupId) {
+  methods: {
+    showTab(lookupId) {
       this.isLoading = true;
       this.sortedBy = null;
+      this.title = lookupId == LookUpKey.tags ? "Tags" : "Resource Types";
+      this.lookupName = lookupId == LookUpKey.tags ? "Tag" : "Resource Type";
       getLookup(lookupId).then ( (result) => {
         if (result) {
           this.lookup = result
@@ -130,14 +126,7 @@ export default {
         }
         this.isLoading = false;
       })
-    }
-  },
-
-  methods: {
-    // async loadDefaultResourceTypes() {
-    //   console.log('load')
-    //   await updateDefaultResourceTypes();
-    // },
+    },
     sortHeadingClasses(propName) {
       var classes = {
         sorted: false,
@@ -263,33 +252,20 @@ export default {
   font-size: var(--prr-font-size-normal);
   margin: 0 10px 10px 10px;
 }
-.action-items {
-  display: flex;
-  align-items: center;
-  
-}
-
-.header {
-  margin-top:50px;
-  height: 50px;
-}
-
-.header h1 {
-  margin: 0px;
-  padding: 0px;
-}
-.header :nth-child(1) {
-  float: left;
-}
 
 .action-strip {
   width: 100%;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   outline: 1px solid var(--prr-lightgrey);
   padding: 10px;
   box-sizing: border-box;
 }
+.action-items {
+  display: flex;
+  align-items: center;  
+}
+
 table {
   width: 100%;
   outline: 1px solid var(--prr-lightgrey);

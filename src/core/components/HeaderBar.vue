@@ -161,18 +161,19 @@ export default {
     
     const categoryNav = this.$refs.nav_with_submenu;
     if (categoryNav) {
-      console.log('addmouseover')
       categoryNav.addEventListener("mouseover", function () {
           categoryNav.classList.add("hover-enabled");
       })
+    } else {
+      console.log("NOPdE")
     }
+
   },
   
   methods: {
     handleTagClick(tag) {
       const categoryNav = this.$refs.nav_with_submenu;
       if (categoryNav) {
-        console.log('removemouseover')
         categoryNav.classList.remove("hover-enabled");
       }
       this.$router.push(`/tag/${tag.key}`);
@@ -223,15 +224,13 @@ export default {
             name: "Profile",
             iconName: "account_circle",
             show: this.useUserStore.isLoggedIn,
-            action: () => {
-              vm.$router.push('/profile');
-            }
+            link: '/profile',
           },
           {
             isDivider: true,
             show: this.useUserStore.isLoggedIn,
           },
-        {
+          {
             name: "ADMIN",
             show: this.useUserStore.isAdmin,
             isLabel: true,
@@ -239,38 +238,29 @@ export default {
           {
             name: "New Resource...",
             show: this.useUserStore.isAdmin,
-            iconName: "menu_book",
-            action: () => {
-              this.$router.push('/admin/resources?tab=draft&new=true');
-            }
+            link: '/admin/resources?tab=draft&new=true',
           },
           {
-            name: this.numberOfRecommendations > 0 ? `Manage Resources (${this.numberOfRecommendations})...` : "Manage Resources...",
+            name: this.numberOfRecommendations > 0 ? `Resources (${this.numberOfRecommendations})` : "Resources",
             show: this.useUserStore.isAdmin,
             badgeCount: this.numberOfRecommendations,
-            action: () => {
-              if (this.numberOfRecommendations > 0) {
-                this.$router.push('/admin/resources?tab=recommendations');
-              } else {
-                this.$router.push('/admin/resources?tab=approved');
-              }
-            }
+            link: this.numberOfRecommendations > 0 ? '/admin/resources?tab=recommendations' : '/admin/resources?tab=approved',
           },
           {
-            name: this.numberOfUnapprovedReviews > 0 ? `Reviews (${this.numberOfUnapprovedReviews})...` : "Reviews...",
+            name: this.numberOfUnapprovedReviews > 0 ? `Reviews (${this.numberOfUnapprovedReviews})` : "Reviews",
             show: this.useUserStore.isAdmin,
-            iconName: "rate_review",
             badgeCount: this.numberOfUnapprovedReviews,
-            action: () => {
-              vm.$router.push('/admin/reviews');
-            }
+            link: '/admin/reviews',
           },
           {
-            name: "Lookups...",
+            name: "Tags",
             show: this.useUserStore.isAdmin,
-            action: () => {
-              vm.$router.push('/admin/tags');
-            }
+            link: '/admin/lookups?tab=tags',
+          },
+          {
+            name: "Resource Types",
+            show: this.useUserStore.isAdmin,
+            link: '/admin/lookups?tab=resource-types',
           },
           {
             isDivider: true,

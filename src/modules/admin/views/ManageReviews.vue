@@ -1,9 +1,7 @@
 <template>
   <div class="manage-reviews">
-    <div class="header">
-      <div>
-        <h1>Reviews</h1>
-      </div>
+    <div>
+      <h1 class="giant">Reviews</h1>
     </div>
     <div class="tabs">
       <base-button :isSecondary="activeTab != 'pending'" @click="filterByApproval('pending')">Pending</base-button>
@@ -115,7 +113,7 @@ export default {
   
   async mounted() {
     this.isLoading = true;
-    await this.filterByApproval(false);
+    await this.filterByApproval('pending');
     this.sortBy('dateCreated', 'desc');
     this.isLoading = false;
   },
@@ -292,19 +290,6 @@ export default {
   display: flex;
   align-items: center;
   
-}
-
-.header {
-  margin-top:50px;
-  height: 50px;
-}
-
-.header h1 {
-  margin: 0px;
-  padding: 0px;
-}
-.header :nth-child(1) {
-  float: left;
 }
 
 .action-strip {

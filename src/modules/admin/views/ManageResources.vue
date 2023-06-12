@@ -1,9 +1,7 @@
 <template>
   <div class="manage-resources">
-    <div class="header">
-      <div>
-        <h1>Resources</h1>
-      </div>
+    <div>
+      <h1 class="giant">Resources</h1>
     </div>
     <div class="tabs">
       <base-button :isSecondary="activeTab != 'recommendations'" @click="filterByStatus('recommendations')">Recommendations</base-button>
@@ -507,19 +505,6 @@ export default {
 .action-items {
   display: flex;
   align-items: center;
-}
-
-.header {
-  margin-top:50px;
-  height: 50px;
-}
-
-.header h1 {
-  margin: 0px;
-  padding: 0px;
-}
-.header :nth-child(1) {
-  float: left;
 }
 
 .action-strip {

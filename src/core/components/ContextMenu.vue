@@ -12,20 +12,20 @@
           <div class="context-menu__row__subHeading" v-if="menuItem.subHeading">{{ menuItem.subHeading }}</div>
           <hr class="divider short"/>
         </div>
-        <div v-else
+        <a v-else
             class="context-menu__row"
             :class="{
                 'context-menu__row--isCentred': menuItem.isFullWidth,
                 'context-menu__row--isLabel': menuItem.isLabel ?? false,
                 'context-menu__row--isDisabled': !(menuItem.isEnabled ?? true),
             }"
-            @click="handleMenuItemClick($event, menuItem)">
+            :href="menuItem.link">
           <div v-if="!menuItem.isFullWidth" class="context-menu__row__icon" >
             <badge-count v-if="menuItem.badgeCount" class="badge"></badge-count>
             <icon
               v-if="menuItem.iconName ?? false"
               :options="{ hover: { backgroundColour: 'transparent' }, isClickable:  false }"
-              @click="handleMenuItemClick(nil, menuItem)"
+              
               >{{ menuItem.iconName }}
             </icon>  
           </div>
@@ -37,7 +37,7 @@
               {{ menuItem.subText }}
             </div>
           </div>
-      </div>
+        </a>
     </template>
   </div>
 </template>
@@ -191,6 +191,7 @@ export default {
   /* height: 25px; */
   /* font-size: 0.875rem; */
   height: 1.25rem;
+  text-decoration: none;
 }
 
 .context-menu__row:hover {

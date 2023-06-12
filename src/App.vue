@@ -1,7 +1,8 @@
 <template>
   <div class="outer">
     <div class="app">
-      <header-bar class="header" v-show="!($route.meta.hideHeader ?? false)"></header-bar>
+      <admin-header v-if="$route.meta.requiresAdmin"></admin-header>
+      <header-bar class="header" v-show="!$route.meta.requiresAdmin && !($route.meta.hideHeader ?? false)"></header-bar>
       <div class="page">
         <router-view :key="$route.fullPath" />
       </div>
@@ -13,11 +14,12 @@
 <script>
 import { defineComponent } from "vue";
 import HeaderBar from "./core/components/HeaderBar.vue";
+import AdminHeader from "./core/components/AdminHeader.vue";
 import { useLookupStore } from "@/core/state/lookupStore"
 import FooterBar from "./core/components/FooterBar.vue";
 
 export default defineComponent({
-  components: { HeaderBar, FooterBar },
+  components: { HeaderBar, AdminHeader, FooterBar },
   name: "App",
   data() {
     return {
