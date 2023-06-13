@@ -1,23 +1,14 @@
 <template>
-  <div class="logout">
-    Logout
-    {{status}}
-  </div>
+    <div></div>
 </template>
-
 <script>
 import { auth } from '@/core/services/firebaseInit';
 
 export default {
-  data() {
-    return {
-      status: 'start'
-    }
-  },
+  name: 'logout-view',
   mounted() {
     auth.signOut();
-    this.status = 'logged out'
-    
+    this.$router.push('/');  
   }
 }
 </script>

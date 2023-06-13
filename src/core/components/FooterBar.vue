@@ -6,9 +6,23 @@
       <a href="https://andrewtokeley.com" target="_blank">
         <img class="logo" src="@/assets/text_mark_andrew_tokeley.svg"/>
       </a>
+      <div class="version">
+        v{{ version }}
+      </div>
     </div>
   </div>
 </template>
+
+<script>
+export default {
+  name: 'footer-bar',
+  computed: {
+    version() {
+      return process.env.VUE_APP_VERSION ?? "v0.0";
+    }
+  }
+}
+</script>
 
 <style scoped>
 
@@ -39,5 +53,11 @@ p {
 .link { 
   color: black;
   /* text-decoration: none; */
+}
+
+.version {
+  margin-top: 40px;
+  border-top: 0.5px solid black;
+  border-bottom: 0.5px solid black;
 }
 </style>

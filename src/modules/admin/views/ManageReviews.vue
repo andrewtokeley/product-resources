@@ -185,8 +185,10 @@ export default {
       this.sortedByOrder[propName] = order;
 
       this.visibleReviews.sort( (a,b) => { 
-        if(a[propName] < b[propName]) { return order == 'asc' ? -1 : 1; }
-        if(a[propName] > b[propName]) { return order == 'asc' ? 1 : -1; }
+        let aa = a[propName] ?? '';
+        let bb = b[propName] ?? '';
+        if(aa < bb) { return order == 'asc' ? -1 : 1; }
+        if(aa > bb) { return order == 'desc' ? -1 : 1; }
         return 0;
       })
 

@@ -22,12 +22,15 @@
             :href="menuItem.link">
           <div v-if="!menuItem.isFullWidth" class="context-menu__row__icon" >
             <badge-count v-if="menuItem.badgeCount" class="badge"></badge-count>
-            <icon
+            <span class="material-symbols-outlined">
+              {{ menuItem.iconName }}
+            </span>
+            <!-- <icon
               v-if="menuItem.iconName ?? false"
               :options="{ hover: { backgroundColour: 'transparent' }, isClickable:  false }"
               
               >{{ menuItem.iconName }}
-            </icon>  
+            </icon>   -->
           </div>
           <div class="context-menu__row__text" :class="{'context-menu__row__small': menuItem.isFullWidth}">
             <div class="context-menu__text">

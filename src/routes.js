@@ -1,4 +1,5 @@
 import Login from './modules/login/views/LoginView'
+import Logout from './modules/login/views/LogoutView'
 import Search from './modules/search/views/SearchResults'
 import ResourceTypes from './modules/resources/views/ResourceTypes'
 import ManageResources from './modules/admin/views/ManageResources'
@@ -15,7 +16,8 @@ import UserReviews from '@/modules/users/views/UserReviews';
 
 export default [
   {path: '/login', component:Login, meta: { hideHeader: false, analytics_title: 'Login' } },
-  
+  {path: '/logout', component:Logout, meta: { hideHeader: false, analytics_title: 'Logout' } },
+
   // home page
   {path: '/', component:Home, meta: { clearSearch: true, analytics_title: 'Home' }},
   
