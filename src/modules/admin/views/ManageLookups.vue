@@ -107,8 +107,10 @@ export default {
   },
   methods: {
     showTab(lookupId) {
+      
       this.isLoading = true;
       this.sortedBy = null;
+      this.selectedLookupId = lookupId;
       this.title = lookupId == LookUpKey.tags ? "Tags" : "Resource Types";
       this.lookupName = lookupId == LookUpKey.tags ? "Tag" : "Resource Type";
       getLookup(lookupId).then ( (result) => {

@@ -195,6 +195,7 @@ export default {
         this.$emit('added', this.editItem);
       }
       if (button.id == 'save') {
+        console.log('stop');
         await updateLookupItem(this.lookupKey, this.item, this.editItem);
         this.$emit('saved', this.editItem);
       }

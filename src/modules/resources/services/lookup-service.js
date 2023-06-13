@@ -171,15 +171,10 @@ const getLookup = async function(lookupId) {
 const getHomePageTags = async function() {
   const tags = await getTags();
   const homePageTags = tags.items.filter( i => i.showOnHomePage );
+  homePageTags.sort((a,b) => { 
+    const aOrder = a.order ?? 10000; // no order means you come last
+    const bOrder = b.order ?? 10000; // no order means you come last
+    return aOrder >= bOrder ? 1 : -1
+  });
   return homePageTags
-  // const q = query(collection(db, COLLECTION_KEY, LookUpKey.tags)
-  //   .withConverter(lookupConverter), 
-  //   where("items.showOnHomePage", "==", true)
-  // );
-  // const querySnapshot = await getDocs(q);
-  // const result = [];
-  // querySnapshot.forEach((doc) => {
-  //   result.push(doc.data());
-  // });
-  // return result
 }

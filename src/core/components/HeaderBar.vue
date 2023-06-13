@@ -211,7 +211,7 @@ export default {
     },
 
     menuOptions() {
-      const vm = this;
+      
       return {
         menuItems: [
           {
@@ -270,19 +270,8 @@ export default {
             name: "Sign Out",
             show: this.useUserStore.isLoggedIn,
             iconName: "logout",
-            action: () => {
-              vm.handleLogout()              
-            }
-          },
-          {
-            name: "Sign In",
-            show: !this.useUserStore.isLoggedIn,
-            subText: "to review/recommend...",
-            iconName: "login",
-            action: () => {
-              this.$router.push('/login');
-            }
-          },
+            link: '/logout',
+          }
         ]
       }
     }
@@ -302,7 +291,7 @@ export default {
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  margin-right: 35px;
+  margin-right: 40px;
   margin-left: 10px;
   margin-top:20px;
 }

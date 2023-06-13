@@ -2,6 +2,9 @@
   <div class="login-view">
     <h1 class="giant">{{  heading }}</h1>
     <h2 v-if="explanation">{{  explanation }}</h2>
+    <p>
+      Signing in will create a new account for first time users. Our website will only be given access to your name and email address.
+    </p>
     <div v-if="error">{{ error }}</div>
     <login-widget v-if="redirectUrl" 
       :redirectUrl="redirectUrl"
@@ -9,9 +12,7 @@
       @success="handleSuccess">
     </login-widget>
     <div class="closing" v-if="!userStore.isLoggedIn">
-      <p>
-        Signing in will create a new account for first time users. Our website will only be given access to your name and email address.
-      </p>
+      
       <base-button :isSecondary="true" @click="handleCancel">No Thanks!</base-button>
     </div>
   </div>
