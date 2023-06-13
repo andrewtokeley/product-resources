@@ -14,6 +14,7 @@ export {
   groupTags,
   updateDefaultResourceTypes,
   getHomePageTags,
+  getHomePageResourceTypes,
 }
 
 const COLLECTION_KEY = "lookups";
@@ -166,6 +167,12 @@ const getLookup = async function(lookupId) {
   } else {
     return null;
   }
+}
+
+const getHomePageResourceTypes = async function() {
+  const types = await getResourceTypes();
+  const homePageTypes = types.items.filter( i => i.showOnHomePage );
+  return homePageTypes
 }
 
 const getHomePageTags = async function() {

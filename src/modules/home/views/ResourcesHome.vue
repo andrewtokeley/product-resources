@@ -10,43 +10,14 @@
         Having a home for these recommendations is the inspiration for creating this site and what keeps it alive, 
         relevant and supportive of the growing number of professional product leaders around the world.</p>
       <p>What resource or person do you <router-link to="/recommend">recommend</router-link> to your peers?</p>
-      <!-- <splide v-if="featured.length > 0" :options="splideOptions" aria-label="Top Reviews">
-        <SplideSlide v-for="review in featured" :key="review.id">
-          <featured-card :review="review" @click="handleViewDetail"></featured-card>
-        </SplideSlide>
-      </splide> -->
       
-      <!-- <section class="featured ">
-        <book-group   
-        heading="Recently Added" 
-        headingIcon="new_releases" 
-        :isGrouped="false" 
-        :resources="recentlyAdded" 
-        :includeItemCount="false" 
-        :singleRow="true"
-        :showMore="true"
-        @click="handleViewDetail"></book-group>
-      </section> -->
-
-      <section class="featured">
+      <section class="featured" v-for="type in homePageResourceTypes" :key="type.key">
         <book-group 
-        heading="Popular Books" 
-        headingIcon="import_contacts" 
-        headingLink="/type/books" 
+        :heading="`Popular ${type.value}`"  
+        :headingLink="`/type/${type.key}`"
+        :headingIcon="type.icon" 
         :isGrouped="false" 
-        :resources="topBooks" 
-        :includeItemCount="false" 
-        :singleRow="true"
-        @click="handleViewDetail"></book-group>
-      </section>
-      
-      <section class="featured">
-        <book-group 
-        heading="Popular Podcasts"  
-        headingLink="/type/podcasts"
-        headingIcon="podcasts" 
-        :isGrouped="false" 
-        :resources="topPodcasts" 
+        :resources="type.resources" 
         :includeItemCount="false" 
         :singleRow="true"
         @click="handleViewDetail"></book-group>
@@ -80,9 +51,9 @@ import LoadingSymbol from '@/core/components/LoadingSymbol.vue';
 // import '@splidejs/vue-splide/css';
 
 import { getPopularResources, getRecentlyAdded, searchByTagKey } from '@/modules/resources/services/resource-service';
-import { reviewStore } from "@/modules/reviews/store/reviewStore";
-import ResourceTypeEnum from '@/modules/resources/model/resourceTypeEnum';
-import { getHomePageTags } from '@/modules/resources/services/lookup-service';
+// import { reviewStore } from "@/modules/reviews/store/reviewStore";
+// import ResourceTypeEnum from '@/modules/resources/model/resourceTypeEnum';
+import { getHomePageTags, getHomePageResourceTypes } from '@/modules/resources/services/lookup-service';
 
 export default {
   name: 'resources-home',
@@ -100,6 +71,7 @@ export default {
       topBooks: [],
       topPodcasts: [],
       homePageTags: [],
+      homePageResourceTypes: [],
       recentlyAdded: [],
       clickedResource: null,
       isLoading: true,
@@ -126,20 +98,54 @@ export default {
 
   async mounted() {
     this.isLoading = true;
-    const favourites = await getPopularResources([ResourceTypeEnum.Books.key, ResourceTypeEnum.Podcasts.key]);
-    this.topBooks = favourites.filter ( r => r.resourceType == ResourceTypeEnum.Books.key)
-    this.topPodcasts = favourites.filter ( r => r.resourceType == ResourceTypeEnum.Podcasts.key)
-    this.recentlyAdded = await getRecentlyAdded(10);
-    this.homePageTags = await getHomePageTags();
+    // getPopularResources([ResourceTypeEnum.Books.key, ResourceTypeEnum.Podcasts.key]).then ((favourites) => {
+    //   this.topBooks = favourites.filter ( r => r.resourceType == ResourceTypeEnum.Books.key)
+    //   this.topPodcasts = favourites.filter ( r => r.resourceType == ResourceTypeEnum.Podcasts.key)
+    // });
 
-    for (let i = 0; i < this.homePageTags.length; i++) {
-      this.homePageTags[i].resources = await this.resourcesByTag(this.homePageTags[i].key);
-    }
+    getRecentlyAdded(10).then ((results) => {
+      this.recentlyAdded = results;
+    });
+
+    getHomePageTags().then (async (results) => {
+      let tags = results;
+      for (let i = 0; i < tags.length; i++) {
+        tags[i].resources = await this.resourcesByTag(tags[i].key);
+      }
+      this.homePageTags = tags;
+    })
+    getHomePageResourceTypes().then (async (results) => {
+      let types = results;
+      for (let i = 0; i < types.length; i++) {
+        types[i].resources = await getPopularResources([types[i].key]);
+      }
+      this.homePageResourceTypes = types;
+    })    
+
+    // for (let i = 0; i < this.homePageTags.length; i++) {
+    //   this.homePageTags[i].resources = await this.resourcesByTag(this.homePageTags[i].key);
+    // }
+    // this.isLoading = true;
+    // const favourites = await getPopularResources([ResourceTypeEnum.Books.key, ResourceTypeEnum.Podcasts.key]);
+    // this.topBooks = favourites.filter ( r => r.resourceType == ResourceTypeEnum.Books.key)
+    // this.topPodcasts = favourites.filter ( r => r.resourceType == ResourceTypeEnum.Podcasts.key)
+    // this.recentlyAdded = await getRecentlyAdded(10);
+    // this.homePageTags = await getHomePageTags();
+    // this.homePageResourceTypes = await getHomePageResourceTypes();
+
+    // for (let i = 0; i < this.homePageTags.length; i++) {
+    //   this.homePageTags[i].resources = await this.resourcesByTag(this.homePageTags[i].key);
+    // }
+
+    // for (let i = 0; i < this.homePageTags.length; i++) {
+    //   this.homePageTags[i].resources = await this.resourcesByTag(this.homePageTags[i].key);
+    // }
+    
     // will get some featured reviews if none have been defined for this session yet.
-    let store = reviewStore()
-    await  store.fetchFeatured();
-    this.featured = store.featuredReviews;
-    console.log(store.featuredReviews.length);
+    // let store = reviewStore()
+    // await  store.fetchFeatured();
+    // this.featured = store.featuredReviews;
+    // console.log(store.featuredReviews.length);
 
     this.isLoading = false;
   },
