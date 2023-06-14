@@ -47,7 +47,10 @@
       </div>
       
       <div v-if="isRecommendation">
-        <div class="label">Anything you'd like to share to help us categorise and learn more about your recommendation?</div>
+        <div class="label">
+          Anything you'd like to share about the resource to help us categorise it? For example, 
+          What's the primary topic? Who would it be good for? 
+        </div>
         <base-multiline-text 
           v-model="recommendation.comment"
           :errorMessage="errorMessage['comment']"
@@ -60,8 +63,9 @@
         </base-multiline-text>
       </div>
 
-      <p>Once submitted, we'll get it published as soon as possibe.</p>
       
+
+      <p class="closing">Once submitted, we'll get it published as soon as possibe.</p>
       <div>
         <base-button  class="buttons" :showSpinner="isSaving" @click="handleSubmit">Submit</base-button>
         <base-button  class="buttons" :isSecondary="true" @click="handleCancel">Cancel</base-button>
@@ -226,9 +230,7 @@ methods: {
         _this.$router.push({ path: '/recommend/confirm', query: {'action': _this.isRecommendation ? "recommendation" : "review"}});
         
       }, 2000);
-    } else {
-      console.log("not valid")
-    }
+    } 
   },
 
   validate() {
@@ -337,6 +339,9 @@ margin-top: 0px;
   padding: 0 4px 0 0px;
 }
 
+.closing {
+  text-align: right;
+}
 @media only screen and (max-width: 600px) {
   .image {
     float: none;

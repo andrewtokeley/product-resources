@@ -55,15 +55,11 @@ export default {
   },
 
   methods: {
-    // handleUIChanged(from, to) {
-    //   this.isLoggingIn
-    //   console.log(to);
-    // },
+    
     handleError(error){
       this.error = error;
     },
     handleSuccess() {
-      console.log('success');
       // this.$router.push(this.redirectUrl ?? '/');
     },
     handleCancel() {

@@ -157,12 +157,9 @@ export default {
                   vm.$emit("update:modelValue", newValue);
                 })
                 .catch((error) => {
-                  console.log(error);
                   vm.errorMessage_ = error;
                 });
-          } else {
-            console.log("nothing");
-          }
+          } 
         }, this.validation.delay);
       } else {
         this.$emit("update:modelValue", newValue);

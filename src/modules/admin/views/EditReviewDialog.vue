@@ -102,7 +102,6 @@ export default {
     checkLink() {
       const this_ = this;
       if (this.review.resourceId) {
-        console.log('check')
         getResource(this.review.resourceId).then( (resource) => {
           if (resource) {
             this_.isLinkBroken = false;

@@ -5,7 +5,6 @@ import { increment, getFirestore, collection, doc, getDoc,getDocs, query, where,
 const { DateTime } = require("luxon");
 import { Timestamp } from "firebase/firestore";
 import FirestoreKeys from '@/core/services/firebaseKeys';
-// import { getResource } from '@/modules/resources/services/resource-service';
 
 const db = getFirestore(app);
 
@@ -182,34 +181,6 @@ const getFeaturedReviews = async function(maximum) {
     results.push(new Review(doc.data()));
   });
   return results;
-
-  // var attempts = 0;
-  // // just in case you get some dupicates we have a few goes at getting unique set
-  // var maxAttempts = 3;
-  // if (!maximum) { maximum = 2 }
-
-  // while (results.length < maximum && attempts < maxAttempts) {
-  //   let randomKey = doc(collection(db, COLLECTION_KEY)).id;
-  //   const q = query(collection(db, COLLECTION_KEY).withConverter(reviewConverter), 
-  //     where(documentId(), ">=", randomKey),
-  //     where('approved', "==", true),
-  //     limit(1));
-  //   const querySnapshot = await getDocs(q);
-  //   console.log(randomKey);
-  //   if (querySnapshot.size == 1) {
-  //     querySnapshot.forEach((doc) => {
-  //       let review = new Review(doc.data());
-  //       // ensure they are for different resources
-  //       if (results.find( r => r.id == review.id)) {
-  //         attempts += 1;
-  //       } else {
-  //         results.push(review);
-  //       }
-  //     });
-  //   } else {
-  //     attempts += 1;
-  //   }
-  // }
   
 }
 

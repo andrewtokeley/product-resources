@@ -77,7 +77,6 @@ export default {
       return nav.path === this.$route.path;
     },
     handleClose() {
-      console.log('hello')
       this.$emit('close');
     },
   }

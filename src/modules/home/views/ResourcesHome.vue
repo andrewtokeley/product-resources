@@ -11,11 +11,13 @@
         relevant and supportive of the growing number of professional product leaders around the world.</p>
       <p>What resource or person do you <router-link to="/recommend">recommend</router-link> to your peers?</p>
       
+      <loading-symbol v-if="!homePageResourceTypes"></loading-symbol>
       <section class="featured" v-for="type in homePageResourceTypes" :key="type.key">
         <book-group 
         :heading="`Popular ${type.value}`"  
         :headingLink="`/type/${type.key}`"
         :headingIcon="type.icon" 
+        :description="type.description"
         :isGrouped="false" 
         :resources="type.resources" 
         :includeItemCount="false" 
@@ -23,11 +25,13 @@
         @click="handleViewDetail"></book-group>
       </section>
 
+      <loading-symbol v-if="!homePageTags"></loading-symbol>
       <section class="featured" v-for="tag in homePageTags" :key="tag.key">
         <book-group 
         :heading="tag.value"  
         :headingIcon="tag.icon" 
         :headingLink="`/tag/${tag.key}`"
+        :description="tag.description"
         :isGrouped="false" 
         :resources="tag.resources" 
         :includeItemCount="false" 
@@ -67,12 +71,8 @@ export default {
   },
   data() {
     return {
-      featured: [],
-      topBooks: [],
-      topPodcasts: [],
-      homePageTags: [],
+      homePageTags: null,
       homePageResourceTypes: [],
-      recentlyAdded: [],
       clickedResource: null,
       isLoading: true,
       showDetail: false,
@@ -121,32 +121,6 @@ export default {
       }
       this.homePageResourceTypes = types;
     })    
-
-    // for (let i = 0; i < this.homePageTags.length; i++) {
-    //   this.homePageTags[i].resources = await this.resourcesByTag(this.homePageTags[i].key);
-    // }
-    // this.isLoading = true;
-    // const favourites = await getPopularResources([ResourceTypeEnum.Books.key, ResourceTypeEnum.Podcasts.key]);
-    // this.topBooks = favourites.filter ( r => r.resourceType == ResourceTypeEnum.Books.key)
-    // this.topPodcasts = favourites.filter ( r => r.resourceType == ResourceTypeEnum.Podcasts.key)
-    // this.recentlyAdded = await getRecentlyAdded(10);
-    // this.homePageTags = await getHomePageTags();
-    // this.homePageResourceTypes = await getHomePageResourceTypes();
-
-    // for (let i = 0; i < this.homePageTags.length; i++) {
-    //   this.homePageTags[i].resources = await this.resourcesByTag(this.homePageTags[i].key);
-    // }
-
-    // for (let i = 0; i < this.homePageTags.length; i++) {
-    //   this.homePageTags[i].resources = await this.resourcesByTag(this.homePageTags[i].key);
-    // }
-    
-    // will get some featured reviews if none have been defined for this session yet.
-    // let store = reviewStore()
-    // await  store.fetchFeatured();
-    // this.featured = store.featuredReviews;
-    // console.log(store.featuredReviews.length);
-
     this.isLoading = false;
   },
 

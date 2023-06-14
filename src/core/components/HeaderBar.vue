@@ -26,8 +26,8 @@
               {{nav.title}}
               </router-link>
             </li>
-            <li ref="nav_with_submenu" class="nav-with-submenu hover-enabled">
-              <a :class="{ selected: isCategoriesSelected }">CATEGORIES</a>    
+            <li ref="nav_with_submenu" class="nav-with-submenu hover-enabled" @click="addHandlerFix">
+              <a :class="{ selected: isCategoriesSelected }">TOPICS</a>    
               <div ref="submenuDiv" class="submenu">
                 <div v-for="tagGroup in tagGroups" :key="tagGroup.groupName" class="submenu-group">
                   <h2 v-if="showCategoryHeading(tagGroup)">{{ tagGroup.groupName.toUpperCase() }}</h2>
@@ -84,12 +84,12 @@ import BadgeCount from './BadgeCount.vue'
 import SideBar from '@/modules/navigation/components/SideBar.vue';
 
 import { auth } from '@/core/services/firebaseInit'
-import { useUserStore } from '@/core/state/userStore'
 import { groupTags } from '@/modules/resources/services/lookup-service'
 import { Resource } from '@/modules/resources/model/resource'
 import { getResource } from '@/modules/resources/services/resource-service'
 
 import { ref } from 'vue';
+import { useUserStore } from '@/core/state/userStore'
 import { useLookupStore } from '@/core/state/lookupStore';
 import { getUnapprovedReviewsCount } from '@/modules/reviews/services/review-service'
 import { getUnlinkedRecommendationsCount } from '@/modules/recommendations/services/recommendation-service'
@@ -143,8 +143,10 @@ export default {
       {id: 'people', path:`/type/${ResourceTypeEnum.People.key}`, title:'PEOPLE'},
     ];
 
-    this.numberOfUnapprovedReviews = await getUnapprovedReviewsCount();
-    this.numberOfRecommendations = await getUnlinkedRecommendationsCount();
+    if (this.useUserStore.isAdmin) {
+      this.numberOfUnapprovedReviews = await getUnapprovedReviewsCount();
+      this.numberOfRecommendations = await getUnlinkedRecommendationsCount();
+    }
 
     const resourceId = this.$route.query.r   
     if (resourceId) {
@@ -158,24 +160,31 @@ export default {
         }
       }
     }
-    
-    const categoryNav = this.$refs.nav_with_submenu;
-    if (categoryNav) {
-      categoryNav.addEventListener("mouseover", function () {
-          categoryNav.classList.add("hover-enabled");
-      })
-    } else {
-      console.log("NOPdE")
-    }
+   
+    this.enableHover();
 
   },
   
   methods: {
-    handleTagClick(tag) {
-      const categoryNav = this.$refs.nav_with_submenu;
-      if (categoryNav) {
-        categoryNav.classList.remove("hover-enabled");
+    removeHover() {
+      const topicNav = this.$refs.nav_with_submenu;
+      if (topicNav) {
+        topicNav.classList.remove("hover-enabled");
+        this.enableHover()
       }
+    },
+    enableHover() {
+      const topicNav = this.$refs.nav_with_submenu;
+      if (topicNav) {
+        topicNav.addEventListener("mouseover", function () {
+          if (!topicNav.classList.contains('hover-enabled')) {
+            topicNav.classList.add("hover-enabled");
+          }
+        })
+      } 
+    },
+    handleTagClick(tag) {
+      this.removeHover();
       this.$router.push(`/tag/${tag.key}`);
     },
     handleLogout() {
@@ -442,7 +451,7 @@ a.selected {
   }
 
   .header-top-strip {
-    margin-right: 10px;
+    margin-right: 15px;
     margin-left: 10px;
 }
 

@@ -43,10 +43,8 @@ export default {
         callbacks: {
           signInSuccessWithAuthResult: async function(authResult) {
             //update the store now, rather than waiting for the authentication handler
-            console.log("signInSuccessWithAuthResult - logged in? " + store.isLoggedIn)
             const store = useUserStore()
             await store.updateAuthUser(authResult);
-            console.log("signInSuccessWithAuthResult - logged in now? " + store.isLoggedIn)
             return true;
 
           },
@@ -64,7 +62,6 @@ export default {
   },
 
   mounted() {
-    console.log('login-widget: ' + this.redirectUrl);
     ui.start("#firebaseui-auth-container", this.uiConfig);
   },
 

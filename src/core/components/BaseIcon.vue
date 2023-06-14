@@ -178,7 +178,6 @@ export default defineComponent({
       });
 
       this.$refs.iconDiv.addEventListener("mouseleave", () => {
-        console.log('out')
         vm.isMouseOver = false;
         // vm.showContextMenu = false;
         //vm.showContextMenu = false;

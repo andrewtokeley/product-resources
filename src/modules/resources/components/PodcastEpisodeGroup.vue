@@ -29,9 +29,6 @@ export default {
       default: () => {[]}
     }
   },
-  mounted() {
-    console.log('epis')
-  },
 
   computed: {
     showHeaderLink() {

@@ -1,7 +1,12 @@
 <template>
   <div class="book-group">
     <template v-for="group in groups" :key="group.key" >
-      <row-header :headingIcon="group.icon" :heading="group.heading" :headingLink="group.link"></row-header>
+      <row-header 
+        :headingIcon="group.icon" 
+        :heading="group.heading" 
+        :headingLink="group.link">
+      </row-header>
+      <p>{{ description }}</p>
       <div class="row" :class="{ singleRow: singleRow }">
         <book-card 
           v-for="resource in group.resources"
@@ -54,6 +59,7 @@ export default {
     },
     headingIcon: String,
     heading: String,
+    description: String,
     headingLink: String,
     singleRow: {
       type: Boolean,

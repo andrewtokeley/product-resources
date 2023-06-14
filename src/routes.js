@@ -36,11 +36,11 @@ export default [
   {path: '/type/:typeId', component:ResourceTypes, meta: { analytics_title: 'Resource Type'}},
   {path: '/type/:typeId/:tagId', component:ResourceTypes, meta: { analytics_title: 'Resource Type' }},
 
-  {path: '/recommend', component: RecommendationView, meta: { requiresAuth: true, analytics_title: 'Recommend', hideNavigation: true }},
-  {path: '/recommend/:typeId', component: RecommendationView, meta: { requiresAuth: true, analytics_title: 'Recommend', hideNavigation: true }},
-  {path: '/recommend/confirm', component: RecommendationConfirmation, meta: {  analytics_title: 'Recommend', hideNavigation: true}},
+  {path: '/recommend', component: RecommendationView, meta: { requiresAuth: true, analytics_title: 'Recommend', hideNavigation: false }},
+  {path: '/recommend/:typeId', component: RecommendationView, meta: { requiresAuth: true, analytics_title: 'Recommend', hideNavigation: false }},
+  {path: '/recommend/confirm', component: RecommendationConfirmation, meta: {  analytics_title: 'Recommend', hideNavigation: false}},
 
-  {path: '/review/:resourceId', component: RecommendationView, meta: { requiresAuth: true, analytics_title: 'Review', hideNavigation: true }},
+  {path: '/review/:resourceId', component: RecommendationView, meta: { requiresAuth: true, analytics_title: 'Review', hideNavigation: false }},
   
   {path: '/about', component:About, meta: { analytics_title: 'About', hideNavigation: true} },
   {path: '/terms', component:TermsOfService, meta: { analytics_title: 'Terms', hideNavigation: true} },

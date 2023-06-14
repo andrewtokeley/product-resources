@@ -62,19 +62,11 @@ export default {
   methods: {
     clearDate() {
       if (!this.$refs.datePickerWrap) {
-        console.log('nope')
         return;
       }
       this.$refs.datePickerWrap.fp.clear();
     },
   },
-
-  // watch: {
-  //   readOnly() {
-  //     // this.pickerConfig.clickOpens = !this.readOnly;
-  //     //console.log("readonly");
-  //   }
-  // },
 
   computed: {
     pickerConfig() {
@@ -106,8 +98,6 @@ export default {
       get() {
         // convert Luxon date into a JS date
         if (this.modelValue) {
-          console.log('v-model:' + this.modelValue);
-          console.log('flatpkr value:' + this.modelValue.toISODate());
           return this.enableTime ? this.modelValue.toISO() : this.modelValue.toISODate();
         } else {
           return null;
@@ -116,7 +106,6 @@ export default {
       set(value) {
         // convert back to Luxon date
         const date = DateTime.fromISO(value);
-        console.log('set date to ' + date + ' from ' + value);
         this.$emit('update:modelValue', date);
       }
     }

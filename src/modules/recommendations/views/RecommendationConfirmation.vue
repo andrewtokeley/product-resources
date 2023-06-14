@@ -3,10 +3,8 @@
     <h1 class="giant">Thanks</h1>
     <p>We'll check out your {{ action }} and get it published as soon as possible.</p>
     <base-button v-if="!isReview" @click="$router.push('/recommend')">Add Another...</base-button>
-
-    <base-button v-if="isReview" 
-      @click="$router.go(-2)">OK</base-button>
-    <base-button :isSecondary="true" v-else @click="$router.go(-2)">Nah, that's all for now</base-button>
+    <base-button v-if="isReview" @click="$router.push('/')">OK</base-button>
+    <base-button :isSecondary="true" v-else @click="$router.push('/')">Nah, that's all for now</base-button>
   </div>
 </template>
 
@@ -21,7 +19,6 @@ export default {
     }
   },
   mounted() {
-    console.log('moun');
     this.action = this.$route.query.action;
   },
   computed: {

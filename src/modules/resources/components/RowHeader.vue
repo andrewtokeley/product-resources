@@ -31,7 +31,7 @@ export default {
 <style scoped>
 
 .material-symbols-outlined {
-  margin: 20px 10px 20px 0px;
+  margin: 20px 10px 0px 0px;
 }
 .row-header {
   position: relative;
@@ -69,7 +69,7 @@ h1 {
   font-size: var(--prr-font-size-large);
   text-transform: uppercase;
   line-height: 30px;
-  margin: 20px 20px 20px 0px;
+  margin: 20px 20px 0px 0px;
   /* cursor: pointer; */
 
 }

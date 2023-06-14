@@ -3,13 +3,14 @@
     <resource-image 
       :preview="showDescription" 
       :resource="resource" 
-      :showTitle="true"
+      :showTitle="showTitle"
       :showAddPlaceholder="showAddPlaceholder" 
       @click="$emit('click', resource)"
       @addRecommend="$emit('addRecommend', resource)">
     </resource-image>
     <div v-if="showDescription" class="description" @click="$emit('click', resource)">
-      {{ summary }}
+      <h1>{{resource.displayName}}</h1>
+      <p>{{ summary }}</p>
     </div>
     <!-- <resource-detail v-if="showDetails" :resource="resource" @close="showDetails = false"></resource-detail> -->
   </div>

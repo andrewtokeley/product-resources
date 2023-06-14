@@ -202,7 +202,7 @@ export default {
     },
 
     handleDelete() {
-      console.log('do delete'); 
+      
     },
 
     async handleSave() {

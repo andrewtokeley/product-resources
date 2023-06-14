@@ -9,6 +9,7 @@ class User {
     this.uid = config?.uid;
     this.displayName = config?.displayName;
     this.jobTitle = config?.jobTitle;
+    this.username = config?.username;
   }
  
   static default() {
@@ -33,7 +34,15 @@ class User {
           return Result.failure("Job title too long.");
         }
         return Result.success(value);
-      }
+      },
+      // username: (value) => {
+      //   if (!value || value.length == 0) {
+      //     return Result.failure("Must enter a username.");
+      //   } else if (value.length > 30 || value.length < 5) {
+      //     return Result.failure("Username must be between 5 and 30 characters.");
+      //   }
+      //   return Result.success(value);
+      // }
     }
   }
 }
@@ -54,6 +63,7 @@ var userConverter = {
     const result = {};
     if (user.displayName) { result.displayName = user.displayName }
     if (user.jobTitle != undefined) { result.jobTitle = user.jobTitle }
+    if (user.username != undefined) { result.username = user.username }
     return result;
   },
 
@@ -63,6 +73,7 @@ var userConverter = {
       uid: snapshot.id,
       displayName: data.displayName,
       jobTitle: data.jobTitle,
+      username: data.username,
     }
 
     return new User(config);

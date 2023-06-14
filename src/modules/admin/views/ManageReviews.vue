@@ -195,7 +195,6 @@ export default {
     },
 
     async setApproval(review, approve) {
-      console.log('stop')
       const result = await setReviewApprove(review, approve);
       if (!result) return;
 

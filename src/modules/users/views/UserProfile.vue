@@ -2,7 +2,13 @@
   <div class="user-profile">
     <h1 class="giant">Profile</h1>
     
-    <label>Name</label>
+    <!-- <label>Your Link</label>
+    <p>You can share this link to share the resources you've reviewed.</p>
+    <username-input 
+      :options="{ placeholder: 'user name'}">
+    </username-input>
+     -->
+    <label>Display Name</label>
     <base-input v-model="user.displayName" :errorMessage="errorMessage['displayName']" @blur="validate('displayName')" :options="{placeholder: 'Display name'}"></base-input>
     <div class="label">This is the name that will be displayed with your reviews.</div>
 
@@ -19,16 +25,16 @@
 
 <script>
 import BaseInput from '@/core/components/BaseInput.vue'
+// import UsernameInput from '../components/UsernameInput.vue';
+import BaseButton from '@/core/components/BaseButton.vue';
+
 import { getUser, updateUser } from '../services/user-services'
 import { useUserStore } from '@/core/state/userStore'
 import { User } from '@/modules/users/model/user';
-import BaseButton from '@/core/components/BaseButton.vue';
 import { validateObject, validateProperty } from '@/core/model/validation';
+
 export default {
   components: { BaseInput, BaseButton },
-  setup() {
-    
-  },
   data() { 
     return {
       user: User.default(),

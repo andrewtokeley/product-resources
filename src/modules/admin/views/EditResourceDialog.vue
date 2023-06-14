@@ -53,7 +53,7 @@
           maximumLength: 1000, 
           showCharacterCount: true}"
       ></base-multiline-text>
-      
+
       <base-check-box 
         v-model="editResource.isFavourite"
         :leftAlign="true"
@@ -259,7 +259,6 @@ export default {
     },
     async handleButtonClick(button) {
       if (button.id == 'add') {
-        console.log('add new recommendation')
         // this will also link the resource with a review if the resource was created from one.
         let resourceId = await addResource(this.editResource);
         this.editResource = await getResource(resourceId);

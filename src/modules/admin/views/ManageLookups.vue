@@ -159,7 +159,6 @@ export default {
       this.sortedByOrder[propName] = order;
 
       // sort the items
-      console.log(`sort by ${propName}, ${this.sortedByOrder[propName]}`)
       this.lookup.items.sort( (a,b) => { 
         let aa = a[propName] ?? '';
         let bb = b[propName] ?? '';
@@ -184,7 +183,6 @@ export default {
       this.lookup.items.unshift(item);
 
       // refresh the lookup state, this will ensure the rest of the app have access to the latest changes
-      console.log('add');
       let store = useLookupStore()
       store.fetchLookups();
 

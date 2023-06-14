@@ -196,7 +196,7 @@ var resourceConverter = {
     if (resource.resourceType != null) { result.resourceType = resource.resourceType }
     if (resource.resourceUrl != null) { result.resourceUrl = resource.resourceUrl }
     if (resource.displayName != null) { result.displayName = resource.displayName }
-    console.log(resource.createdDate);
+    
     if (resource.createdDate != null && resource.createdDate.isValid) { 
       result.createdDate = Timestamp.fromDate(resource.createdDate.toJSDate()); 
     } else {

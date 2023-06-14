@@ -10,7 +10,6 @@ export { logResourceSelect, logPageViewFromRouteLocation }
 // }
 
 const logResourceSelect = function(resource) {
-  console.log('log resource');
   logEvent(analytics, 'select_item', {
     item_list_id: resource.resourceType,
     items: [
@@ -23,9 +22,6 @@ const logResourceSelect = function(resource) {
 }
 
 const logPageViewFromRouteLocation = function(routeLocation) {
-  console.log('page_location ' + routeLocation.fullPath);
-  console.log('page_path ' + routeLocation.path);
-  console.log('page_title ' + routeLocation.meta.analytics_title);
   logEvent(analytics, 'page_view', {
     page_location: routeLocation.fullPath,
     page_path: routeLocation.path,

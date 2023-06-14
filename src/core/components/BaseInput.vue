@@ -163,6 +163,7 @@ export default defineComponent({
         newValue = newValue.toLowerCase();
       }
       this.$emit("update:modelValue", newValue);
+      this.$emit("input", event);
     },
     
     beforeUnmount() {

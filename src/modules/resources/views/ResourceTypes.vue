@@ -70,7 +70,6 @@ export default {
   computed: {
     isGrouped() {
       const typeId = this.$route.params.typeId;
-      console.log(typeId);
       return (typeId == ResourceTypeEnum.Websites.key || typeId == ResourceTypeEnum.Podcasts.key);
     },
     recommendLink() {

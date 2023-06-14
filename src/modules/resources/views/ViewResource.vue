@@ -87,7 +87,6 @@ export default {
 
   watch: {
     async resource() {
-      console.log('here');
       this.refreshRelatedData();
     }
   },
