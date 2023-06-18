@@ -19,12 +19,12 @@
           'base-input__input--is-large': _options.large, 
           'base-input__input--is-blue': _options.blue, 
           'base-input__input--is-white': !_options.blue, 
-          'base-input__input--has-error': errorMessage && errorMessage.length > 0,
+          'base-input__input--has-error': error_ && error_.length > 0,
         }"
       />
     </div>
     <div v-if="_options.descriptionText" class='base-input__descriptionText' v-html="_options.descriptionText"></div>
-    <div v-if="_options.inlineErrors" class='base-input__errorMessage'>{{ errorMessage }}</div>
+    <div v-if="_options.inlineErrors" class='base-input__errorMessage'>{{ error_ }}</div>
   </div>
 </template>
 
@@ -39,7 +39,7 @@ export default defineComponent({
   //   Icon,
   // },
 
-  emits: ["update:modelValue", "focus", "blur", "error"],
+  emits: ["update:modelValue", "focus", "blur", "error", "input"],
 
   props: {
     id: String,
@@ -82,6 +82,7 @@ export default defineComponent({
       validationDelayTimer: Object,
       validationMessage: "",
       lastValue: null,
+      error_: null,
     }
   },
   
@@ -125,6 +126,8 @@ export default defineComponent({
     if (this.hasFocus) {
       setTimeout(() => { this.$refs.input.focus() }, 300)
     }
+    // if the client sets an errorMessage...
+    this.error_ = this.errorMessage;
   },
 
   methods: {
@@ -140,19 +143,20 @@ export default defineComponent({
         if (value != vm.lastValue) {
           vm.lastValue = value;
           vm.validation.callback(value)
-            // .then( (response) => {
-            //   if (response.result) {
-            //     // clear error, we're good!
-            //     vm.errorMessage = null;
-            //   } else {
-            //     // let the user know there's a problem
-            //     vm.errorMessage = response.message ?? "Error";
-            //     vm.$emit('error', vm.id, response.message)
-            //   }
-            // })
-            // .catch( (error) => {
-            //   vm.errorMessage = error ?? "Error";
-            // })
+            .then( (response) => {
+
+              if (response.result) {
+                vm.error_ = null;
+              } else {
+                vm.error_ = response.message ?? "Error";
+                vm.$emit('error', vm.id, response.message)
+              }
+              // regardless of error, still set the value??
+              vm.$emit("update:modelValue", value);
+            })
+            .catch( (error) => {
+              vm.$emit('error', vm.id, error);
+            })
         }
       }, this.validation.delay);
     },
@@ -162,8 +166,12 @@ export default defineComponent({
       if (this._options.forceLowerCase) {
         newValue = newValue.toLowerCase();
       }
-      this.$emit("update:modelValue", newValue);
-      this.$emit("input", event);
+      if (this.validation) {
+        this.runValidation(newValue);
+      } else {
+        this.$emit("update:modelValue", newValue);
+        this.$emit("input", event);
+      }
     },
     
     beforeUnmount() {

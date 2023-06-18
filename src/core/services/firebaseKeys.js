@@ -9,8 +9,8 @@ export default class FirestoreKeys {
   static LookupsCollection = new FirestoreKeys("lookups")
   static UsersCollection = new FirestoreKeys("users")
   static UsersPrivateCollection = new FirestoreKeys("private")
+  static UsernamesCollection = new FirestoreKeys("usernames")
   static UsersPrivateDocument = new FirestoreKeys("secure")
-
   constructor(key) {
     this.key = key;
   }

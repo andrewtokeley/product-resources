@@ -104,8 +104,7 @@ export default {
 }
 
 .card {
-  flex-basis: 40%;
-  min-height: 400px;
+  flex-basis: 100%;
 }
 h2 span {
   color: var(--prr-mediumgrey);

@@ -8,16 +8,31 @@ import { User, UserPrivate } from "@/modules/users/model/user";
 import FirestoreKeys from "@/core/services/firebaseKeys";
 
 export { 
-  addUser,
   getUser,
+  usernameExists,
+  updateUsername,
+  addUser,
   recordUserLogin, 
   updateUser,
 }
 
 const COLLECTION_KEY = FirestoreKeys.UsersCollection.key;
 const COLLECTION_PRIVATE_KEY = FirestoreKeys.UsersPrivateCollection.key;
+const COLLECTION_USERNAMES_KEY = FirestoreKeys.UsernamesCollection.key;
 const DOCUMENT_PRIVATE_KEY = FirestoreKeys.UsersPrivateDocument.key;
 const db = getFirestore(app);
+
+/**
+ * Returns whether a username is available. This does not guarantee the username will still be available when setting it for a user.
+ * @param {*} username 
+ * @returns true if username available. 
+ */
+const usernameExists = async function(username) {
+  if (!username) { return false; }
+  const ref = doc(db, COLLECTION_USERNAMES_KEY, username);
+  const docSnap = await getDoc(ref);
+  return docSnap.exists();
+ }
 
 /**
  * Returns a public user object.
@@ -92,5 +107,33 @@ const updateUser = async function(user) {
     return await setDoc(ref, user, {merge: true})
   } else {
     return null;
+  }
+}
+
+/**
+ * Updates a user's username, ensuring it is unique
+ * @param {*} uid 
+ * @param {*} username 
+ */
+const updateUsername = async function(uid, username) {
+  //remove any username that was previously set for this user
+  const batch = writeBatch(db);
+
+  const user = await getUser(uid);
+  if (user) {
+    // update the username on the user document
+    const prevUsername = user.username;
+    const ref = doc(db, COLLECTION_KEY, uid);
+    batch.update(ref, { username: username });
+
+    // delete the previous username from the usernames collection
+    const previousUsernameRef = doc(db, COLLECTION_KEY, prevUsername);
+    batch.delete(previousUsernameRef);
+
+    // add the new username (and uid) to the usernames collection
+    const newUsernameRef = doc(db, COLLECTION_KEY, username);
+    batch.set(newUsernameRef, { uid: uid });
+
+    await batch.commit();
   }
 }

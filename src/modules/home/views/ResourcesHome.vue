@@ -13,7 +13,7 @@
       
       <loading-symbol v-if="!homePageResourceTypes"></loading-symbol>
 
-      <splide v-if="featured?.length > 0" class="carousell" :options="splideOptions" aria-label="Top Reviews">
+      <splide v-if="featured?.length > 0" class="carousel" :options="splideOptions" aria-label="Top Reviews">
         <SplideSlide v-for="review in featured" :key="review.id">
           <featured-card :review="review" @click="handleViewDetail"></featured-card>
         </SplideSlide>
@@ -172,7 +172,7 @@ export default {
 </style>
 <style scoped>
 
-.carousell {
+.carousel {
   margin-top: 30px;
 }
 .resources-home {
