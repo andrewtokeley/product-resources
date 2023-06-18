@@ -2,13 +2,12 @@
   <div class="review-widget">
     <p class="draft-heading" v-if="!review.approved">DRAFT</p>
     <p v-if="review.reason" class="quote" :class="{ short: short}">"{{ review.reason }}"</p>
-    <p v-else class="quote" >"I like this resource because..."</p>
-    <div class="by">
+    <div v-if="showBy" class="by">
       <router-link class="link" v-if="review.reviewedByUid" :to="`/user/${review.reviewedByUid}`">{{ review.reviewedByName }}</router-link>
       <span v-else>{{ review.reviewedByName ?? 'Anon'}}</span>
       <div class="jobtitle" v-if="review.reviewedByJobTitle">{{ review.reviewedByJobTitle }}</div>
     </div>
-    <hr/>
+    
   </div>
 </template>
 
@@ -26,6 +25,10 @@ export default {
     short: { 
       type: Boolean,
       default: false,
+    },
+    showBy: {
+      type: Boolean,
+      default: true,
     }
   },
 

@@ -8,7 +8,7 @@
       </resource-image>
     </div>
     <div class="review">
-      <review-widget class="quote" :review="review"></review-widget>
+      <review-widget :showBy="false" class="quote" :review="review"></review-widget>
     </div>
   </div>
 </template>
@@ -60,6 +60,7 @@ export default {
 .review-with-image {
   display: flex;
   flex-direction: row;
+  align-items: center;
   justify-content: flex-start;
   gap: 10px;
   overflow: hidden;

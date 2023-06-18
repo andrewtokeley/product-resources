@@ -1,6 +1,7 @@
 import { Timestamp } from "firebase/firestore";
 const { DateTime } = require("luxon");
 import Result from "@/core/model/Result";
+import { validateUrl } from "@/core/model/validation";
 
 export { User, UserPrivate, userConverter, userPrivateConverter };
 
@@ -8,6 +9,8 @@ class User {
   constructor(config) {
     this.uid = config?.uid;
     this.displayName = config?.displayName;
+    this.summary = config?.summary;
+    this.website = config?.website;
     this.jobTitle = config?.jobTitle;
     this.username = config?.username;
   }
@@ -34,6 +37,12 @@ class User {
           return Result.failure("Job title too long.");
         }
         return Result.success(value);
+      },
+      website: (value) => {
+        if (this.website) {
+          return validateUrl(value);        
+        }
+        return Result.success();
       },
       // username: (value) => {
       //   if (!value || value.length == 0) {
@@ -64,6 +73,7 @@ var userConverter = {
     if (user.displayName) { result.displayName = user.displayName }
     if (user.jobTitle != undefined) { result.jobTitle = user.jobTitle }
     if (user.username != undefined) { result.username = user.username }
+    if (user.summary != undefined) { result.summary = user.summary }
     return result;
   },
 
@@ -74,6 +84,7 @@ var userConverter = {
       displayName: data.displayName,
       jobTitle: data.jobTitle,
       username: data.username,
+      summary: data.summary,
     }
 
     return new User(config);

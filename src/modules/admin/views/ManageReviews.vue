@@ -13,7 +13,7 @@
           <th v-if="activeTab == 'pending'" style="width:200px"><a @click="sortBy('dateCreated')" class="sortHeading" :class="sortHeadingClasses('dateCreated')">Created</a></th>
           <th v-else style="width:200px"><a @click="sortBy('dateApproved')" class="sortHeading" :class="sortHeadingClasses('dateApproved')">Approved</a></th>
           <th style="width:200px"><a @click="sortBy('reviewedByName')" class="sortHeading" :class="sortHeadingClasses('reviewedByName')">Reviewed By</a></th>
-          <th style="width:200px"><a @click="sortBy('source')" class="sortHeading" :class="sortHeadingClasses('source')">Source</a></th>
+          <th style="width:200px"><a @click="sortBy('isFeatured')" class="sortHeading" :class="sortHeadingClasses('isFeatured')">Featured</a></th>
           <th style="width:200px"><a @click="sortBy('statusDescription')" class="sortHeading" :class="sortHeadingClasses('statusDescription')">Linked to Resource</a></th>
           <th style="width:200px"></th>
         </tr>
@@ -24,19 +24,24 @@
           <td v-if="activeTab == 'pending'">{{ review.dateCreatedFormatted }}</td>
           <td v-else>{{ review.dateApprovedFormatted }}</td>
           <td>{{ review.reviewedByName }}</td>
-          <td>{{ review.source }}</td>
+          <td>{{ review.isFeatured ? "true" : "" }}</td>
           <td v-if="review.resourceId">
             <a @click.prevent.stop="handleShowResourceDetail(review)" >{{ review.statusDescription }}</a>
           </td>
           <td v-else>
             {{ review.statusDescription }}
           </td>
-          <td rowspan="2" class="underline">
+          <td rowspan="3" class="underline">
             <div class="actions">
               <base-button v-if="!review.approved" :disabled="!review.canApprove" @click.stop="setApproval(review, true)">Approve</base-button>
               <base-button v-else @click.stop="setApproval(review, false)" :isSecondary="true">Un-Approve</base-button>
               <base-icon :menu="menuItems(review)">more_vert</base-icon>
             </div>
+          </td>
+        </tr>
+        <tr >
+          <td colspan="4">
+            <div class="source">"{{ review.source }}"</div>
           </td>
         </tr>
         <tr >
@@ -374,6 +379,12 @@ tbody:hover {
 .reason-text {
   margin: 10px 0px 10px 25px; 
   color: var(--prr-mediumgrey);
+  white-space: pre-wrap;
+}
+
+.source {
+  margin: 10px 0px 10px 25px; 
+  font-weight: bold;
   white-space: pre-wrap;
 }
 </style>

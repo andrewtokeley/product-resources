@@ -101,13 +101,31 @@ export default {
       return [
         {
           id: 'view',
-          title: this.viewResource.resourceType == 'people' ? "Get in Touch" : "Check it Out",
-          iconName: "open_in_new",
+          title: this.viewResource.resourceType == 'people' ? "Connect" : "View",
           isPrimary: true,
         },
         {
+          id: 'addToProfile',
+          title: "Add to Profile...",
+          isSecondary: true,
+          align: 'left',
+          type: 'grouped',
+          buttonGroupVerticalAlign: 'top',
+          buttonGroupHorizontalAlign: 'left',
+          buttonGroup: [
+            { id: 0, text: "Recommend"},
+            { id: 1, text: "Recommend & Review"},
+          ],
+        },
+        {
           id: 'review',
-          title: "Write a Review...",
+          title: "Review",
+          isSecondary: true,
+          align: 'left',
+        },
+        {
+          id: 'recommend',
+          title: "Add",
           isSecondary: true,
           align: 'left',
         },

@@ -1,10 +1,10 @@
 <template>
   <div v-if="resource" class="featured-card">
     <div class="container" @click="$emit('click', resource)">
-      <resource-image v-if="showImage && resource" class="image" :resource="resource"></resource-image>
+      <resource-image v-if="showImage && resource" :preview="true" class="image" :resource="resource"></resource-image>
       <div class="review">
-        <div class="heading"><h1>{{resource.displayName}}</h1></div>
-        <h2>{{resource.authorsList}}</h2>
+        <!-- <div class="heading"><h1>{{resource.displayName}}</h1></div>
+        <h2>{{resource.authorsList}}</h2> -->
         <review-widget class="quote" :short="true" :review="review"></review-widget>
       </div>
     </div>
@@ -39,7 +39,7 @@ export default {
     },
     showImage: {
       type: Boolean,
-      default: false,
+      default: true,
     }
   },
   
@@ -62,6 +62,7 @@ export default {
 .container {
   background: transparent;
   display: flex;
+  align-items: center;
   flex-direction: row;
   margin: 0px auto;
   max-width: 600px;
@@ -73,6 +74,7 @@ export default {
 .review {
   flex-grow: 2;
   width:100%;
+  margin-left: 15px;
 }
 .quote {
   margin-left: auto;
@@ -103,5 +105,10 @@ h2 {
   text-overflow: ellipsis;
 }
 
-
+@media only screen and (max-width: 600px) {
+  .featured-card {
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+}
 </style>

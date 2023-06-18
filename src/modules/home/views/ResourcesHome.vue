@@ -12,6 +12,13 @@
       <p>What resource or person do you <router-link to="/recommend">recommend</router-link> to your peers?</p>
       
       <loading-symbol v-if="!homePageResourceTypes"></loading-symbol>
+
+      <splide v-if="featured?.length > 0" class="carousell" :options="splideOptions" aria-label="Top Reviews">
+        <SplideSlide v-for="review in featured" :key="review.id">
+          <featured-card :review="review" @click="handleViewDetail"></featured-card>
+        </SplideSlide>
+      </splide>
+      
       <section class="featured" v-for="type in homePageResourceTypes" :key="type.key">
         <book-group 
         :heading="`Popular ${type.value}`"  
@@ -45,32 +52,33 @@
 </template>
 
 <script>
-// import FeaturedCard from "@/modules/home/components/FeaturedCard.vue";
 import ResourceDetail from "@/modules/resources/views/ResourceDetail.vue";
 import BookGroup from '@/modules/resources/components/BookGroup.vue';
 import LoadingSymbol from '@/core/components/LoadingSymbol.vue';
 // import 'vue3-carousel/dist/carousel.css'
 // import { Carousel, Slide, Navigation } from 'vue3-carousel'
-// import { Splide, SplideSlide } from '@splidejs/vue-splide';
-// import '@splidejs/vue-splide/css';
+import FeaturedCard from "@/modules/home/components/FeaturedCard.vue";
+import { Splide, SplideSlide } from '@splidejs/vue-splide';
+import '@splidejs/vue-splide/css';
 
 import { getPopularResources, getRecentlyAdded, searchByTagKey } from '@/modules/resources/services/resource-service';
-// import { reviewStore } from "@/modules/reviews/store/reviewStore";
+import { reviewStore } from "@/modules/reviews/store/reviewStore";
 // import ResourceTypeEnum from '@/modules/resources/model/resourceTypeEnum';
 import { getHomePageTags, getHomePageResourceTypes } from '@/modules/resources/services/lookup-service';
 
 export default {
   name: 'resources-home',
   components: { 
-    // FeaturedCard, 
+    FeaturedCard, 
     BookGroup, 
     LoadingSymbol, 
     ResourceDetail,
-    // Splide,
-    // SplideSlide,
+    Splide,
+    SplideSlide,
   },
   data() {
     return {
+      featured: [],
       homePageTags: null,
       homePageResourceTypes: [],
       clickedResource: null,
@@ -96,7 +104,7 @@ export default {
     }
   },
 
-  async mounted() {
+  mounted() {
     this.isLoading = true;
     // getPopularResources([ResourceTypeEnum.Books.key, ResourceTypeEnum.Podcasts.key]).then ((favourites) => {
     //   this.topBooks = favourites.filter ( r => r.resourceType == ResourceTypeEnum.Books.key)
@@ -121,6 +129,12 @@ export default {
       }
       this.homePageResourceTypes = types;
     })    
+
+    let store = reviewStore()
+    store.fetchFeatured().then ((results) => {
+      this.featured = results;
+    })
+
     this.isLoading = false;
   },
 
@@ -143,6 +157,13 @@ export default {
   width: 4em;
   height: 4em;
 }
+
+@media only screen and (max-width: 600px) {
+  .carousel-class-prev, .carousel-class-next  {
+    display: none;
+  }
+}
+
 </style>
 <style scoped>
 .splide__pagination__page.is-active {
@@ -151,7 +172,9 @@ export default {
 </style>
 <style scoped>
 
-
+.carousell {
+  margin-top: 30px;
+}
 .resources-home {
   display:block;
 }

@@ -28,24 +28,37 @@
         </div>
         
         <div v-if="buttonActions" class="modal__footer">
-          <div>
-            <template v-for="action in buttonActions" :key="action.id">
-              <base-button v-if="action.align == 'left' && (action.show ?? true)"
-                :class="action.align"
-                :disabled="action.disabled"
-                :isPrimary="action.isPrimary"
-                :isSecondary="action.isSecondary"
-                :isDestructive="action.isDestructive"
-                :showSpinner="action.showSpinner"
-                :iconName="action.iconName"
-                @click="$emit('buttonClick', action)"
-                >{{ action.title }}</base-button
+          <div>  
+            <template v-for="button in leftButtons" :key="button.id">
+              <base-button v-if="!button.type"
+                
+                :disabled="button.disabled"
+                :isPrimary="button.isPrimary"
+                :isSecondary="button.isSecondary"
+                :isDestructive="button.isDestructive"
+                :showSpinner="button.showSpinner"
+                :iconName="button.iconName"
+                @click="$emit('buttonClick', button)"
+                >{{ button.title }}</base-button
+              >
+              <base-button-group v-if="button.type == 'grouped'"
+                :disabled="button.disabled"
+                :isPrimary="button.isPrimary"
+                :isSecondary="button.isSecondary"
+                :isDestructive="button.isDestructive"
+                :showSpinner="button.showSpinner"
+                :iconName="button.iconName"
+                :verticalAlign="button.buttonGroupVerticalAlign"
+                :horizontalAlign="button.buttonGroupHorizontalAlign"
+                :buttonGroup="button.buttonGroup"
+                @click="$emit('buttonClick', button)"
+                >{{ button.title }}</base-button-group
               >
             </template>
           </div>
           <div>
-            <template v-for="action in buttonActions" :key="action.id">
-              <base-button v-if="action.align != 'left' && (action.show ?? true)"
+            <template v-for="action in rightButtons" :key="action.id">
+              <base-button
                 :class="action.align"
                 :disabled="action.disabled"
                 :isPrimary="action.isPrimary"
@@ -68,13 +81,14 @@
 import { defineComponent } from "vue";
 
 import BaseButton from "./BaseButton";
+import BaseButtonGroup from "./BaseButtonGroup.vue";
 import BaseIcon from "./BaseIcon";
 import LoadingSymbol from "./LoadingSymbol.vue";
 
 export default defineComponent({
   name: "modal-dialog",
   emits: ["close", "iconClick", "buttonClick", "backButtonClick"],
-  components: { BaseButton, BaseIcon, LoadingSymbol },
+  components: { BaseButton, BaseIcon, LoadingSymbol, BaseButtonGroup },
 
   props: {
     titleIcon: {
@@ -108,6 +122,15 @@ export default defineComponent({
     showBackButton: {
       type: Boolean,
       default: false,
+    }
+  },
+
+  computed: {
+    leftButtons() {
+      return this.buttonActions.filter( b => b.align == 'left' && (b.show ?? true));
+    },
+    rightButtons() {
+      return this.buttonActions.filter( b => b.align != 'left' && (b.show ?? true));
     }
   },
 

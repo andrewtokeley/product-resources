@@ -58,6 +58,10 @@ label {
   display:inline-block;
 }
 
+button {
+  font-family: var(--prr-font-family);
+}
+
 h1 {
   font-weight: 600;
 }

@@ -151,4 +151,11 @@ export default {
         transform: rotate(1turn);
     }
 }
+
+@media only screen and (max-width: 600px) {
+
+  .base-button {
+    min-width: 100px;
+  }
+}
 </style>

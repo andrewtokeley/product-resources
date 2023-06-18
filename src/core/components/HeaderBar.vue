@@ -166,6 +166,9 @@ export default {
   },
   
   methods: {
+    handleButtonClick(item) {
+      console.log(item.id)
+    },
     removeHover() {
       const topicNav = this.$refs.nav_with_submenu;
       if (topicNav) {
@@ -234,6 +237,12 @@ export default {
             iconName: "account_circle",
             show: this.useUserStore.isLoggedIn,
             link: '/profile',
+          },
+          {
+            name: "Your Recommendations",
+            iconName: "account_circle",
+            show: this.useUserStore.isLoggedIn,
+            link: `/user/${this.useUserStore.uid}`,
           },
           {
             isDivider: true,

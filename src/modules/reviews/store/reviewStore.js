@@ -9,9 +9,7 @@ export const reviewStore = defineStore( {
 
   actions: {    
     async fetchFeatured() {
-      if (this.featuredReviews.length == 0) {
-        this.featuredReviews = await getFeaturedReviews(5);
-      }
+      return await getFeaturedReviews(5);
     },
   },
 })
