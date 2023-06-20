@@ -1,5 +1,6 @@
 <template>
   <div class="base-input">
+    
     <div class="base-input__input-block">
       <input type="text" 
         ref="input"
@@ -35,10 +36,6 @@ import { defineComponent } from "vue";
 export default defineComponent({
   name: "base-input",
   
-  // components: {
-  //   Icon,
-  // },
-
   emits: ["update:modelValue", "focus", "blur", "error", "input"],
 
   props: {
@@ -47,11 +44,6 @@ export default defineComponent({
       type: String,
       default: ''
     },
-    // isMandatory: {
-    //   type: Boolean,
-    //   default: false,
-    // },
-    // The bound value of the input, set by clients using the v-model property
     modelValue: String,
     options: Object,
 
@@ -69,7 +61,7 @@ export default defineComponent({
     validation: {
       required: false,
       type: Object,
-      default: function () { return { onBlur: false, delay: 200, callback: () => { return Promise.resolve(true) }}},
+      default: null,
     },
     hasFocus: {
       type: Boolean,
@@ -85,7 +77,11 @@ export default defineComponent({
       error_: null,
     }
   },
-  
+  watch: {
+    errorMessage(value) {
+      this.error_ = value;
+    }
+  },
   computed: {
     _options() {
       
@@ -104,12 +100,6 @@ export default defineComponent({
       }
     },
 
-    // showInlineError() {
-    //   return (this.options.inlineErrors ?? false) && this.errorMessage.length > 0;
-    // },
-    // showErrorBlock() {
-    //   return this.options.inlineErrors ?? false;
-    // },
     value: {
       get() {
         return this.modelValue;
@@ -141,18 +131,18 @@ export default defineComponent({
       this.validationDelayTimer = setTimeout(function () {
         // only bother validating if the value is different.
         if (value != vm.lastValue) {
-          vm.lastValue = value;
           vm.validation.callback(value)
             .then( (response) => {
-
+              vm.lastValue = value;
               if (response.result) {
                 vm.error_ = null;
+                vm.$emit("update:modelValue", value);
               } else {
                 vm.error_ = response.message ?? "Error";
                 vm.$emit('error', vm.id, response.message)
               }
               // regardless of error, still set the value??
-              vm.$emit("update:modelValue", value);
+              vm.$emit("update:modelValue", vm.lastValue);              
             })
             .catch( (error) => {
               vm.$emit('error', vm.id, error);

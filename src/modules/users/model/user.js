@@ -72,8 +72,8 @@ var userConverter = {
     const result = {};
     if (user.displayName) { result.displayName = user.displayName }
     if (user.jobTitle != undefined) { result.jobTitle = user.jobTitle }
-    if (user.username != undefined) { result.username = user.username }
     if (user.summary != undefined) { result.summary = user.summary }
+    // don't send the username
     return result;
   },
 
@@ -83,8 +83,8 @@ var userConverter = {
       uid: snapshot.id,
       displayName: data.displayName,
       jobTitle: data.jobTitle,
-      username: data.username,
       summary: data.summary,
+      username: data.username,
     }
 
     return new User(config);

@@ -3,14 +3,22 @@
     <h1 class="giant">Profile</h1>
     
     <label>Your Link</label>
-    <p>You can share this link to share the resources you've reviewed.</p>
+    <p>This is your own personal link to your recommended resources.</p>
+    
     <username-input 
       v-model="user.username"
+      @error="invalidUserName = true"
+      @valid="invalidUserName = false"
       :options="{ placeholder: 'user name'}">
     </username-input>
     
     <label>Display Name</label>
-    <base-input v-model="user.displayName" :errorMessage="errorMessage['displayName']" @blur="validate('displayName')" :options="{placeholder: 'Display name'}"></base-input>
+    <base-input 
+      v-model="user.displayName" 
+      :errorMessage="errorMessage['displayName']" 
+      @input="validate('displayName')"
+      :options="{placeholder: 'Display name'}">
+    </base-input>
     <div class="label">This name will be displayed with your reviews and on your recommendations page.</div>
 
     <label>Job Title</label>
@@ -46,6 +54,8 @@ export default {
       isSaving: false,
       errorMessage: [],
       saved: false,
+      invalidUserName: false,
+      originalUser: null,
     }
   },
   computed: {
@@ -53,16 +63,20 @@ export default {
       return useUserStore();
     },
     isValid() {
-      return validateObject(this.user, this.user.schema).length == 0;
+      return validateObject(this.user, this.user.schema).length == 0 && !this.invalidUserName;
     },
     isDirty() {
-      const dirty = this.user.displayName != this.store.displayName || this.user.jobTitle != this.store.jobTitle;
+      const dirty = 
+        this.user.displayName != this.orginalUser.displayName || 
+        this.user.jobTitle != this.orginalUser.jobTitle ||
+        this.user.username != this.orginalUser.username 
       return dirty;
     },
   },
 
   async mounted() {
     this.user = await getUser(this.store.uid);
+    this.orginalUser = new User(this.user);
   },
   
   methods: {
@@ -80,24 +94,25 @@ export default {
     },
 
     async handleSave() {
-      this.isSaving = true;
-      
       // save and update state with user's updated displayName
       const store = useUserStore();
-      if (this.user.displayName != store.displayName || this.user.jobTitle != store.jobTitle) {
+      if (this.isDirty) {
+        this.isSaving = true;
         await updateUser(this.user);
         store.setDisplayName(this.user.displayName);
         store.setJobTitle(this.user.jobTitle);
+        this.isSaving = false;
         this.saved = true;
       }
       
-      this.isSaving = false;      
+      
     }
   },
 }
 </script>
 
 <style scoped>
+
 .actions {
   margin-top: 30px;
   float: right;

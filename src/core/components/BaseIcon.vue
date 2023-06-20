@@ -13,6 +13,7 @@
     <span class="icon__text material-symbols-outlined">
       <slot></slot>
     </span>
+    <div class="tooltip" :class="{'enabled': toolTip}">{{toolTip}}</div>
   </div>
   
   <transition name="fade">
@@ -54,6 +55,10 @@ export default defineComponent({
     rotate: {
       type: Number,
       default: 0
+    },
+    toolTip: {
+      type: String,
+      default: null,
     },
     showSpinner: {
       type: Boolean,
@@ -275,6 +280,36 @@ path {
 .icon--spinning .icon__text {
   visibility: hidden;
   opacity: 0;
+}
+
+.tooltip.enabled {
+  opacity: 1;
+}
+.tooltip {
+  position: absolute;
+  opacity: 0;
+  white-space: nowrap;
+  width:170px;
+  /* padding: 10px 30px 0px 30px; */
+  line-height: 35px;
+  height: 35px;
+  top:-60px;
+  border-radius: 5px;
+  background: var(--prr-darkgrey);
+  color: white;
+  text-align: center;
+  font-size: var(--prr-font-size-normal);
+  transition: opacity 0.3s;
+}
+.tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #555 transparent transparent transparent;
 }
 
 @keyframes button-loading-spinner {

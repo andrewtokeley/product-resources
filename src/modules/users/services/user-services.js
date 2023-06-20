@@ -103,6 +103,12 @@ const recordUserLogin = async function(uid) {
  */
 const updateUser = async function(user) {
   if (user?.uid) {
+    console.log('user');
+    // update the username first
+    await updateUsername(user.uid, user.username);
+    
+    // assuming that didn't throw exception...    
+    
     const ref = doc(db, COLLECTION_KEY, user.uid).withConverter(userConverter);
     return await setDoc(ref, user, {merge: true})
   } else {
@@ -121,17 +127,25 @@ const updateUsername = async function(uid, username) {
 
   const user = await getUser(uid);
   if (user) {
+    
+    if (user.username == username) {
+      // no change
+      return;
+    }
+    console.log('updating username');
     // update the username on the user document
     const prevUsername = user.username;
     const ref = doc(db, COLLECTION_KEY, uid);
     batch.update(ref, { username: username });
 
     // delete the previous username from the usernames collection
-    const previousUsernameRef = doc(db, COLLECTION_KEY, prevUsername);
-    batch.delete(previousUsernameRef);
+    if (prevUsername) {
+      const previousUsernameRef = doc(db, COLLECTION_USERNAMES_KEY, prevUsername);
+      batch.delete(previousUsernameRef);
+    }
 
     // add the new username (and uid) to the usernames collection
-    const newUsernameRef = doc(db, COLLECTION_KEY, username);
+    const newUsernameRef = doc(db, COLLECTION_USERNAMES_KEY, username);
     batch.set(newUsernameRef, { uid: uid });
 
     await batch.commit();
