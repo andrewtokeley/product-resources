@@ -13,7 +13,7 @@
     <span class="icon__text material-symbols-outlined">
       <slot></slot>
     </span>
-    <div class="tooltip" :class="{'enabled': toolTip}">{{toolTip}}</div>
+    <div v-if="toolTip" class="tooltip" :class="{'enabled': toolTip}">{{toolTip}}</div>
   </div>
   
   <transition name="fade">
