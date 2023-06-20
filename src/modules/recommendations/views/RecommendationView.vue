@@ -3,14 +3,16 @@
     <loading-symbol v-if="isLoading"></loading-symbol>
     <div v-else class="content" >
       
-      <template v-if="isRecommendation">
-        <h1 class="giant">RECOMMEND</h1>
-        <h2>for the community, by the community</h2>
-      </template>
-      <template v-else>
-        <h1 class="giant">REVIEW</h1>
-        <h2>for the community, by the community</h2>
-      </template>
+      <h1 class="giant">RECOMMEND</h1>
+      <h2>for the community, by the community</h2>
+    <!-- <template v-if="isRecommendation">
+      <h1 class="giant">RECOMMEND</h1>
+      <h2>for the community, by the community</h2>
+    </template>
+    <template v-else>
+      <h1 class="giant">REVIEW</h1>
+      <h2>for the community, by the community</h2>
+    </template> -->
 
       <div v-if="isRecommendation">
         <div class="label tight">{{  whereText }}</div> 
@@ -25,24 +27,39 @@
       
       <div class="review">
         <!-- <h2 v-if="resource"><span class="material-symbols-outlined">{{resourceImage}}</span>{{ resource.displayName }}</h2> -->
+        <template v-if="!isRecommendation">
+          <p>Recommending this resource adds it to <router-link :to="`/${userStore.username}`">your profile</router-link>.</p>
+          <base-check-box 
+            class="review-check"
+            :leftAlign="true" 
+            v-model="includeReview"
+            label="Do you want to also include a review?">
+          </base-check-box>
+        </template>
         <resource-image v-if="resource" class="image" :resource="resource" :showTitle="true"></resource-image>
-        <div class="label tight" v-if="isRecommendation">We think it's important for all recommendations to include a public review.</div>
+        <div class="label tight" v-if="isRecommendation">We think it's important for all new recommendations to include a public review.</div>
         <div class="textarea-wrap">
           <base-multiline-text 
             v-model="review.reason"
             :validation="{ delay: 200, callback: validateReviewReason}"
             :hasFocus="!isRecommendation"
             :errorMessage="errorMessage['reason']"
+            :disabled="isSaving || !includeReview"
             :options="{ numberOfLines: 5, 
               maximumLength: 500, 
               inlineErrors: false,
               showCharacterCount: true, 
-              placeholder: 'Your Review',
-              readOnly: isSaving}">
+              placeholder: 'Your Review'}">
           </base-multiline-text>
-          <div class="label tight">Feel free to update your name and job title that will appear with your review</div>
-          <base-input v-model="review.reviewedByName"></base-input>
-          <base-input v-model="review.reviewedByJobTitle"></base-input>
+          <div class="label tight">The name and job title that will appear with your review</div>
+          <base-input 
+            v-model="review.reviewedByName"
+            :disabled="!includeReview">
+          </base-input>
+          <base-input 
+            v-model="review.reviewedByJobTitle"
+            :disabled="!includeReview">
+          </base-input>
         </div>
       </div>
       
@@ -65,7 +82,7 @@
 
       
 
-      <p class="closing">Once submitted, we'll get it published as soon as possibe.</p>
+      <p class="closing" v-if="isRecommendation">We'll get your recommendation published as soon as possible.</p>
       <div>
         <base-button  class="buttons" :showSpinner="isSaving" @click="handleSubmit">Submit</base-button>
         <base-button  class="buttons" :isSecondary="true" @click="handleCancel">Cancel</base-button>
@@ -94,6 +111,7 @@ import { useLookupStore } from '@/core/state/lookupStore'
 import { getUser, updateUser } from '@/modules/users/services/user-services'
 
 import ResourceTypeEnum from '@/modules/resources/model/resourceTypeEnum'
+import BaseCheckBox from '@/core/components/BaseCheckBox.vue'
 
 export default {
 name: "recommend-view",
@@ -103,6 +121,7 @@ components: {
   BaseButton,
   LoadingSymbol,
   ResourceImage,
+BaseCheckBox,
 },  
 beforeCreate() {
   // this is needed to avoid circular references - the recommend dialog contains the resource image which contains the dialog
@@ -117,6 +136,7 @@ data() {
     resource: null,
     errorMessage: [],
     resourceImage: "menu",
+    includeReview: false,
   }
 },
 async mounted() {
@@ -125,6 +145,7 @@ async mounted() {
   if (this.isRecommendation) {    
     // we're reviewing a new (unapproved) recommended resource
     // this.recommendation.resourceType = this.$route.params.typeId ?? 'books';
+    this.includeReview = true;
     this.recommendation.recommendedByUid = this.userStore.uid;
     this.recommendation.recommendedByName = this.userStore.displayName;
     
@@ -341,6 +362,10 @@ margin-top: 0px;
 
 .closing {
   text-align: right;
+}
+
+.review-check {
+  margin: 30px 0px 10px 0px;
 }
 @media only screen and (max-width: 600px) {
   .image {

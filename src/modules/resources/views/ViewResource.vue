@@ -45,8 +45,6 @@
 import { Resource } from "@/modules/resources/model/resource";
 import ReviewWidget from '@/modules/reviews/components/ReviewWidget.vue';
 import LoadingSymbol from '@/core/components/LoadingSymbol.vue';
-
-import { getReviewsForResource } from "@/modules/reviews/services/review-service";
 import { getRelatedResources } from '../services/resource-service';
 import { getTags } from '../services/lookup-service';
 
@@ -55,6 +53,10 @@ export default {
   name: "view-resource",
   emit: ['changeResource', 'back'],
   props: {
+    reviews: {
+      type: Array,
+      default: () => [],
+    },
     resource: {
       type: Resource,
       default: Resource.default()
@@ -74,7 +76,7 @@ export default {
       // recommendations: [],
       relatedResources: [],
       tags: [],
-      reviews: [],
+      // reviews: [],
       isLoading: true,
     }
   },
@@ -94,7 +96,7 @@ export default {
     async refreshRelatedData() {
       this.isLoading = true;
       this.relatedResources = await getRelatedResources(this.resource.id);    
-      this.reviews = await getReviewsForResource(this.resource.id, this.showUnapprovedReviews);
+      // this.reviews = await getReviewsForResource(this.resource.id, this.showUnapprovedReviews);
       this.isLoading = false;
     },
     tagDescription(key) {

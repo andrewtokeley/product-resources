@@ -1,5 +1,5 @@
 import { app } from "@/core/services/firebaseInit"
-import { writeBatch, getFirestore, doc, getDoc, setDoc } from "firebase/firestore"; 
+import { writeBatch, query, collection, limit, getDocs, where, getFirestore, doc, getDoc, setDoc } from "firebase/firestore"; 
 
 import { userConverter, userPrivateConverter } from '@/modules/users/model/user'
 // import { userConverter, userPrivateConverter } from '@/modules/users/model/user'
@@ -9,6 +9,7 @@ import FirestoreKeys from "@/core/services/firebaseKeys";
 
 export { 
   getUser,
+  getUserByUsername,
   usernameExists,
   updateUsername,
   addUser,
@@ -21,6 +22,18 @@ const COLLECTION_PRIVATE_KEY = FirestoreKeys.UsersPrivateCollection.key;
 const COLLECTION_USERNAMES_KEY = FirestoreKeys.UsernamesCollection.key;
 const DOCUMENT_PRIVATE_KEY = FirestoreKeys.UsersPrivateDocument.key;
 const db = getFirestore(app);
+
+function generateRandomSequence() {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let sequence = '';
+
+  for (let i = 0; i < 6; i++) {
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    sequence += characters.charAt(randomIndex);
+  }
+
+  return sequence;
+}
 
 /**
  * Returns whether a username is available. This does not guarantee the username will still be available when setting it for a user.
@@ -51,6 +64,18 @@ const getUser = async function(uid) {
   }
 }
 
+const getUserByUsername = async function(username) {
+  if (!username) return null;
+  const q = query(collection(db, COLLECTION_KEY)
+    .withConverter(userConverter),
+    where("username", "==", username),
+    limit(1));
+  const querySnapshot = await getDocs(q);
+  if (querySnapshot.size == 1) {
+    return new User(querySnapshot.docs[0].data());
+  }
+  return null;
+}
 /**
  * Adds a new user record to the datastore, including private data. 
  * Only authenticated users can call this and only with their authUser instance.
@@ -73,8 +98,20 @@ const addUser = async function(authUser) {
   
   batch.set(ref, user);
   batch.set(refPrivate, userPrivate);
+
   await batch.commit();
 
+  // now create update the user record with a unique username
+  let retry = true;
+  let username = generateRandomSequence();
+  while (retry) {
+    try {
+      updateUsername(authUser.uid, username);
+      retry = false;
+    } catch {
+      retry = true;
+    }
+  }
   return true;
 }
 
@@ -132,7 +169,7 @@ const updateUsername = async function(uid, username) {
       // no change
       return;
     }
-    console.log('updating username');
+    
     // update the username on the user document
     const prevUsername = user.username;
     const ref = doc(db, COLLECTION_KEY, uid);

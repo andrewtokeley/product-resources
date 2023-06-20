@@ -98,9 +98,14 @@ export default {
       const store = useUserStore();
       if (this.isDirty) {
         this.isSaving = true;
+        // update the user, including the username
         await updateUser(this.user);
+        
+        // update user store in case it changed
         store.setDisplayName(this.user.displayName);
         store.setJobTitle(this.user.jobTitle);
+        store.setUsername(this.user.username);
+
         this.isSaving = false;
         this.saved = true;
       }

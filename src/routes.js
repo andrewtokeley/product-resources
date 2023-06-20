@@ -24,7 +24,7 @@ export default [
   // profile page
   {name: 'user-profile', path: '/profile', component:UserProfile, meta: { requiresAuth: true, analytics_title: 'User Profile', hideNavigation: true}},
 
-  {name: 'user-review', path: '/user/:userUid', component:UserReviews, meta: {analytics_title: 'User Review', hideNavigation: false }},
+  {name: 'user-review', path: '/:username', component:UserReviews, meta: {analytics_title: 'User Review', hideNavigation: false }},
 
   // search across all resources
   {name: 'search', path: '/search/:searchTerm', component:Search, meta: { analytics_title: 'Search Keyword' }},

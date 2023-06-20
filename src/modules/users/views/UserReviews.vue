@@ -4,12 +4,10 @@
     <div v-else class="content">
       <h1 class="giant">Recommendations</h1>
       <h2><span>by </span>{{user?.displayName}}</h2>
-
+      
       <div v-if="isOwner">
         <p>Let people know what you recommend!</p>
         <base-button iconName="share">Share</base-button>
-        <!-- <p>Summary to introduce yourself and your recommendations.</p>
-        <base-multiline-text v-model="user.summary" @blur="saveUser"></base-multiline-text> -->
       </div>
       <p v-else>{{user?.summary}}</p>
 
@@ -30,7 +28,7 @@
 
 <script>
 import { getReviewsByUser } from '@/modules/reviews/services/review-service'
-import { getUser, updateUser } from '@/modules/users/services/user-services';
+import { getUserByUsername, updateUser } from '@/modules/users/services/user-services';
 import LoadingSymbol from '@/core/components/LoadingSymbol.vue';
 import ResourceDetail from '@/modules/resources/views/ResourceDetail.vue';
 import ReviewWithImage from '@/modules/reviews/components/ReviewWithImage.vue';
@@ -52,28 +50,27 @@ export default {
     }
   },
   computed: { 
-    userUid() {
-      return this.$route.params.userUid;
+    username() {
+      return this.$route.params.username;
     },
     userStore() {
       return useUserStore();
     },
     isOwner() {
       if (!this.user) return false;
-      return (this.userStore.uid == this.user.uid);
+      return (this.userStore.username == this.username);
     },
   },
 
   async mounted() {
-    if (!this.userUid) {
+    if (!this.username) {
       this.$router.push('/');
+    } else {
+      this.isLoading = true;
+      this.user = await getUserByUsername(this.username);
+      this.reviews = await getReviewsByUser(this.user.uid);
+      this.isLoading = false;
     }
-    this.isLoading = true;
-    if (this.userUid) {
-      this.reviews = await getReviewsByUser(this.userUid);  
-      this.user = await getUser(this.userUid);
-    }
-    this.isLoading = false;
   },
 
   methods: {

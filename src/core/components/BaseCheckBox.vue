@@ -163,12 +163,10 @@ export default {
   display: block;
 }
 
-
-
-
-
 .base-check-box__label {
   color: var(--prr-darkgrey);
   font-size: var(--prr-font-size-normal);
+  
+  font-weight: normal;
 }
 </style>

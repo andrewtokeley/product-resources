@@ -48,13 +48,13 @@ export default {
   components: { BaseInput, BaseIcon },  
 
   mounted() {
-    this.baseUrl = window.location.origin;
+    this.baseUrl = window.location.origin + "/";
     this.currentUsername = this.modelValue;
   },
 
   computed: {
     recommendUrl() {
-      return this.baseUrl + '/' + this.value;
+      return this.baseUrl + this.value;
     },
     value: {
       get() {
@@ -69,12 +69,12 @@ export default {
   methods: {
     handleCopy() {
       navigator.clipboard.writeText(this.recommendUrl);
-      this.copyTooltip = "Copied!"
+      this.copyTooltip = "Copied to clipboard";
       // wait a couple of seconds and clear tooltip
       const vm = this;
       setTimeout(function () {
         vm.copyTooltip = null;
-      },1000);
+      },2000);
     },
     validateUsername(username) {
       const vm = this;

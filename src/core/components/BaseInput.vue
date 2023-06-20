@@ -12,10 +12,11 @@
         :placeholder="_options.placeholder"
         class="base-input__input" 
         :readonly="_options.readOnly"
+        :disabled="disabled"
         :class="{ 
           'base-input__input--borderless': _options.borderless,
           'base-input__input--is-centred': _options.centred,
-          'base-input__input--has-hover-effect': _options.hoverEffect, 
+          'base-input__input--has-hover-effect': _options.hoverEffect && !disabled, 
           'base-input__input--has-underline-effect': _options.underlineEffect, 
           'base-input__input--is-large': _options.large, 
           'base-input__input--is-blue': _options.blue, 
@@ -43,6 +44,10 @@ export default defineComponent({
     errorMessage: {
       type: String,
       default: ''
+    },
+    disabled: {
+      type: Boolean,
+      default: false,
     },
     modelValue: String,
     options: Object,
@@ -201,6 +206,11 @@ export default defineComponent({
   outline: none;
   padding: 0px 10px;
   /* box-sizing: border-box; */
+}
+
+.base-input__input:disabled {
+  color: var(--prr-mediumgrey);
+  border-bottom-color: var(--prr-extralightgrey);
 }
 
 .base-input__input--borderless {

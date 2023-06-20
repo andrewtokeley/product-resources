@@ -15,8 +15,9 @@
   >
     <div>
       <view-resource
-        v-if="!isLoading"
+        v-if="!isLoading && reviews"
         :resource="viewResource"
+        :reviews="reviews"
         :showUnapprovedReviews="showUnapprovedReviews"
         @back="handleBackButton"
         @changeResource="handleChangeResource">
@@ -32,6 +33,7 @@ import { cloneDeep } from 'lodash';
 import { useUserStore } from '@/core/state/userStore'
 import { useLookupStore } from '@/core/state/lookupStore'
 import { getResource } from '../services/resource-service';
+import { getReviewsForResource } from '@/modules/reviews/services/review-service';
 import { Resource } from "@/modules/resources/model/resource"
 import { ref } from 'vue';
 import { logResourceSelect } from '@/core/services/analytics';
@@ -66,20 +68,31 @@ export default {
   data() {
     return {
       viewResource: Resource.default(),
+      reviews: null,
       showBackButton: false,
       isLoading: true,
     }
   },
 
   
-  mounted() {
+  async mounted() {
     this.isLoading = true;
     this.viewResource = cloneDeep(this.resource);
+    this.reviews = await getReviewsForResource(this.resource.id, this.showUnapprovedReviews);
     this.updateHistory();
     this.isLoading = false;
   },
 
   computed: { 
+    hasReviewed() {
+      if (this.reviews) {
+        const reviewed = this.reviews.filter( r => r.reviewedByUid == this.userStore.uid);
+        return reviewed.length != 0;
+      } else {
+        return true; // assume they have reviewed so they can't review until we know for sure
+      }
+      
+    },
     titleIcon() {
       const type = this.lookupStore.resourceTypes.find ( r => r.key == this.viewResource.resourceType);
       if (type) {
@@ -105,27 +118,9 @@ export default {
           isPrimary: true,
         },
         {
-          id: 'addToProfile',
-          title: "Add to Profile...",
-          isSecondary: true,
-          align: 'left',
-          type: 'grouped',
-          buttonGroupVerticalAlign: 'top',
-          buttonGroupHorizontalAlign: 'left',
-          buttonGroup: [
-            { id: 0, text: "Recommend"},
-            { id: 1, text: "Recommend & Review"},
-          ],
-        },
-        {
           id: 'review',
-          title: "Review",
-          isSecondary: true,
-          align: 'left',
-        },
-        {
-          id: 'recommend',
-          title: "Add",
+          title: "Recommend...",
+          show: !this.hasReviewed,
           isSecondary: true,
           align: 'left',
         },
@@ -152,7 +147,7 @@ export default {
           window.open(this.viewResource.resourceUrl, '_blank');
         }
       } else if (action.id == 'review') {
-        this.$router.push(`/review/${this.viewResource.id}`);
+      this.$router.push(`/review/${this.viewResource.id}`);
       }
     },
 

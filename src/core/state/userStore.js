@@ -8,6 +8,7 @@ export const useUserStore = defineStore({
     isLoggedIn: false,
     isAdmin: false,
     displayName: null,
+    username: null,
     jobTitle: null,
     email: null,
   }),
@@ -19,6 +20,10 @@ export const useUserStore = defineStore({
 
     async setJobTitle(jobTitle) {
       this.jobTitle = jobTitle;
+    },
+
+    async setUserName(username) {
+      this.username = username;
     },
 
     async updateAuthUser(authUser) {
@@ -33,9 +38,9 @@ export const useUserStore = defineStore({
 
         // check if they're an admin
         const token = await authUser.getIdTokenResult();
-        this.isAdmin = token.claims.admin ?? false
+        this.isAdmin = token.claims.admin ?? false;
 
-        // see if they've overridden any authuser properties (like displayName)
+        // see if they've overridden any authUser properties (like displayName)
         let dbUser = await getUser(authUser.uid);
         if (!dbUser) {
           // default the displayName to the authUser
@@ -44,6 +49,7 @@ export const useUserStore = defineStore({
         } else {
           this.displayName = dbUser.displayName;
           this.jobTitle = dbUser.jobTitle;
+          this.username = dbUser.username;
         }
 
         // record last logged in 
@@ -57,7 +63,7 @@ export const useUserStore = defineStore({
         this.displayName = null;
         this.jobTitle = null;
         this.email = null;
-        
+        this.username = null;        
       }
       
     },
