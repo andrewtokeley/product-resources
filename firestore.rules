@@ -2,22 +2,95 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
+    function isAuthenticated() {
+    	return request.auth != null
+    }
+    
+    function isAuthenticatedWith(uid) {
+    	return request.auth != null && request.auth.uid == uid
+    }
+    
+    // Usernames collections helper methods
+    
+    // Returns a username document, after current batch has been committed
+    function getUsernameAfter(username) {
+      return getAfter(/databases/$(database)/documents/usernames/$(username))
+    }
+
+    function getUsernameBefore(username) {
+      return get(/databases/$(database)/documents/usernames/$(username))
+    }
+
+    function usernameExistsAfter(username) {
+      return existsAfter(/databases/$(database)/documents/usernames/$(username))
+    }
+
+    function usernameExistsBefore(username) {
+      return exists(/databases/$(database)/documents/usernames/$(username))
+    }
+    
+    // User collection helper methods
+    
+    function getUserAfter(id) {
+      return getAfter(/databases/$(database)/documents/users/$(id))
+    }
+
+    function getUserBefore(id) {
+      return get(/databases/$(database)/documents/users/$(id))
+    }
+
+    function userExistsAfter(id) {
+      return existsAfter(/databases/$(database)/documents/users/$(id))
+    }
+    
+    // Only used for add admin users
     match /tempoAssignClaim/{tempoDoc} {
       allow read, write: if false;
     }
 
-    // Anyone can read a users public profile
-    // Only authenticated users can only write their own record
-	  match /users/{uid} {
-  		allow write: if request.auth != null && request.auth.uid == uid;
-      allow read: if true; 
+    match /users/{uid} {
+    	
+      // Anyone can read user records
+    	allow read: if true; 
       
-      // Only authenticated users can read/write their own private data
+    	// Can only update/create if requesting user is authenticated and there is
+    	// a matching username/uid document in the usernames collection (or no record)
+    	allow create, update: if
+      	isAuthenticatedWith(uid) &&
+	      (getUsernameAfter(getUserAfter(uid).data.username).data.uid == uid ||
+        !usernameExistsBefore(getUserAfter(uid).data.username));
+
+			// Can only delete if, after batch, there is no username document in usernames
+			// collection (so that it's free for others to use).
+  		allow delete: if
+      	isAuthenticatedWith(uid) &&
+        !usernameExistsAfter(getUserBefore(uid).data.username);
+        
+			// Only authenticated users can read/write their own private data
       match /private/{secure} {
         allow read, write: if request.auth != null && request.auth.uid == uid;
       }
     }
+		
+    match /usernames/{username} {
+    
+    	// Anyone can read usernames (to see if they're available for example)
+    	allow read: if true;
+      
+      // Can only create a username record, if its uid refers to a user
+      // that has (after batch) the same username.
+      allow create: if
+      	isAuthenticated() &&
+        getUserAfter(getUsernameAfter(username).data.uid).data.username == username;
 
+			// Can only delete if the matching user record is also deleted, or the matching
+      // user has a different username.
+      allow delete: if 
+      	isAuthenticated() &&
+        (!userExistsAfter(getUsernameBefore(username).data.uid) || 
+        getUserAfter(getUsernameBefore(username).data.uid).data.username != username);
+    }
+    
     // Anyone can read all lookup data
     // Only admins can write
     match /lookups/{document=**} {
@@ -39,11 +112,14 @@ service cloud.firestore {
       allow write: if request.auth != null;
     }
 
-    // Anyone can write a recommendation
-    // Only admins can read them    
+    // Anyone can read, authenticated users can create reviews, but can ony edit/delete
+    // your own.
     match /reviews/{recommendation} {
-      allow read: if request.auth.token.admin == true;
-      allow write: if request.auth != null;
+      allow read: if true;
+      allow create: if request.auth != null;
+      allow update, delete: if 
+      	isAuthenticatedWith(resource.data.reviewedByUid) ||
+        request.auth.token.admin == true;
     }
   }
 }

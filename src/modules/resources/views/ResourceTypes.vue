@@ -27,6 +27,8 @@
       </template>
       <div v-if="filteredSearchResults.length == 0 && !isLoading" class="noresults">
         <p>Doesn't look like we've got any <b>{{ this.title.toLowerCase() }}</b> under the category <b>{{ selectedTagName }}</b>.</p>
+        <p>Want to recommend something?</p>
+        <base-button @click="$router.push('/recommend')" >Recommend...</base-button>
       </div>
       
     </div>
@@ -48,6 +50,7 @@ import { useLookupStore } from '@/core/state/lookupStore';
 import { ref } from 'vue'
 import ResourceTypeEnum from '../model/resourceTypeEnum';
 import { logPageViewFromRouteLocation } from '@/core/services/analytics';
+import BaseButton from '@/core/components/BaseButton.vue';
 
 
 export default {
@@ -58,6 +61,7 @@ export default {
     BookGroup,
     ResourceDetail,
     TagSelector,
+    BaseButton,
   },
 
   setup() {

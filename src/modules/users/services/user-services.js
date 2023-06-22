@@ -99,19 +99,25 @@ const addUser = async function(authUser) {
   batch.set(ref, user);
   batch.set(refPrivate, userPrivate);
 
-  await batch.commit();
-
-  // now create update the user record with a unique username
-  let retry = true;
-  let username = generateRandomSequence();
-  while (retry) {
-    try {
-      updateUsername(authUser.uid, username);
-      retry = false;
-    } catch {
-      retry = true;
-    }
+  const username = generateRandomSequence();
+  let exists = true;
+  let attempts = 0;
+  while (exists && attempts < 3) {
+    exists = usernameExists(username);
+    attempts += 1;
   }
+
+  if (!exists) {
+    // abort
+    return false;
+  }
+
+  // set the username 
+  batch.update(ref, { username: username });
+  const newUsernameRef = doc(db, COLLECTION_USERNAMES_KEY, username);
+  batch.set(newUsernameRef, { uid: authUser.uid });
+
+  await batch.commit();
   return true;
 }
 

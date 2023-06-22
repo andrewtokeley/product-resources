@@ -1,11 +1,12 @@
 <template>
   <div class="username-input">
+    
     <span class="label">{{baseUrl}}</span>
     <base-input 
       v-model="value"
       id="username"
       class="input" 
-      :options="{inlineErrors: true}"
+      :options="options"
       :errorMessage="error"
       :validation="{ delay: 300, callback: validateUsername}"
       >
@@ -26,6 +27,7 @@
 import BaseInput from '@/core/components/BaseInput.vue'
 import { usernameExists } from '../services/user-services';
 import BaseIcon from '@/core/components/BaseIcon.vue';
+import { useUserStore } from '@/core/state/userStore';
 
 export default {
   name: 'username-input',
@@ -40,7 +42,6 @@ export default {
     return {
       baseUrl: String,
       error: null,
-      currentUsername: null,
       copyTooltip: null,
     }
   },
@@ -49,12 +50,14 @@ export default {
 
   mounted() {
     this.baseUrl = window.location.origin + "/";
-    this.currentUsername = this.modelValue;
   },
 
   computed: {
     recommendUrl() {
       return this.baseUrl + this.value;
+    },
+    userStore() {
+      return useUserStore();
     },
     value: {
       get() {
@@ -76,11 +79,11 @@ export default {
         vm.copyTooltip = null;
       },2000);
     },
+
     validateUsername(username) {
       const vm = this;
       return new Promise( (resolve) => {
-        if (username == vm.currentUsername) {
-          console.log('smaem')
+        if (username == vm.userStore.username) {
           resolve({ result: true});
           this.$emit('valid');
         } else { 

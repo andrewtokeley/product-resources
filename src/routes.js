@@ -12,7 +12,7 @@ import RecommendationView from './modules/recommendations/views/RecommendationVi
 import RecommendationConfirmation from '@/modules/recommendations/views/RecommendationConfirmation';
 import TermsOfService from '@/modules/about/views/TermsOfService';
 import PrivacyView from '@/modules/about/views/PrivacyView';
-import UserReviews from '@/modules/users/views/UserReviews';
+import UserReviews from '@/modules/reviews/views/UserReviews';
 
 export default [
   {path: '/login', component:Login, meta: { hideHeader: false, analytics_title: 'Login' } },
@@ -24,7 +24,7 @@ export default [
   // profile page
   {name: 'user-profile', path: '/profile', component:UserProfile, meta: { requiresAuth: true, analytics_title: 'User Profile', hideNavigation: true}},
 
-  {name: 'user-review', path: '/:username', component:UserReviews, meta: {analytics_title: 'User Review', hideNavigation: false }},
+  {name: 'user-review', path: '/:usernameOrUid', component:UserReviews, meta: {analytics_title: 'User Review', hideNavigation: false }},
 
   // search across all resources
   {name: 'search', path: '/search/:searchTerm', component:Search, meta: { analytics_title: 'Search Keyword' }},

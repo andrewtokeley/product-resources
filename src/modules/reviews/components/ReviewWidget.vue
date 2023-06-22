@@ -3,8 +3,7 @@
     <p class="draft-heading" v-if="!review.approved">DRAFT</p>
     <p v-if="review.reason" class="quote" :class="{ short: short}">"{{ review.reason }}"</p>
     <div v-if="showBy" class="by">
-      <router-link v-if="username" class="link" :to="`/${username}`">{{ review.reviewedByName }}</router-link>
-      <span v-else class="link">{{ review.reviewedByName ?? 'Anon'}}</span>
+      <router-link class="link" :to="`/${review.reviewedByUid}?isUID=true`">{{ review.reviewedByName }}</router-link>
       <div class="jobtitle" v-if="review.reviewedByJobTitle">{{ review.reviewedByJobTitle }}</div>
     </div>
     
@@ -13,7 +12,7 @@
 
 <script>
 import { Review } from "@/modules/reviews/model/review";
-import { getUser } from '@/modules/users/services/user-services';
+// import { getUser } from '@/modules/users/services/user-services';
 
 export default {
   name: "review-widget",
@@ -38,12 +37,12 @@ export default {
     }
   },
 
-  async mounted() {
-    const vm = this;
-    getUser(this.review.reviewedByUid).then( (user) => {
-      vm.username = user.username;
-    });    
-  },
+  // async mounted() {
+  //   const vm = this;
+  //   getUser(this.review.reviewedByUid).then( (user) => {
+  //     vm.username = user.username;
+  //   });    
+  // },
   methods: {
     handleUserClick(userUid) {
       this.$router.push(`/user/${userUid}`);

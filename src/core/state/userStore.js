@@ -22,7 +22,7 @@ export const useUserStore = defineStore({
       this.jobTitle = jobTitle;
     },
 
-    async setUserName(username) {
+    async setUsername(username) {
       this.username = username;
     },
 

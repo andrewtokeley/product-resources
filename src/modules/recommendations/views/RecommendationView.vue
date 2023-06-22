@@ -3,39 +3,28 @@
     <loading-symbol v-if="isLoading"></loading-symbol>
     <div v-else class="content" >
       
+    <template v-if="isRecommendation">
       <h1 class="giant">RECOMMEND</h1>
-      <h2>for the community, by the community</h2>
-    <!-- <template v-if="isRecommendation">
-      <h1 class="giant">RECOMMEND</h1>
-      <h2>for the community, by the community</h2>
     </template>
     <template v-else>
       <h1 class="giant">REVIEW</h1>
-      <h2>for the community, by the community</h2>
-    </template> -->
+    </template>
+    <h2>for the community, by the community</h2>
 
-      <div v-if="isRecommendation">
-        <div class="label tight">{{  whereText }}</div> 
-        <base-input 
-          v-model="recommendation.resourceUrl" 
-          @blur="validateRecommendation('resourceUrl')"
-          :hasFocus="true"
-          :errorMessage="errorMessage['resourceUrl']"
-          :options="{ placeholder: 'Link', readOnly: isSaving, inlineErrors: false }">
-        </base-input>
-      </div>
+    <div v-if="isRecommendation">
+      <div class="label tight">{{  whereText }}</div> 
+      <base-input 
+        v-model="recommendation.resourceUrl" 
+        @blur="validateRecommendation('resourceUrl')"
+        :hasFocus="true"
+        :errorMessage="errorMessage['resourceUrl']"
+        :options="{ placeholder: 'Link', readOnly: isSaving, inlineErrors: false }">
+      </base-input>
+    </div>
       
       <div class="review">
-        <!-- <h2 v-if="resource"><span class="material-symbols-outlined">{{resourceImage}}</span>{{ resource.displayName }}</h2> -->
-        <template v-if="!isRecommendation">
-          <p>Recommending this resource adds it to <router-link :to="`/${userStore.username}`">your profile</router-link>.</p>
-          <base-check-box 
-            class="review-check"
-            :leftAlign="true" 
-            v-model="includeReview"
-            label="Do you want to also include a review?">
-          </base-check-box>
-        </template>
+        <p v-if="!isRecommendation">Leaving a review for this resource will add it to <router-link :to="`/${userStore.username}`">your profile</router-link>.</p>
+        
         <resource-image v-if="resource" class="image" :resource="resource" :showTitle="true"></resource-image>
         <div class="label tight" v-if="isRecommendation">We think it's important for all new recommendations to include a public review.</div>
         <div class="textarea-wrap">
@@ -44,22 +33,20 @@
             :validation="{ delay: 200, callback: validateReviewReason}"
             :hasFocus="!isRecommendation"
             :errorMessage="errorMessage['reason']"
-            :disabled="isSaving || !includeReview"
-            :options="{ numberOfLines: 5, 
+            :disabled="isSaving"
+            :options="{ numberOfLines: 10, 
               maximumLength: 500, 
               inlineErrors: false,
               showCharacterCount: true, 
               placeholder: 'Your Review'}">
           </base-multiline-text>
-          <div class="label tight">The name and job title that will appear with your review</div>
+          <!-- <div class="label tight">The name and job title that will appear with your review</div>
           <base-input 
-            v-model="review.reviewedByName"
-            :disabled="!includeReview">
+            v-model="review.reviewedByName">
           </base-input>
           <base-input 
-            v-model="review.reviewedByJobTitle"
-            :disabled="!includeReview">
-          </base-input>
+            v-model="review.reviewedByJobTitle">
+          </base-input> -->
         </div>
       </div>
       
@@ -111,7 +98,6 @@ import { useLookupStore } from '@/core/state/lookupStore'
 import { getUser, updateUser } from '@/modules/users/services/user-services'
 
 import ResourceTypeEnum from '@/modules/resources/model/resourceTypeEnum'
-import BaseCheckBox from '@/core/components/BaseCheckBox.vue'
 
 export default {
 name: "recommend-view",
@@ -121,7 +107,6 @@ components: {
   BaseButton,
   LoadingSymbol,
   ResourceImage,
-BaseCheckBox,
 },  
 beforeCreate() {
   // this is needed to avoid circular references - the recommend dialog contains the resource image which contains the dialog

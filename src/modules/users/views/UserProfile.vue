@@ -2,28 +2,30 @@
   <div class="user-profile">
     <h1 class="giant">Profile</h1>
     
-    <label>Your Link</label>
-    <p>This is your own personal link to your recommended resources.</p>
+    <label>Link to Your Reviews</label>
+    <div class="label">This is your own personal link to share your reviews.</div>
     
     <username-input 
       v-model="user.username"
       @error="invalidUserName = true"
       @valid="invalidUserName = false"
-      :options="{ placeholder: 'user name'}">
+      :options="{
+        inlineErrors: true, 
+        placeholder: 'user name'}">
     </username-input>
     
     <label>Display Name</label>
+    <div class="label">This name will be displayed with your reviews and on your recommendations page.</div>
     <base-input 
       v-model="user.displayName" 
       :errorMessage="errorMessage['displayName']" 
       @input="validate('displayName')"
       :options="{placeholder: 'Display name'}">
     </base-input>
-    <div class="label">This name will be displayed with your reviews and on your recommendations page.</div>
 
     <label>Job Title</label>
-    <base-input v-model="user.jobTitle" :errorMessage="errorMessage['jobTitle']" @blur="validate('jobTitle')" :options="{placeholder: 'Job title'}"></base-input>
     <div class="label">Optional job title, displayed with your reviews.</div>
+    <base-input v-model="user.jobTitle" :errorMessage="errorMessage['jobTitle']" @blur="validate('jobTitle')" :options="{placeholder: 'Job title'}"></base-input>
 
     <div class="actions">
       <base-button :isSecondary="true" @click="$router.go(-1)">Close</base-button>
@@ -67,16 +69,16 @@ export default {
     },
     isDirty() {
       const dirty = 
-        this.user.displayName != this.orginalUser.displayName || 
-        this.user.jobTitle != this.orginalUser.jobTitle ||
-        this.user.username != this.orginalUser.username 
+        this.user.displayName != this.originalUser.displayName || 
+        this.user.jobTitle != this.originalUser.jobTitle ||
+        this.user.username != this.originalUser.username 
       return dirty;
     },
   },
 
   async mounted() {
     this.user = await getUser(this.store.uid);
-    this.orginalUser = new User(this.user);
+    this.originalUser = new User(this.user);
   },
   
   methods: {
@@ -106,10 +108,12 @@ export default {
         store.setJobTitle(this.user.jobTitle);
         store.setUsername(this.user.username);
 
+        // store the current state
+        this.originalUser = new User(this.user);
+
         this.isSaving = false;
-        this.saved = true;
       }
-      
+      this.saved = true;
       
     }
   },
@@ -118,6 +122,9 @@ export default {
 
 <style scoped>
 
+.label {
+  margin-bottom: 10px;
+}
 .actions {
   margin-top: 30px;
   float: right;

@@ -11,7 +11,7 @@
       </div>
       <div v-if="resource.tags && resource.tags.length > 0" class="tagGroup">
         <span class="label">Categories: </span>
-        <a v-for="tag in resource.tags" :key="tag.key" :href="`/tag/${tag}`">{{ tagDescription(tag) }}</a>
+        <router-link v-for="tag in resource.tags" :key="tag.key" :to="`/tag/${tag}`">{{ tagDescription(tag) }}</router-link>
       </div>
     </div>
     <div class="topblock" :class="{ tall: isImageTall, short : !isImageTall }" >

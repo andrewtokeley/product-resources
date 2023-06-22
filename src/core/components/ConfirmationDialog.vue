@@ -1,5 +1,10 @@
 <template>
-  <modal-dialog :title="heading" @close="$emit('close')" :buttonActions="buttonActions" @buttonClick="handleButtonClick" >
+  <modal-dialog 
+    :title="heading" 
+    :subTitle="subTitle"
+    :buttonActions="buttonActions" 
+    @close="$emit('close')" 
+    @buttonClick="handleButtonClick" >
     <p>{{ message }}</p>
   </modal-dialog>
 </template>
@@ -18,6 +23,10 @@ export default {
     heading: {
       type: String,
       default: ''
+    },
+    subTitle: {
+      type: String,
+      default: null
     },
     message: {
       type: String,

@@ -1,14 +1,19 @@
 <template>
-  <div class="review-with-image" @click="$emit('click', resource)">
+  <div class="review-with-image" >
     <div class="image">
       <resource-image 
         v-if="resource" 
         :show-title="true"
-        :resource="resource">
+        :resource="resource"
+        @click="$emit('click', resource)">
       </resource-image>
     </div>
     <div class="review">
       <review-widget :showBy="false" class="quote" :review="review"></review-widget>
+      <div v-if="isOwner" class="action-links">
+        <base-link-button @click.stop="handleEdit">Edit</base-link-button>
+        <base-link-button @click.stop="handleDelete">Delete</base-link-button>
+      </div>
     </div>
   </div>
 </template>
@@ -16,21 +21,23 @@
 <script>
 import ResourceImage from '@/modules/resources/components/ResourceImage.vue';
 import ReviewWidget from '@/modules/reviews/components/ReviewWidget.vue'
-
+import BaseLinkButton from '@/core/components/BaseLinkButton.vue';
 import { Review } from '@/modules/reviews/model/review';
 import { getResource } from '@/modules/resources/services/resource-service';
+import { useUserStore } from '@/core/state/userStore';
 
 export default {
-  components: { ReviewWidget, ResourceImage },
+  components: { ReviewWidget, ResourceImage, BaseLinkButton },
 
   name: 'feature-card',
   
-  emits: ['click'],
+  emits: ['click', 'edit', 'delete'],
   
   data() { 
     return { 
       isLoading: true,
       resource: null,
+      isOwner: false,
     } 
   },  
 
@@ -49,8 +56,18 @@ export default {
     this.isLoading = true;
     this.resource = await getResource(this.review.resourceId);
     this.isLoading = false;
+    const userStore = useUserStore();
+    this.isOwner = userStore.uid == this.review.reviewedByUid;
   },
 
+  methods: {
+    handleEdit() {
+      this.$emit('edit', this.review);
+    },
+    handleDelete() {
+      this.$emit('delete', this.review);
+    }
+  }
 }
 
 </script>
@@ -64,16 +81,18 @@ export default {
   justify-content: flex-start;
   gap: 10px;
   overflow: hidden;
-  cursor: pointer;
   margin-top: 20px;
 }
 
 .image {
   width: 20%;
   min-width:180px;
+  cursor: pointer;
 }
 .review {
-  /* max-width:700px; */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   width: 80%;
 }
 .quote {
@@ -105,6 +124,16 @@ h2 {
   text-overflow: ellipsis;
 }
 
+.action-links {
+  visibility: hidden;
+}
+.review-with-image:hover .action-links {
+  visibility: visible;
+}
+.action-links button {
+  margin: 0px 10px;
+}
+
 @media only screen and (max-width: 600px) {
   .review-with-image {
     flex-direction: column;
@@ -116,6 +145,11 @@ h2 {
     width:100%;
     justify-content: center;
   }
+
+  .action-links {
+    visibility: visible;
+  }
+
 }
 
 </style>

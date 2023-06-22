@@ -12,14 +12,14 @@
           <div class="context-menu__row__subHeading" v-if="menuItem.subHeading">{{ menuItem.subHeading }}</div>
           <hr class="divider short"/>
         </div>
-        <a v-else
+        <router-link v-else-if="menuItem.link"
             class="context-menu__row"
             :class="{
                 'context-menu__row--isCentred': menuItem.isFullWidth,
                 'context-menu__row--isLabel': menuItem.isLabel ?? false,
                 'context-menu__row--isDisabled': !(menuItem.isEnabled ?? true),
             }"
-            :href="menuItem.link">
+            :to="menuItem.link">
           <div v-if="!menuItem.isFullWidth" class="context-menu__row__icon" >
             <badge-count v-if="menuItem.badgeCount" class="badge"></badge-count>
             <span class="material-symbols-outlined">
@@ -40,7 +40,7 @@
               {{ menuItem.subText }}
             </div>
           </div>
-        </a>
+        </router-link>
     </template>
   </div>
 </template>

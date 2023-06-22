@@ -165,9 +165,12 @@ export default {
 }
 
 </style>
-<style scoped>
+<style >
 .splide__pagination__page.is-active {
   background: var(--prr-green) !important;
+}
+.splide__list {
+  margin-bottom: 30px!important;
 }
 </style>
 <style scoped>

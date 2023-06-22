@@ -119,7 +119,7 @@ export default {
         },
         {
           id: 'review',
-          title: "Recommend...",
+          title: "Review...",
           show: !this.hasReviewed,
           isSecondary: true,
           align: 'left',

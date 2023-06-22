@@ -239,10 +239,9 @@ export default {
             link: '/profile',
           },
           {
-            name: "Your Recommendations",
-            iconName: "account_circle",
+            name: "Your Reviews",
             show: this.useUserStore.isLoggedIn,
-            link: `/user/${this.useUserStore.uid}`,
+            link: `/${this.useUserStore.username}`,
           },
           {
             isDivider: true,
