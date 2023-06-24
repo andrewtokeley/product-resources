@@ -1,5 +1,5 @@
 import "../src/main.css"
-import { createApp } from 'vue'
+import { createApp, nextTick } from 'vue'
 import routes from './routes'
 import { createRouter, createWebHistory } from "vue-router"
 import App from './App.vue'
@@ -40,6 +40,17 @@ router.beforeEach((to) => {
   // just continue to the destination
   return true;
 
+});
+
+router.afterEach((to) => {
+  nextTick(() => {
+    let title = "Top Product Resources"
+    const sub = to.meta.page_title
+    if (sub) {
+      title += " - " + sub;
+    }
+    document.title = title;
+  });
 });
 
 let app;

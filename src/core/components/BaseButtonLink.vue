@@ -1,25 +1,25 @@
 <template>
-  <button
+  <router-link
     :disabled="disabled"
-    class="base-button"
+    class="base-button-link"
     :class="{
-      'base-button--danger': isDestructive,
-      'base-button--secondary': isSecondary,
-      'base-button--spinning': showSpinner,
-      'base-button--transparent': isTransparent,
+      'base-button-link--danger': isDestructive,
+      'base-button-link--secondary': isSecondary,
+      'base-button-link--spinning': showSpinner,
+      'base-button-link--transparent': isTransparent,
       }"
   >
-      <span class="base-button__text">
+      <span class="base-button-link__text">
         <slot></slot>
         <span v-show="iconName" class="material-symbols-outlined">{{ iconName }}</span>
       </span>
-    </button>
+    </router-link>
 </template>
 
 <script>
 
 export default { 
-  name: "base-button",
+  name: "base-button-link",
   props: {
     disabled: {
       type: Boolean,
@@ -52,7 +52,7 @@ export default {
 
 <style scoped>
 
-.base-button {
+.base-button-link {
   position: relative;
   display: inline-block;
 	padding: 0px 20px;
@@ -72,11 +72,11 @@ export default {
   transition: background 400ms;
   border: 1px transparent solid;
 }
-.base-button:hover {
+.base-button-link:hover {
   cursor: pointer;
 }
 
-.base-button:disabled {
+.base-button-link:disabled {
   cursor: default;
   background: white;
   color: var(--prr-mediumgrey);
@@ -84,34 +84,34 @@ export default {
 }
 
 /* TRANSPARENT */
-.base-button--transparent {
+.base-button-link--transparent {
   background: transparent;
   color: var(--prr-blue);
   border: 1px transparent solid;
 }
-.base-button--secondary:hover {
+.base-button-link--secondary:hover {
   background: transparent;
 }
 
 /* SECONDARY */
-.base-button--secondary {
+.base-button-link--secondary {
   background: white;
   color: var(--prr-blue);
   border: 1px var(--prr-lightgrey) solid;
 }
-.base-button--secondary:hover {
+.base-button-link--secondary:hover {
   background: var(--prr-lightgrey);
 }
 
 /* DANGER */
-.base-button--danger {
+.base-button-link--danger {
   background: var(--prr-red);
   color: white;
   border: 1px var(--prr-red) solid;
 }
 
 /* SPINNER */
-.base-button--spinning::after {
+.base-button-link--spinning::after {
     content: "";
     position: absolute;
     width: 16px;
@@ -127,16 +127,17 @@ export default {
     animation: button-loading-spinner 1s ease infinite;
 }
 
-.base-button--spinning .base-button__text {
+.base-button-link--spinning .base-button-link__text {
   visibility: hidden;
   opacity: 0;
 }
 
-.base-button__text {
+.base-button-link__text {
   display:flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
+  height: 100%;
 }
 
 .material-symbols-outlined {
@@ -154,7 +155,7 @@ export default {
 
 @media only screen and (max-width: 600px) {
 
-  .base-button {
+  .base-button-link {
     min-width: 100px;
   }
 }

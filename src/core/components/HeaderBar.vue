@@ -5,12 +5,12 @@
         <img class="header-image" src="@/assets/logo-long.svg"/>
       </router-link>
       <div class="right-top-nav">
-        <router-link class="desktop" to="/about">About</router-link>
+        <router-link class="nav-link desktop" to="/about">About</router-link>
         <div v-if="useUserStore.isLoggedIn" class="icon">
           <base-icon :menu="menuOptions">account_circle</base-icon>
           <badge-count v-if="todoCount > 0 && useUserStore.isAdmin" class="badge" :count="todoCount"></badge-count>
         </div>
-        <router-link v-else to="/login">Sign In</router-link>
+        <router-link v-else class="nav-link" to="/login">Sign In</router-link>
       </div>
     </div>
     <div v-if="showNavigation" class="nav">
@@ -20,6 +20,7 @@
           <ul >
             <li v-for="nav in navLinks" :key="nav.path">
               <router-link 
+                class="nav-link"
                 :class="{ selected: isSelected(nav)}" 
                 :to="nav.path"
               >
@@ -27,7 +28,7 @@
               </router-link>
             </li>
             <li ref="nav_with_submenu" class="nav-with-submenu hover-enabled" @click="addHandlerFix">
-              <a :class="{ selected: isCategoriesSelected }">TOPICS</a>    
+              <a class="nav-link" :class="{ selected: isCategoriesSelected }">TOPICS</a>    
               <div ref="submenuDiv" class="submenu">
                 <div v-for="tagGroup in tagGroups" :key="tagGroup.groupName" class="submenu-group">
                   <h2 v-if="showCategoryHeading(tagGroup)">{{ tagGroup.groupName.toUpperCase() }}</h2>
@@ -45,7 +46,7 @@
         <div class="spacer"></div>
 
         <div class="header__right">
-          <base-button class="desktop" @click="$router.push('/recommend')" >Recommend...</base-button>
+          <base-button-link class="desktop" to="/recommend">Recommend...</base-button-link>
           <search-input 
             class="desktop"
             v-model="searchTerm" 
@@ -78,10 +79,10 @@ import BaseIcon from '@/core/components/BaseIcon.vue'
 import MobileNav from '@/core/components/MobileNav.vue';
 import SearchInput from './SearchInput.vue'
 import TagButton from '@/modules/resources/components/TagButton.vue'
-import BaseButton from './BaseButton.vue'
 import ResourceDetail from '@/modules/resources/views/ResourceDetail.vue'
 import BadgeCount from './BadgeCount.vue'
 import SideBar from '@/modules/navigation/components/SideBar.vue';
+import BaseButtonLink from './BaseButtonLink.vue';
 
 import { auth } from '@/core/services/firebaseInit'
 import { groupTags } from '@/modules/resources/services/lookup-service'
@@ -101,7 +102,7 @@ export default {
     SearchInput,
     TagButton,
     BaseIcon,
-    BaseButton,
+    BaseButtonLink,
     ResourceDetail,
     BadgeCount,
     SideBar,
@@ -338,7 +339,7 @@ export default {
   align-items: center;
 }
 
-.left-nav .nav-with-submenu a {
+.left-nav .nav-with-submenu .nav-link {
   padding: 20px 60px 40px 10px;
   font-weight: var(--prr-font-weight);
 }
@@ -394,7 +395,7 @@ li {
   display: inline-block;
 }
 
-a {
+.nav-link {
   text-decoration: none;
   padding: 0px 10px 0px 10px;
   cursor: pointer;
@@ -404,15 +405,15 @@ a {
   text-transform: uppercase;
 }
 
-.right-top-nav a {
+.right-top-nav .nav-link {
   font-weight: var(--prr-font-weight);
 }
-a:hover, a.selected {
+.nav-link:hover, .nav-link.selected {
   transition: border-bottom 300ms;
   color: var(--prr-green);
 }
 
-a.selected {
+.nav-link.selected {
   font-weight: 800;
 }
 
@@ -429,9 +430,6 @@ a.selected {
   gap:20px;
 }
 
-.right-top-nav a {
-
-}
 .icon {
   position:relative;
 }

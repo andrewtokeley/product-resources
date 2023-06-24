@@ -26,9 +26,9 @@
         </book-group>
       </template>
       <div v-if="filteredSearchResults.length == 0 && !isLoading" class="noresults">
-        <p>Doesn't look like we've got any <b>{{ this.title.toLowerCase() }}</b> under the category <b>{{ selectedTagName }}</b>.</p>
+        <p>We could find and {{ this.title.toLowerCase() }} under the category <i>{{ selectedTagName }}</i>.</p>
         <p>Want to recommend something?</p>
-        <base-button @click="$router.push('/recommend')" >Recommend...</base-button>
+        <base-button-link to="/recommend">Recommend</base-button-link>
       </div>
       
     </div>
@@ -44,14 +44,15 @@ import ResourceDetail from "@/modules/resources/views/ResourceDetail.vue";
 import LoadingSymbol from "@/core/components/LoadingSymbol.vue";
 import BookGroup from '@/modules/resources/components/BookGroup.vue';
 import TagSelector from "../components/TagSelector.vue";
+import BaseButtonLink from "@/core/components/BaseButtonLink.vue"
 
 import { getTagsForResources, searchByResourceTypes } from "@/modules/resources/services/resource-service";
 import { useLookupStore } from '@/core/state/lookupStore';
 import { ref } from 'vue'
-import ResourceTypeEnum from '../model/resourceTypeEnum';
 import { logPageViewFromRouteLocation } from '@/core/services/analytics';
-import BaseButton from '@/core/components/BaseButton.vue';
+import { logAppEvent } from '@/core/services/analytics';
 
+import ResourceTypeEnum from '../model/resourceTypeEnum';
 
 export default {
   name: 'resource-types',
@@ -61,7 +62,7 @@ export default {
     BookGroup,
     ResourceDetail,
     TagSelector,
-    BaseButton,
+    BaseButtonLink,
   },
 
   setup() {
@@ -127,6 +128,13 @@ export default {
           routePath
         );
         this.filteredSearchResults = this.searchResults.filter( r => r.tags.includes(key));
+
+        logAppEvent('search', { 
+          search_term: key, 
+          search_scope: `${this.$route.params.typeId}-tag`,
+          search_results: this.filteredSearchResults.length > 0 ? 'true' : 'false' 
+        });
+
       } else {
         
         this.filteredSearchResults = this.searchResults;
@@ -168,6 +176,11 @@ export default {
           this.selectedTagName = tagId;
         }
       }
+      logAppEvent('search', { 
+        search_term: tagId, 
+        search_scope: `${typeId}-tag`,
+        search_results: this.filteredSearchResults.length > 0 ? 'true' : 'false' 
+      });
       
       this.isLoading = false;
     },

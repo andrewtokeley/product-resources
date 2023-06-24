@@ -21,7 +21,9 @@
         </book-group>
       </div>
       <div v-if="searchResults.length == 0 && !isLoading" class="noresults">
-        We couldn't find anything matching, <i>{{ searchTerm }}</i>
+        <p>We couldn't find anything matching, <i>{{ searchTerm }}</i></p>
+        <p>If you think we've missed something amazing, <router-link to="/recommend">let us know</router-link> :-)</p>
+        
       </div>
     </div>
     <resource-detail 
@@ -38,6 +40,7 @@ import ResourceDetail from '@/modules/resources/views/ResourceDetail.vue';
 
 import { searchByTagKey, searchByText } from '@/modules/resources/services/resource-service.js'
 import { getTags } from '@/modules/resources/services/lookup-service.js'
+import { logAppEvent } from "@/core/services/analytics";
 
 export default {
   name: 'search-results',
@@ -61,7 +64,7 @@ export default {
     this.tags = lookup.items;
     this.searchTag = this.$route.params.tagId;
     this.searchTerm = this.$route.params.searchTerm;
-    this.title = `Search Results for '${this.searchTag ? this.searchTag : this.searchTerm}'`;
+    this.title = `Search results for '${this.searchTag ? this.searchTag : this.searchTerm}'`;
     await this.loadSearchResults()
   },
 
@@ -86,6 +89,12 @@ export default {
       // if (tagKeyValue) {
         this.searchResults = await searchByTagKey(tagKey);
         
+        logAppEvent('search', { 
+          search_term: tagKey, 
+          search_scope: 'global-tag',
+          search_results: this.searchResults.length > 0 ? 'true' : 'false' 
+        });
+        
         let item = this.tags.find( t => t.key == tagKey);
         this.title = item.value.toUpperCase();
         this.summary = item.description;
@@ -93,6 +102,11 @@ export default {
       
     async loadResourcesByTextSearch(term) {
       this.searchResults = await searchByText(term);
+      logAppEvent('search', { 
+          search_term: term, 
+          search_scope: 'global-text',
+          search_results: this.searchResults.length > 0 ? 'true' : 'false' 
+        });
     },
 
     // resourcesByType(key) {
@@ -168,11 +182,11 @@ h1 {
   margin-bottom: 5px;
 }
 
-p {
+/* p {
   margin: 0px 10px;
-}
+} */
 
 .noresults {
-  margin-top:100px;
+  margin-top:50px;
 }
 </style>
