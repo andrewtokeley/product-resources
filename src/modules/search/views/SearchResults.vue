@@ -40,7 +40,7 @@ import ResourceDetail from '@/modules/resources/views/ResourceDetail.vue';
 
 import { searchByTagKey, searchByText } from '@/modules/resources/services/resource-service.js'
 import { getTags } from '@/modules/resources/services/lookup-service.js'
-import { logAppEvent } from "@/core/services/analytics";
+import { logSearchEvent } from "@/core/services/analytics";
 
 export default {
   name: 'search-results',
@@ -89,11 +89,11 @@ export default {
       // if (tagKeyValue) {
         this.searchResults = await searchByTagKey(tagKey);
         
-        logAppEvent('search', { 
-          search_term: tagKey, 
-          search_scope: 'global-tag',
-          search_results: this.searchResults.length > 0 ? 'true' : 'false' 
-        });
+        logSearchEvent(
+          tagKey, 
+          'global-tag',
+          this.searchResults.length > 0 ? 'true' : 'false' 
+        );
         
         let item = this.tags.find( t => t.key == tagKey);
         this.title = item.value.toUpperCase();
@@ -102,11 +102,12 @@ export default {
       
     async loadResourcesByTextSearch(term) {
       this.searchResults = await searchByText(term);
-      logAppEvent('search', { 
-          search_term: term, 
-          search_scope: 'global-text',
-          search_results: this.searchResults.length > 0 ? 'true' : 'false' 
-        });
+
+      logSearchEvent(
+          term, 
+          'global-text',
+          this.searchResults.length > 0 ? 'true' : 'false' 
+        );
     },
 
     // resourcesByType(key) {

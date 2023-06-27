@@ -50,7 +50,7 @@ import { getTagsForResources, searchByResourceTypes } from "@/modules/resources/
 import { useLookupStore } from '@/core/state/lookupStore';
 import { ref } from 'vue'
 import { logPageViewFromRouteLocation } from '@/core/services/analytics';
-import { logAppEvent } from '@/core/services/analytics';
+import { logSearchEvent } from '@/core/services/analytics';
 
 import ResourceTypeEnum from '../model/resourceTypeEnum';
 
@@ -129,11 +129,11 @@ export default {
         );
         this.filteredSearchResults = this.searchResults.filter( r => r.tags.includes(key));
 
-        logAppEvent('search', { 
-          search_term: key, 
-          search_scope: `${this.$route.params.typeId}-tag`,
-          search_results: this.filteredSearchResults.length > 0 ? 'true' : 'false' 
-        });
+        logSearchEvent(
+          key,
+          `${this.$route.params.typeId}-tag`,
+          this.filteredSearchResults.length > 0 ? 'true' : 'false'
+        );
 
       } else {
         
@@ -176,11 +176,11 @@ export default {
           this.selectedTagName = tagId;
         }
       }
-      logAppEvent('search', { 
-        search_term: tagId, 
-        search_scope: `${typeId}-tag`,
-        search_results: this.filteredSearchResults.length > 0 ? 'true' : 'false' 
-      });
+      logSearchEvent(
+        tagId,
+        `${typeId}-tag`,
+        this.filteredSearchResults.length > 0 ? 'true' : 'false' 
+      );
       
       this.isLoading = false;
     },
