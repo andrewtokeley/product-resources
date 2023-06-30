@@ -93,7 +93,7 @@ export default {
         rewind: true,
         perPage: 1,
         autoplay: true,
-        interval: 5000,
+        interval: 8000,
         classes: {
           arrows: 'splide__arrows carousel-class-arrows',
           arrow : 'splide__arrow carousel-class-arrow',

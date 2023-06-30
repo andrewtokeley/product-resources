@@ -76,6 +76,7 @@ export default {
     },
   },
   mounted() {
+    console.log('mob nav mounted');
     this.navLinks = [
       {id: 'books', path:`/type/${ResourceTypeEnum.Books.key}`, title:'BOOKS'},
       {id: 'podcasts', path:`/type/${ResourceTypeEnum.Podcasts.key}`, title:'PODCASTS'},
@@ -85,19 +86,9 @@ export default {
     this.selectedNav = this.$route.params.typeId;
   },
   methods: {
-    // doSomething() {
-      //   const t1 = this.$refs.t1;
-      //   const t2 = this.$refs.t2;
-      //   const t3 = this.$refs.t3;
-      //   const cancel = this.$refs.cancel;
-      //   const rightOfCancel = cancel.getBoundingClientRect().right;
-      //   // t2 move to the left, just in front of cancel
-      //   const t2xDelta = 
-      
-      // },
       showNavItem(nav) {
         if (this.isHomePage) { return true; }
-        return !this.showCancel || this.selectedNav.id == nav.id;
+        return !this.showCancel || this.selectedNav?.id == nav.id;
       },
       isSelected(nav) {
         if (this.isHomePage) { return false; }
@@ -112,7 +103,7 @@ export default {
         this.selectedTag = tagkey;
         if (this.selectedNav) {
           // resource type, tag search
-          this.$router.push(`${this.selectedNav.path}/${tagkey}`)
+          this.$router.push(`${this.selectedNav?.path}/${tagkey}`)
         } else {
           // global tag search
           this.$router.push(`/tag/${tagkey}`)

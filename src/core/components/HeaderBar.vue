@@ -1,18 +1,6 @@
 <template>
   <div class="header">
-    <div class="header-top-strip">
-      <router-link class="header-link" to="/">
-        <img class="header-image" src="@/assets/logo-long.svg"/>
-      </router-link>
-      <div class="right-top-nav">
-        <router-link class="nav-link desktop" to="/about">About</router-link>
-        <div v-if="useUserStore.isLoggedIn" class="icon">
-          <base-icon :menu="menuOptions">account_circle</base-icon>
-          <badge-count v-if="todoCount > 0 && useUserStore.isAdmin" class="badge" :count="todoCount"></badge-count>
-        </div>
-        <router-link v-else class="nav-link" to="/login">Sign In</router-link>
-      </div>
-    </div>
+    <header-top-nav></header-top-nav>
     <div v-if="showNavigation" class="nav">
       <div class="header-top desktop">
         
@@ -34,7 +22,11 @@
                   <h2 v-if="showCategoryHeading(tagGroup)">{{ tagGroup.groupName.toUpperCase() }}</h2>
                   <ul>
                     <li v-for="tag in tagGroup.tags" :key="tag.key" >
-                      <tag-button :enableHoverEffect="true" @click="handleTagClick(tag)">{{tag.value}}</tag-button>
+                      <tag-button-link 
+                        :tag="tag"
+                        :enableHoverEffect="true" 
+                        @click="handleTagClick">
+                      </tag-button-link>
                     </li>
                   </ul>
                 </div>
@@ -46,13 +38,13 @@
         <div class="spacer"></div>
 
         <div class="header__right">
-          <base-button-link class="desktop" to="/recommend">Recommend...</base-button-link>
-          <search-input 
+          <!-- <base-button-link class="desktop" to="/recommend">Recommend...</base-button-link> -->
+          <!-- <search-input 
             class="desktop"
             v-model="searchTerm" 
             @search="$router.push(`/search/${searchTerm}`)" 
             @mouseover="showCategories=false">
-          </search-input>
+          </search-input> -->
         </div>
       </div>
       <div>
@@ -75,14 +67,14 @@
 </template>
 
 <script>
-import BaseIcon from '@/core/components/BaseIcon.vue'
 import MobileNav from '@/core/components/MobileNav.vue';
-import SearchInput from './SearchInput.vue'
-import TagButton from '@/modules/resources/components/TagButton.vue'
+// import SearchInput from './SearchInput.vue'
+import TagButtonLink from '@/modules/resources/components/TagButtonLink.vue';
 import ResourceDetail from '@/modules/resources/views/ResourceDetail.vue'
-import BadgeCount from './BadgeCount.vue'
 import SideBar from '@/modules/navigation/components/SideBar.vue';
-import BaseButtonLink from './BaseButtonLink.vue';
+// import BaseButtonLink from '@/core/components/BaseButtonLink.vue';
+
+import HeaderTopNav from '@/core/components/HeaderTopNav.vue';
 
 import { auth } from '@/core/services/firebaseInit'
 import { groupTags } from '@/modules/resources/services/lookup-service'
@@ -92,21 +84,19 @@ import { getResource } from '@/modules/resources/services/resource-service'
 import { ref } from 'vue';
 import { useUserStore } from '@/core/state/userStore'
 import { useLookupStore } from '@/core/state/lookupStore';
-import { getUnapprovedReviewsCount } from '@/modules/reviews/services/review-service'
-import { getUnlinkedRecommendationsCount } from '@/modules/recommendations/services/recommendation-service'
 import ResourceTypeEnum from '@/modules/resources/model/resourceTypeEnum'
+
 
 export default {
   name: 'HeaderBar',
   components: {
-    SearchInput,
-    TagButton,
-    BaseIcon,
-    BaseButtonLink,
+    // SearchInput,
+    TagButtonLink,
+    // BaseButtonLink,
     ResourceDetail,
-    BadgeCount,
     SideBar,
     MobileNav,
+    HeaderTopNav,
   },
   setup() {
     const lookupStore = ref(null);
@@ -128,8 +118,8 @@ export default {
       showRecommendDialog: false,
       showResourceDialog: false,
       resourceFromQueryString: Resource,
-      numberOfUnapprovedReviews: 0,
-      numberOfRecommendations: 0,
+      // numberOfUnapprovedReviews: 0,
+      // numberOfRecommendations: 0,
       showSideBar: false,
     }
   },
@@ -144,10 +134,10 @@ export default {
       {id: 'people', path:`/type/${ResourceTypeEnum.People.key}`, title:'PEOPLE'},
     ];
 
-    if (this.useUserStore.isAdmin) {
-      this.numberOfUnapprovedReviews = await getUnapprovedReviewsCount();
-      this.numberOfRecommendations = await getUnlinkedRecommendationsCount();
-    }
+    // if (this.useUserStore.isAdmin) {
+    //   this.numberOfUnapprovedReviews = await getUnapprovedReviewsCount();
+    //   this.numberOfRecommendations = await getUnlinkedRecommendationsCount();
+    // }
 
     const resourceId = this.$route.query.r   
     if (resourceId) {
@@ -187,9 +177,9 @@ export default {
         })
       } 
     },
-    handleTagClick(tag) {
+    handleTagClick() {
       this.removeHover();
-      this.$router.push(`/tag/${tag.key}`);
+      // this.$router.push(`/tag/${tag.key}`);
     },
     handleLogout() {
       auth.signOut().then ( () => {
@@ -215,84 +205,84 @@ export default {
     isCategoriesSelected() {
       return this.$route.path.includes('/tag/');
     },
-    todoCount() {
-      return this.numberOfRecommendations + this.numberOfUnapprovedReviews;
-    },
+    // todoCount() {
+    //   return this.numberOfRecommendations + this.numberOfUnapprovedReviews;
+    // },
 
     useUserStore() {
       return useUserStore()
     },
 
-    menuOptions() {
+    // menuOptions() {
       
-      return {
-        menuItems: [
-          {
-            isHeading: true,
-            heading: this.useUserStore.displayName,
-            subHeading: this.useUserStore.email,
-            show: this.useUserStore.isLoggedIn,
-          },
-          {
-            name: "Profile",
-            iconName: "account_circle",
-            show: this.useUserStore.isLoggedIn,
-            link: '/profile',
-          },
-          {
-            name: "Your Reviews",
-            show: this.useUserStore.isLoggedIn,
-            link: `/${this.useUserStore.username}`,
-          },
-          {
-            isDivider: true,
-            show: this.useUserStore.isLoggedIn,
-          },
-          {
-            name: "ADMIN",
-            show: this.useUserStore.isAdmin,
-            isLabel: true,
-          },
-          {
-            name: "New Resource...",
-            show: this.useUserStore.isAdmin,
-            link: '/admin/resources?tab=draft&new=true',
-          },
-          {
-            name: this.numberOfRecommendations > 0 ? `Resources (${this.numberOfRecommendations})` : "Resources",
-            show: this.useUserStore.isAdmin,
-            badgeCount: this.numberOfRecommendations,
-            link: this.numberOfRecommendations > 0 ? '/admin/resources?tab=recommendations' : '/admin/resources?tab=approved',
-          },
-          {
-            name: this.numberOfUnapprovedReviews > 0 ? `Reviews (${this.numberOfUnapprovedReviews})` : "Reviews",
-            show: this.useUserStore.isAdmin,
-            badgeCount: this.numberOfUnapprovedReviews,
-            link: '/admin/reviews',
-          },
-          {
-            name: "Tags",
-            show: this.useUserStore.isAdmin,
-            link: '/admin/lookups?tab=tags',
-          },
-          {
-            name: "Resource Types",
-            show: this.useUserStore.isAdmin,
-            link: '/admin/lookups?tab=resource-types',
-          },
-          {
-            isDivider: true,
-            show: this.useUserStore.isAdmin,
-          },
-          {
-            name: "Sign Out",
-            show: this.useUserStore.isLoggedIn,
-            iconName: "logout",
-            link: '/logout',
-          }
-        ]
-      }
-    }
+    //   return {
+    //     menuItems: [
+    //       {
+    //         isHeading: true,
+    //         heading: this.useUserStore.displayName,
+    //         subHeading: this.useUserStore.email,
+    //         show: this.useUserStore.isLoggedIn,
+    //       },
+    //       {
+    //         name: "Profile",
+    //         iconName: "account_circle",
+    //         show: this.useUserStore.isLoggedIn,
+    //         link: '/profile',
+    //       },
+    //       {
+    //         name: "Your Reviews",
+    //         show: this.useUserStore.isLoggedIn,
+    //         link: `/${this.useUserStore.username}`,
+    //       },
+    //       {
+    //         isDivider: true,
+    //         show: this.useUserStore.isLoggedIn,
+    //       },
+    //       {
+    //         name: "ADMIN",
+    //         show: this.useUserStore.isAdmin,
+    //         isLabel: true,
+    //       },
+    //       {
+    //         name: "New Resource...",
+    //         show: this.useUserStore.isAdmin,
+    //         link: '/admin/resources?tab=draft&new=true',
+    //       },
+    //       {
+    //         name: this.numberOfRecommendations > 0 ? `Resources (${this.numberOfRecommendations})` : "Resources",
+    //         show: this.useUserStore.isAdmin,
+    //         badgeCount: this.numberOfRecommendations,
+    //         link: this.numberOfRecommendations > 0 ? '/admin/resources?tab=recommendations' : '/admin/resources?tab=approved',
+    //       },
+    //       {
+    //         name: this.numberOfUnapprovedReviews > 0 ? `Reviews (${this.numberOfUnapprovedReviews})` : "Reviews",
+    //         show: this.useUserStore.isAdmin,
+    //         badgeCount: this.numberOfUnapprovedReviews,
+    //         link: '/admin/reviews',
+    //       },
+    //       {
+    //         name: "Tags",
+    //         show: this.useUserStore.isAdmin,
+    //         link: '/admin/lookups?tab=tags',
+    //       },
+    //       {
+    //         name: "Resource Types",
+    //         show: this.useUserStore.isAdmin,
+    //         link: '/admin/lookups?tab=resource-types',
+    //       },
+    //       {
+    //         isDivider: true,
+    //         show: this.useUserStore.isAdmin,
+    //       },
+    //       {
+    //         name: "Sign Out",
+    //         show: this.useUserStore.isLoggedIn,
+    //         iconName: "logout",
+    //         link: '/logout',
+    //       }
+    //     ]
+    //   }
+    // }
   }
 }
 </script>
@@ -427,7 +417,7 @@ li {
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap:20px;
+  gap:10px;
 }
 
 .icon {

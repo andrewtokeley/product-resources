@@ -12,6 +12,7 @@
           <div class="context-menu__row__subHeading" v-if="menuItem.subHeading">{{ menuItem.subHeading }}</div>
           <hr class="divider short"/>
         </div>
+
         <router-link v-else-if="menuItem.link"
             class="context-menu__row"
             :class="{
@@ -41,6 +42,32 @@
             </div>
           </div>
         </router-link>
+
+        <div v-else
+          class="context-menu__row"
+          :class="{
+              'context-menu__row--isCentred': menuItem.isFullWidth,
+              'context-menu__row--isLabel': menuItem.isLabel ?? false,
+              'context-menu__row--isDisabled': !(menuItem.isEnabled ?? true),
+          }"
+          @click.stop="handleMenuItemClick(menuItem)"
+        >
+          <div v-if="!menuItem.isFullWidth" class="context-menu__row__icon" >
+            <badge-count v-if="menuItem.badgeCount" class="badge"></badge-count>
+            <span class="material-symbols-outlined">
+              {{ menuItem.iconName }}
+            </span>
+          </div>
+          <div class="context-menu__row__text" :class="{'context-menu__row__small': menuItem.isFullWidth}">
+            <div class="context-menu__text">
+              <span>{{ menuItem.name }}</span>
+            </div>
+            <div class="context-menu__row__subText" v-if="menuItem.subText" >
+              {{ menuItem.subText }}
+            </div>
+          </div>
+        </div>
+
     </template>
   </div>
 </template>
@@ -109,13 +136,10 @@ export default {
   },
 
   methods: {
-      handleMenuItemClick(event, menuItem) {
-          if (event) {
-              event.stopPropagation();
-          }
-          if (menuItem.isClickable ?? true) {
-              this.$emit("click", menuItem);
-          }
+      handleMenuItemClick(menuItem) {
+        if (menuItem.isClickable ?? true) {
+            this.$emit("click", menuItem);
+        }
       },
 
       blur() {

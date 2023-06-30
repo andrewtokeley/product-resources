@@ -8,8 +8,8 @@
       @focus="handleFocus()"
       @blur="handleBlur()"
       v-model="value"
-      placeholder="Search for resources"/>
-    <base-icon @click="handleClear()">close</base-icon>
+      placeholder="Search"/>
+    <base-icon @click.stop="handleClear()">close</base-icon>
   </div>
 </template>
 
@@ -22,6 +22,10 @@ export default {
   name: "SearchInput",
 
   emits: ["update:modelValue", "focus", "blur", "search"],
+
+  mounted() {
+    this.$refs.input.focus();
+  },
 
   data() {
     return {
@@ -51,7 +55,6 @@ export default {
   methods: {
     handleClear() {
       this.$emit("update:modelValue","");
-      // this.$emit("search")
       this.$refs.input.focus()
     },
     handleSearch() {
@@ -114,6 +117,7 @@ input {
   border: none;
   background: transparent;
   font-size: 1.0em;
+  flex-grow: 1;
 }
 
 input:focus {

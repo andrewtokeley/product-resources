@@ -175,12 +175,12 @@ export default {
         } else {
           this.selectedTagName = tagId;
         }
+        logSearchEvent(
+          tagId,
+          `${typeId}-tag`,
+          this.filteredSearchResults.length > 0 ? 'true' : 'false' 
+        );
       }
-      logSearchEvent(
-        tagId,
-        `${typeId}-tag`,
-        this.filteredSearchResults.length > 0 ? 'true' : 'false' 
-      );
       
       this.isLoading = false;
     },

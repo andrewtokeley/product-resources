@@ -1,7 +1,7 @@
 
 import { Review, reviewConverter } from '@/modules/reviews/model/review';
 import { app } from "@/core/services/firebaseInit"
-import { increment, getFirestore, collection, doc, getDoc,getDocs, query, where, addDoc, setDoc, limit, getCountFromServer, writeBatch } from "firebase/firestore"; 
+import { increment, getFirestore, collection, doc, getDoc,getDocs, query, where, addDoc, setDoc, limit, getCountFromServer, writeBatch, orderBy } from "firebase/firestore"; 
 const { DateTime } = require("luxon");
 import { Timestamp } from "firebase/firestore";
 import FirestoreKeys from '@/core/services/firebaseKeys';
@@ -171,15 +171,28 @@ const getReviewsByApproval = async function(approved) {
 const getFeaturedReviews = async function(maximum) {
   var results = [];
   
-  const q = query(collection(db, COLLECTION_KEY).withConverter(reviewConverter), 
+  // get all featured
+  let q = query(collection(db, COLLECTION_KEY).withConverter(reviewConverter), 
     where('isFeatured', "==", true),
-    where('approved', "==", true),
-    limit(maximum));
+    where('approved', "==", true));
   
-  const querySnapshot = await getDocs(q);
+  let querySnapshot = await getDocs(q);
   querySnapshot.forEach((doc) => {
     results.push(new Review(doc.data()));
   });
+
+  // plus most recent (up to max)
+  q = query(collection(db, COLLECTION_KEY).withConverter(reviewConverter), 
+    where('isFeatured', "!=", true),
+    where('approved', "==", true),
+    orderBy('isFeatured'),
+    orderBy('dateApproved', 'desc'),
+    limit(maximum));
+  querySnapshot = await getDocs(q);
+    querySnapshot.forEach((doc) => {
+      results.push(new Review(doc.data()));
+    });
+      
   return results;
   
 }

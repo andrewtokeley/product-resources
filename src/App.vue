@@ -2,7 +2,10 @@
   <div class="outer">
     <div class="app">
       <admin-header v-if="$route.meta.requiresAdmin"></admin-header>
-      <header-bar class="header" v-show="!$route.meta.requiresAdmin && !($route.meta.hideHeader ?? false)"></header-bar>
+      <header-bar 
+        class="header" 
+        v-show="!$route.meta.requiresAdmin && !($route.meta.hideHeader ?? false)">
+      </header-bar>
       <div class="page">
         <router-view :key="$route.fullPath" />
       </div>

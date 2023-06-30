@@ -1,10 +1,6 @@
 <template>
   <div class="header">
-    <div class="header-top-strip">
-      <router-link class="header-link" to="/">
-        <img class="header-image" src="@/assets/logo-long.svg"/>
-      </router-link>
-    </div>
+    <header-top-nav></header-top-nav>
     <div class="nav">
       <div class="header-top">
         
@@ -27,9 +23,11 @@
 
 <script>
 import { useUserStore } from '@/core/state/userStore'
+import HeaderTopNav from '@/core/components/HeaderTopNav.vue'
 
 export default {
   name: 'admin-header',
+  components: { HeaderTopNav },
   data() {
     return {
       navLinks: [],
