@@ -11,6 +11,7 @@ export default class FirestoreKeys {
   static UsersPrivateCollection = new FirestoreKeys("private")
   static UsernamesCollection = new FirestoreKeys("usernames")
   static UsersPrivateDocument = new FirestoreKeys("secure")
+  static EmailCollection = new FirestoreKeys("emails")
   constructor(key) {
     this.key = key;
   }
