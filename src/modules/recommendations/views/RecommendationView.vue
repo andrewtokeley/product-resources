@@ -222,6 +222,7 @@ methods: {
       // add the review
       await addReview(this.review);
 
+      // send an email to admin
       // update the user's display name if they've updated it for this review
       if (this.review.reviewedByName != this.userStore.displayName || this.review.reviewedByJobTitle != this.userStore.jobTitle) {
         this.userStore.setDisplayName(this.review.reviewedByName);
