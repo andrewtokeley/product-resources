@@ -26,15 +26,19 @@
           :review="review">
         </review-widget>
       </div>
-      <div class="related" v-if="relatedResources?.length > 0">
+      <!-- <div class="related" v-if="relatedResources?.length > 0">
+        <br>
         <hr class="divider" />
-        <h2>Related</h2>
+        <h2>Related Resources</h2>
         <div class="related-resources">
-          <div class="related-resources-card" v-for="resource in relatedResources" :key="resource.id" @click="$emit('changeResource',resource)">
-            <book-card :resource="resource" :preview="true" :showTitle="false" :showDescription="true"></book-card>  
-          </div>
+          <base-link-button 
+            v-for="resource in relatedResources" 
+            :key="resource.id" 
+            @click="$emit('changeResource',resource)">
+            {{resource.displayName}}
+          </base-link-button>
         </div>
-      </div>
+      </div> -->
       <loading-symbol v-if="isLoading" class="loader"></loading-symbol>
     </div>    
 
@@ -208,5 +212,13 @@ export default {
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+@media only screen and (max-width: 600px) {
+ 
+  .related-resources-card {
+    flex-basis: 100%;
+  }
+
 }
 </style>

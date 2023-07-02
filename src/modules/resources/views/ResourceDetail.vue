@@ -114,7 +114,7 @@ export default {
       return [
         {
           id: 'view',
-          title: this.viewResource.resourceType == 'people' ? "Connect" : "View",
+          title: this.viewResource.actionText,
           isPrimary: true,
         },
         {

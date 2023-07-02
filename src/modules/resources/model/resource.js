@@ -116,6 +116,7 @@ class Resource {
       case 'books': return "Buy..."
       case 'podcasts': return "Listen..."
       case 'episodes': return "Listen..."
+      case 'people': return "Connect..."
       default: return "Read..."
     }
   }
