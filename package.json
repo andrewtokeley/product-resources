@@ -5,6 +5,8 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build --mode development",
+    "predeploy": "firebase use default",
+    "deploy": "firebase deploy",
     "prebuildproduction": "firebase use production",
     "buildproduction": "vue-cli-service build",
     "postbuildproduction": "firebase use default",
