@@ -1,5 +1,4 @@
 import { Timestamp } from "firebase/firestore";
-const { DateTime } = require("luxon");
 import { validateMandatoryProperty, validateObject } from "@/core/model/validation";
 export { Email, emailConverter };
 

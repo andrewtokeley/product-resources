@@ -167,7 +167,7 @@ const getReviewsByApproval = async function(approved) {
   return result 
 }
 
-
+  
 const getFeaturedReviews = async function(maximum) {
   var results = [];
   

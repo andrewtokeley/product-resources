@@ -16,7 +16,6 @@
 
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
-admin.initializeApp();
 
 /**
  * Fires when a new document is placed into the tempoAssignClaim table.

@@ -87,7 +87,7 @@ export default {
             link: '/profile',
           },
           {
-            name: "Your Reviews",
+            name: "My Reviews",
             show: this.userStore.isLoggedIn,
             link: `/${this.userStore.username}`,
           },
@@ -126,6 +126,11 @@ export default {
             name: "Resource Types",
             show: this.userStore.isAdmin,
             link: '/admin/lookups?tab=resource-types',
+          },
+          {
+            name: "Email Templates",
+            show: this.userStore.isAdmin,
+            link: '/admin/email',
           },
           {
             isDivider: true,

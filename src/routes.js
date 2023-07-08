@@ -13,6 +13,7 @@ import RecommendationConfirmation from '@/modules/recommendations/views/Recommen
 import TermsOfService from '@/modules/about/views/TermsOfService';
 import PrivacyView from '@/modules/about/views/PrivacyView';
 import UserReviews from '@/modules/reviews/views/UserReviews';
+import EmailTemplates from '@/modules/admin/views/EmailTemplates'
 
 export default [
   {path: '/login', component:Login, meta: { hideHeader: false, page_title: 'Login' } },
@@ -51,5 +52,7 @@ export default [
   {path: '/admin/reviews', component:ManageReviews, meta: { requiresAuth: true, requiresAdmin: true, page_title: 'Admin Reviews' } },
 
   {path: '/admin/lookups', component:ManageLookups, meta: { requiresAuth: true, requiresAdmin: true, page_title: 'Admin Lookups'} },
+  
+  {path: '/admin/email', component:EmailTemplates, meta: { requiresAuth: true, requiresAdmin: true, page_title: 'Admin Email'} },
 
 ]

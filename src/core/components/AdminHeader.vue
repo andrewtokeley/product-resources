@@ -41,6 +41,7 @@ export default {
       {id: 'reviews', path:`/admin/reviews`, title:'REVIEWS'},
       {id: 'tags', path:`/admin/lookups?tab=tags`, title:'TAGS'},
       {id: 'types', path:`/admin/lookups?tab=resource-types`, title:'RESOURCE TYPES'},
+      {id: 'templates', path:`/admin/email`, title: 'EMAIL'},
     ];
   },
   
