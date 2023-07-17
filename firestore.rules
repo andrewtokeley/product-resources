@@ -2,6 +2,10 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
+    function isAdmin() {
+    	return isAuthenticated() && request.auth.token.admin == true
+    }
+    
     function isAuthenticated() {
     	return request.auth != null
     }
@@ -120,6 +124,10 @@ service cloud.firestore {
       allow update, delete: if 
       	isAuthenticatedWith(resource.data.reviewedByUid) ||
         request.auth.token.admin == true;
+    }
+    
+    match /email-templates/{template} {
+      allow read, write: if isAdmin();
     }
   }
 }

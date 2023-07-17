@@ -23,7 +23,8 @@ import ResourceImage from '@/modules/resources/components/ResourceImage.vue';
 import ReviewWidget from '@/modules/reviews/components/ReviewWidget.vue'
 import BaseLinkButton from '@/core/components/BaseLinkButton.vue';
 import { Review } from '@/modules/reviews/model/review';
-import { getResource } from '@/modules/resources/services/resource-service';
+import { Resource } from '@/modules/resources/model/resource';
+// import { getResource } from '@/modules/resources/services/resource-service';
 import { useUserStore } from '@/core/state/userStore';
 
 export default {
@@ -36,12 +37,15 @@ export default {
   data() { 
     return { 
       isLoading: true,
-      resource: null,
       isOwner: false,
     } 
   },  
 
   props: {
+    resource: {
+      type: Resource,
+      required: true
+    },
     review: {
       type: Review,
       required: true
@@ -54,7 +58,7 @@ export default {
   
   async mounted() {
     this.isLoading = true;
-    this.resource = await getResource(this.review.resourceId);
+    // this.resource = await getResource(this.review.resourceId);
     this.isLoading = false;
     const userStore = useUserStore();
     this.isOwner = userStore.uid == this.review.reviewedByUid;

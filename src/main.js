@@ -8,6 +8,7 @@ import { auth } from '@/core/services/firebaseInit'
 import { useUserStore } from "@/core/state/userStore"
 import { useLookupStore } from "@/core/state/lookupStore"
 import { logPageViewFromRouteLocation } from "./core/services/analytics"
+import { appStore } from "./core/state/appStore"
 
 const pinia = createPinia();
 
@@ -73,6 +74,10 @@ auth.onAuthStateChanged(async (authUser) => {
     storeUser = useUserStore();
     await storeUser.updateAuthUser(authUser); 
 
+    // initialise worker counts
+    const appStoreInstance = appStore();
+    appStoreInstance.initialiseCounts();
+    
     app.use(router);
     app.mount('#app');
   }

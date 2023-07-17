@@ -49,6 +49,6 @@ const getEmailTemplateTypes = function() {
     {key: 'review', value: 'New Review'},
     {key: 'recommendation', value: 'New Recommendation'},
     {key: 'review-approved', value: 'Review Approved'},
-    {key: 'recommendation-approved', value: 'Recommendation Approved'}, 
+    // {key: 'recommendation-approved', value: 'Recommendation Approved'}, 
   ]
 }

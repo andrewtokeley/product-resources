@@ -219,7 +219,7 @@ methods: {
         this.review.recommendationId = recommendationId;
       } 
       
-      // add the review
+      // add the review (should really be in a batch)
       await addReview(this.review);
 
       // send an email to admin

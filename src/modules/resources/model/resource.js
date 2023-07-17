@@ -117,6 +117,7 @@ class Resource {
       case 'podcasts': return "Listen..."
       case 'episodes': return "Listen..."
       case 'people': return "Connect..."
+      case 'videos': return "View..."
       default: return "Read..."
     }
   }

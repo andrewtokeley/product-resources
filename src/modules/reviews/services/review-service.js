@@ -1,10 +1,11 @@
 
 import { Review, reviewConverter } from '@/modules/reviews/model/review';
 import { app } from "@/core/services/firebaseInit"
-import { increment, getFirestore, collection, doc, getDoc,getDocs, query, where, addDoc, setDoc, limit, getCountFromServer, writeBatch, orderBy } from "firebase/firestore"; 
+import { increment, onSnapshot, getFirestore, collection, doc, getDoc,getDocs, query, where, addDoc, setDoc, limit, writeBatch, orderBy } from "firebase/firestore"; 
 const { DateTime } = require("luxon");
 import { Timestamp } from "firebase/firestore";
 import FirestoreKeys from '@/core/services/firebaseKeys';
+import { appStore } from '@/core/state/appStore';
 
 const db = getFirestore(app);
 
@@ -19,7 +20,7 @@ export { getReview,
   updateReview, 
   addReview, 
   getReviewsByApproval,
-  getUnapprovedReviewsCount,
+  registerUnapprovedReviewsCounter,
   deleteReview,
   setReviewApprove,
   deleteUnlinkedReviewsForRecommendation,
@@ -70,12 +71,29 @@ const linkRecommendationReviewToResource = async function(recommendationId, reso
   return true; 
 }
 
-const getUnapprovedReviewsCount = async function() {
+const registerUnapprovedReviewsCounter = async function() {
   const q = query(collection(db, COLLECTION_KEY).withConverter(reviewConverter), 
     where("approved", "==", false),
+    where("resourceId", "!=", null),
   );
-  const snapshot = await getCountFromServer(q);
-  return snapshot.data().count; 
+
+  onSnapshot(q, (snapshot) => {
+    console.log('registerUnapprovedReviewsCounter');
+    let count = 0;
+    snapshot.docChanges().forEach((change) => {
+      if (change.type === "added") {
+        count += 1;
+      }
+      if (change.type === "removed") {
+        count -= 1;
+      }
+    });
+
+    // save count to state
+    const store = appStore();
+    console.log('increment review count by ' + count);
+    store.incrementUnapprovedReviewsCount(count);
+  });
 }
 
 /**
@@ -162,7 +180,10 @@ const getReviewsByApproval = async function(approved) {
   const querySnapshot = await getDocs(q);
   const result = [];
   querySnapshot.forEach((doc) => {
-    result.push(new Review(doc.data()));
+    const review = new Review(doc.data());
+    if (review.canApprove) {
+      result.push(review);
+    }
   });
   return result 
 }

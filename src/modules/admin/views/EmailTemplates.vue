@@ -9,7 +9,12 @@
     <label>Subject</label>
     <base-input v-model="selectedTemplate.subject" :options="{ placeholder: 'Subject'}"></base-input>
     <label>Content (Html)</label>
-    <base-multiline-text v-model="selectedTemplate.html" :options="{ placeholder: 'Html', numberOfLines: 10}"></base-multiline-text>
+    <base-multiline-text v-model="selectedTemplate.html" 
+      :options="{ 
+        placeholder: 'Html', 
+        numberOfLines: 10, 
+        maximumLength: 1000,
+        showCharacterCount: true}"></base-multiline-text>
     <base-button :showSpinner="isSaving" @click="handleSave">Save</base-button>
   </div>
 </template>

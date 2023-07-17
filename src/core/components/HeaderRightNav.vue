@@ -1,6 +1,6 @@
 <template>
   <div class="header-right-nav">
-
+    
     <base-button-link class="recommend-button desktop" to="/recommend">Recommend...</base-button-link>
     
     <base-icon v-if="!userStore.isLoggedIn" @click="$emit('searchClicked')">search</base-icon>
@@ -40,9 +40,11 @@ import BaseIcon from '@/core/components/BaseIcon.vue'
 import BadgeCount from '@/core/components/BadgeCount.vue'
 import BaseButtonLink from './BaseButtonLink.vue'
 
-import { getUnapprovedReviewsCount } from '@/modules/reviews/services/review-service'
-import { getUnlinkedRecommendationsCount } from '@/modules/recommendations/services/recommendation-service'
+// import { getUnapprovedReviewsCount } from '@/modules/reviews/services/review-service'
+// import { getUnlinkedRecommendationsCount } from '@/modules/recommendations/services/recommendation-service'
 import { useUserStore } from '../state/userStore'
+import { appStore } from '../state/appStore'
+import { ref } from 'vue';
 
 export default {
   name: 'header-right-nav',
@@ -52,16 +54,17 @@ export default {
     BaseButtonLink,
   },
   emits: ['searchClicked'],
-  data() {
+  setup() {
+    const store = ref(null);
+    store.value = appStore();
     return {
-      numberOfUnapprovedReviews: 0,
-      numberOfRecommendations: 0,
+      store
     }
   },
   async mounted() {
     if (this.userStore.isAdmin) {
-      this.numberOfUnapprovedReviews = await getUnapprovedReviewsCount();
-      this.numberOfRecommendations = await getUnlinkedRecommendationsCount();
+      // this.numberOfUnapprovedReviews = await getUnapprovedReviewsCount();
+      // this.numberOfRecommendations = await getUnlinkedRecommendationsCount();
     }
   },
   computed: {
@@ -69,7 +72,12 @@ export default {
       return useUserStore();
     },
     todoCount() {
-      return this.numberOfRecommendations + this.numberOfUnapprovedReviews;
+      return this.store.unapprovedReviewsCount + 
+        this.unapprovedRecResCount;
+    },
+    unapprovedRecResCount() {
+      return this.store.unapprovedRecommendationsCount +
+        this.store.unapprovedResourcesCount;
     },
     menuOptions() {
       return {
@@ -106,15 +114,16 @@ export default {
             link: '/admin/resources?tab=draft&new=true',
           },
           {
-            name: this.numberOfRecommendations > 0 ? `Resources (${this.numberOfRecommendations})` : "Resources",
+            name: this.unapprovedRecResCount > 0 ? `Resources (${this.unapprovedRecResCount})` : "Resources",
             show: this.userStore.isAdmin,
-            badgeCount: this.numberOfRecommendations,
-            link: this.numberOfRecommendations > 0 ? '/admin/resources?tab=recommendations' : '/admin/resources?tab=approved',
+            badgeCount: this.unapprovedRecResCount,
+            link: this.store.unapprovedRecommendationsCount > 0 ? '/admin/resources?tab=recommendations' : 
+              (this.store.unapprovedResourcesCount > 0 ? '/admin/resources?tab=draft' : '/admin/resources?tab=approved'),
           },
           {
-            name: this.numberOfUnapprovedReviews > 0 ? `Reviews (${this.numberOfUnapprovedReviews})` : "Reviews",
+            name: this.store.unapprovedReviewsCount > 0 ? `Reviews (${this.store.unapprovedReviewsCount})` : "Reviews",
             show: this.userStore.isAdmin,
-            badgeCount: this.numberOfUnapprovedReviews,
+            badgeCount: this.store.unapprovedReviewsCount,
             link: '/admin/reviews',
           },
           {

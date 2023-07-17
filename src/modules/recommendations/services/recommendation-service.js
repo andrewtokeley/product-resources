@@ -2,8 +2,9 @@
 import { Recommendation, recommendationConverter } from '../model/recommendation'
 import { app } from "@/core/services/firebaseInit"
 import { deleteUnlinkedReviewsForRecommendation, getReviewForRecommendation } from '@/modules/reviews/services/review-service';
-import { updateDoc, getFirestore, collection, doc, getDoc,getDocs, query, where, addDoc, setDoc, deleteDoc, limit, getCountFromServer } from "firebase/firestore"; 
+import { updateDoc, onSnapshot, getFirestore, collection, doc, getDoc,getDocs, query, where, addDoc, setDoc, deleteDoc, limit, getCountFromServer } from "firebase/firestore"; 
 import FirestoreKeys from '@/core/services/firebaseKeys';
+import { appStore } from '@/core/state/appStore';
 
 const { DateTime } = require("luxon");
 
@@ -19,7 +20,8 @@ export { getRecommendation,
   approveRecommendation,
   unapproveRecommendation,
   linkRecommendationToResource,
-  unlinkRecommendationFromResource
+  unlinkRecommendationFromResource,
+  registerUnapprovedRecommendationsCounter,
 }
 
 const COLLECTION_KEY = FirestoreKeys.RecommendationsCollection.key;
@@ -67,6 +69,31 @@ const getUnlinkedRecommendationsCount = async function() {
   );
   const snapshot = await getCountFromServer(q);
   return snapshot.data().count; 
+}
+
+const registerUnapprovedRecommendationsCounter = async function() {
+  const q = query(collection(db, COLLECTION_KEY).withConverter(recommendationConverter), 
+    where("approved", "==", false),
+    where("resourceId", "==", null),
+  );
+  
+  onSnapshot(q, (snapshot) => {
+    console.log('registerUnapprovedRecommendationsCounter');
+    let count = 0;
+    snapshot.docChanges().forEach((change) => {
+      if (change.type === "added") {
+        count += 1;
+      }
+      if (change.type === "removed") {
+        count -= 1;
+      }
+    });
+
+    // save count to state
+    const store = appStore();
+    console.log('increment recommendation count by ' + count);
+    store.incrementUnapprovedRecommendationsCount(count);
+  });
 }
 
 const getUnlinkedRecommendations = async function() {

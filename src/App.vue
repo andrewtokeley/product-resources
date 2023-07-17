@@ -1,17 +1,20 @@
 <template>
-  <div class="outer">
-    <div class="app">
-      <admin-header v-if="$route.meta.requiresAdmin"></admin-header>
-      <header-bar 
-        class="header" 
-        v-show="!$route.meta.requiresAdmin && !($route.meta.hideHeader ?? false)">
-      </header-bar>
-      <div class="page">
-        <router-view :key="$route.fullPath" />
-      </div>
+  <div v-if="!isOffline" class="app">
+    <admin-header v-if="$route.meta.requiresAdmin"></admin-header>
+    <header-bar 
+      v-show="!$route.meta.requiresAdmin && !($route.meta.hideHeader ?? false)">
+    </header-bar>
+    <div class="page">
+      <router-view :key="$route.fullPath" />
     </div>
     <footer-bar></footer-bar>
   </div>
+  <div v-else class="app-offline">
+    <div class="box">
+      looks like you're offline :-(
+    </div>
+  </div>
+  
 </template>
 
 <script>
@@ -27,9 +30,12 @@ export default defineComponent({
   data() {
     return {
       hideHeader: true,
+      isOffline: false,
     }
   },
   async mounted() {
+    window.addEventListener('online', () => this.isOffline = false );
+    window.addEventListener('offline', () => this.isOffline = true );
     // load up some data into the state stores
     let store = useLookupStore();
     await store.fetchLookups();
@@ -38,13 +44,26 @@ export default defineComponent({
 </script>
 
 <style>
-body { 
+/* html, body { 
   margin: 0px;
-}
+  height: 100%;
+} */
 .app {
   max-width: 2000px;
   min-height: 100%;
   margin: 0 auto;
+}
+
+.app-offline {
+  height: 100vh;
+  display:flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.box {
+  border: 0.5px solid var(--prr-mediumgrey);
+  padding: 10px 30px;
 }
 
 .page {

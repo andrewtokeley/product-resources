@@ -4,17 +4,25 @@
     <div v-else class="content">
       <h1 class="giant">Reviews</h1>
       <h2 v-if="user"><span>by </span>{{user.displayName}}</h2>
-      
-      <div v-if="user" class="cards">
-        <div v-for="review in reviews" :key="review.id" class="card">
-          <review-with-image
-            :showImage="true"
-            :review="review"
-            @click="handleClick"
-            @edit="handleEdit"
-            @delete="handleDelete">
-          </review-with-image>
+      <div  v-if="user">
+        <div v-for="reviewGroup in groupedReviews" :key="reviewGroup.resourceType" >
+          <h1 class="group-heading">
+            <span class="material-symbols-outlined">{{ reviewGroup.icon }}</span>
+            {{ reviewGroup.resourceType }}
+          </h1>
           <hr class="divider grey" />
+          <div class="cards">
+            <review-with-image
+              v-for="review in reviewGroup.reviews" :key="review.id"
+              class="card"
+              :showImage="true"
+              :resource="review.resource"
+              :review="review"
+              @click="handleClick"
+              @edit="handleEdit"
+              @delete="handleDelete">
+            </review-with-image>
+          </div>
         </div>
       </div>
       <div v-else>
@@ -52,11 +60,19 @@ import EditReview from '@/modules/reviews/views/EditReview.vue';
 import { deleteReview, getReviewsByUser } from '@/modules/reviews/services/review-service'
 import { getUser, getUserByUsername, updateUser } from '@/modules/users/services/user-services';
 import { useUserStore } from '@/core/state/userStore';
+import { getResource } from '@/modules/resources/services/resource-service';
+import { useLookupStore } from '@/core/state/lookupStore';
 
 export default {
   name: 'user-reviews',
 
-  components: { LoadingSymbol, ReviewWithImage, ResourceDetail, EditReview, ConfirmationDialog },
+  components: { 
+    LoadingSymbol, 
+    ReviewWithImage, 
+    ResourceDetail, 
+    EditReview, 
+    ConfirmationDialog,
+  },
 
   data() {
     return {
@@ -76,10 +92,26 @@ export default {
     userStore() {
       return useUserStore();
     },
+    lookupStore() {
+      return useLookupStore();
+    },
     isOwner() {
       if (!this.user) return false;
       return (this.userStore.username == this.username);
     },
+    groupedReviews() {
+      let allResourceTypes = this.reviews.map ( r => r.resource.resourceType );
+      let uniqueTypes = new Set(allResourceTypes.flat());
+
+      var result = [];
+      uniqueTypes.forEach( t => {
+        let reviews = this.reviews.filter ( r => r.resource.resourceType == t );
+        const icon = this.lookupStore.resourceTypes.find( r => r.key == t)?.icon;
+        let group = {resourceType: t, reviews: reviews, icon: icon};        
+        result.push(group);
+      });
+      return result;
+    }
   },
 
   async mounted() {
@@ -104,6 +136,14 @@ export default {
     if (this.user) {
       this.noUser = false;
       this.reviews = await getReviewsByUser(this.user.uid);
+
+      // add the full resource to the review
+      for (let i = 0; i<this.reviews.length; i++) {
+        let review = this.reviews[i];
+        const resource = await getResource(review.resourceId);
+        review.resource = resource;
+      }
+
     }
     this.isLoading = false;
   },
@@ -156,7 +196,7 @@ export default {
   display:flex;
   flex-direction: row;
   flex-wrap: wrap;
-  margin-top: 40px;
+  margin-top: 10px;
   justify-content: space-between;
   gap:20px;
 }
@@ -165,13 +205,32 @@ export default {
   flex-basis: 100%;
 }
 
+.group-heading {
+  text-transform: capitalize;
+  display:flex;
+  align-items: center;
+  margin-top: 20px;
+  margin-bottom: 0px;
+  font-size: var(--prr-font-size-large);
+  text-transform: uppercase;
+}
+.group-heading span {
+  margin-right: 5px;
+}
 .divider.grey {
   border-width: 2px;
   border-color: var(--prr-lightgrey);
-  margin: 20px 70px 0px 70px;
+  margin-top: 0px;
+  /* margin: 20px 70px 0px 70px; */
 }
 h2 span {
   color: var(--prr-mediumgrey);
+}
+
+@media only screen and (max-width: 600px) {
+  .card {
+   flex-basis: 100%;
+  }
 }
 
 </style>

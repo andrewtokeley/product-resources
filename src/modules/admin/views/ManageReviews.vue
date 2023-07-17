@@ -35,6 +35,7 @@
             <div class="actions">
               <base-button v-if="!review.approved" :disabled="!review.canApprove" @click.stop="setApproval(review, true)">Approve</base-button>
               <base-button v-else @click.stop="setApproval(review, false)" :isSecondary="true">Un-Approve</base-button>
+              <base-icon v-if="review.resourceId" @click="handleShowResourceDetail(review)">visibility</base-icon>
               <base-icon :menu="menuItems(review)">more_vert</base-icon>
             </div>
           </td>
@@ -221,6 +222,8 @@ export default {
         else {
           if (this.pendingReviews?.length > 0) {
             this.pendingReviews = [review, ...this.pendingReviews];
+          } else {
+            this.pendingReviews = [review];
           }
           this.approvedReviews.splice(index, 1);
           this.visibleReviews = this.approvedReviews;

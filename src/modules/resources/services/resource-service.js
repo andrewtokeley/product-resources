@@ -1,18 +1,20 @@
 
 import { Resource, resourceConverter } from '../model/resource'
 import { app } from "@/core/services/firebaseInit"
-import { getFirestore, orderBy, query, collection, doc, getDocs, getDoc, where, addDoc, setDoc, deleteDoc, limit, updateDoc } from "firebase/firestore"; 
+import { getFirestore, onSnapshot, orderBy, query, collection, doc, getDocs, getDoc, where, addDoc, setDoc, deleteDoc, limit, updateDoc } from "firebase/firestore"; 
 
 import { useLookupStore } from '@/core/state/lookupStore';
 import { linkRecommendationReviewToResource, unlinkReviewsFromResource } from '@/modules/reviews/services/review-service';
 import { linkRecommendationToResource, unlinkRecommendationFromResource } from '@/modules/recommendations/services/recommendation-service';
 import FirestoreKeys from "@/core/services/firebaseKeys";
+import { appStore } from '@/core/state/appStore';
 
 const { DateTime } = require('luxon');
 
 const db = getFirestore(app);
 
 export { 
+  getResourcesByIds,
   getResource, 
   getResources,
   getTagsForResources, 
@@ -28,6 +30,7 @@ export {
   updateResource, 
   addResource, 
   deleteResource,
+  registerUnapprovedResourcesCounter,
   // incrementReviewCount,
   // decrementReviewCount,
 }
@@ -126,6 +129,19 @@ const searchByResourceTypes = async function(keys, resultLimit, approval) {
   return result
 };
 
+const getResourcesByIds = async function(ids) {
+  // there's no where id in functionality, but this will result in the same number of records being
+  // returned, and hence no billing impact.
+  let result = [];
+  ids.forEach( async (id) => {
+    const resource = await getResource(id);
+    if (resource) {
+      result.push(resource);
+    }
+  });
+  return result;
+}
+
 /**
  * Returns resources matching the typeS and, optionlly, tag.
  * @param {*} type id of the resource type
@@ -223,6 +239,29 @@ const getResource = async function(id) {
   } else {
     return null;
   }
+}
+
+const registerUnapprovedResourcesCounter = async function() {
+  const q = query(collection(db, COLLECTION_KEY).withConverter(resourceConverter), 
+    where("approved", "==", false),
+  );
+  
+  onSnapshot(q, (snapshot) => {
+    console.log('registerUnapprovedResourcesCounter');
+    let count = 0;
+    snapshot.docChanges().forEach((change) => {
+      if (change.type === "added") {
+        count += 1;
+      }
+      if (change.type === "removed") {
+        count -= 1;
+      }
+    });
+
+    // save count to state
+    const store = appStore();
+    store.incrementUnapprovedResourcesCount(count);
+  });
 }
 
 const updateResource = async function(resource) {

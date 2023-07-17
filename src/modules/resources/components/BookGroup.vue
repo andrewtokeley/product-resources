@@ -22,6 +22,9 @@
             :showAddPlaceholder="true"
             @addRecommend="handleAddRecommendation(group.key)"></book-card>
         </div>
+        <div v-if="group.link" class="more">
+          <base-icon @click="$router.push(group.link)">arrow_forward_ios</base-icon>
+        </div>
       </div>
       <hr v-if="isGrouped" class="divider"/>
     </template>
@@ -31,6 +34,7 @@
 <script>
 import BookCard from "@/modules/resources/components/BookCard.vue"
 import RowHeader from '@/modules/resources/components/RowHeader.vue';
+import BaseIcon from "@/core/components/BaseIcon.vue";
 import { ref } from 'vue';
 import { useLookupStore } from "@/core/state/lookupStore";
 
@@ -39,6 +43,7 @@ export default {
   components: { 
     BookCard,
     RowHeader,
+    BaseIcon,
   },
   emits: ['click', 'recommend'],
   setup() {
@@ -107,7 +112,12 @@ export default {
           });
       } else if (this.resources.length > 0) {
         const type = this.resources[0].resourceType;
-        const singleType = [{ key: type, heading: this._heading, link: this.headingLink, resources: this.resources, icon: this.headingIcon}];
+        const singleType = [{ 
+          key: type, 
+          heading: this._heading, 
+          link: this.headingLink, 
+          resources: this.resources, 
+          icon: this.headingIcon}];
         return singleType;
       }
       return [];
@@ -175,6 +185,12 @@ h1 {
   justify-content: flex-start;
 }
 
+.more {
+  display:flex;
+  align-items: center;
+  height: 145px;
+  background: transparent;
+}
 /* .add-resource-card {
   display:flex;
   flex-direction: column;
