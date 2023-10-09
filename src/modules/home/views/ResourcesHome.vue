@@ -29,6 +29,7 @@
         :resources="type.resources" 
         :includeItemCount="false" 
         :singleRow="true"
+        :showMore="true"
         @click="handleViewDetail"></book-group>
       </section>
 
@@ -43,6 +44,7 @@
         :resources="tag.resources" 
         :includeItemCount="false" 
         :singleRow="true"
+        :showMore="true"
         @click="handleViewDetail"></book-group>
       </section>
 
@@ -140,7 +142,7 @@ export default {
 
   methods: {
     async resourcesByTag(tagKey) {
-      const results = await searchByTagKey(tagKey, 10);
+      const results = await searchByTagKey(tagKey, 30);
       return results;
     },
     handleViewDetail(resource) {

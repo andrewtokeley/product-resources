@@ -12,10 +12,10 @@
         <book-group 
           v-if="searchResults" 
           heading="Results" 
-          :showMore="true"
+          :showMore="false"
           :resources="searchResults"
           :showDescription="true" 
-          :includeItemCount="false" 
+          :includeItemCount="false"
           :showAddRecommendation="false"
           @click="handleShowDetail">
         </book-group>
