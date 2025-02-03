@@ -1,6 +1,6 @@
 <template>
 <div class="icon" :class="{'icon--spinning': showSpinner}" :style="rotateStyle" >
-  <div ref="iconDiv" 
+  <div ref="iconDiv"
       :title="title" class="icon" 
       :class="{ 
         'material-icons': isMaterialIconProp, 
@@ -10,7 +10,7 @@
     <svg v-if="!isMaterialIconProp">
       <path :d="_options.svgPath" />
     </svg>
-    <span class="icon__text material-symbols-outlined">
+    <span ref="icon_span" class="icon__text material-symbols-outlined">
       <slot></slot>
     </span>
     <div v-if="toolTip" class="tooltip" :class="{'enabled': toolTip}">{{toolTip}}</div>
@@ -89,17 +89,25 @@ export default defineComponent({
   },
 
   mounted() {
+    if (this.options.stop == true) {
+      console.log('stop');
+    }
     this.iconDivElement = this.$refs.iconDiv;
     this.showContextMenu = false;    
     this.isMouseOver = false;
     if (this.isMaterialIcon) {
       // set default state
+      this.$refs.icon_span.style.fontSize = this._options.size;
+      this.$refs.icon_span.style.color = this._options.colour;
+
       this.$refs.iconDiv.style.width = this._options.background.size;
       this.$refs.iconDiv.style.height = this._options.background.size;
       this.$refs.iconDiv.style.borderRadius = this._options.background.borderRadius;
-      this.$refs.iconDiv.style.fontSize = this._options.size;
-      this.$refs.iconDiv.style.color = this._options.colour;
       this.$refs.iconDiv.style.backgroundColor = this._options.background.colour;
+      if (this._options.showShadow) {
+        this.$refs.iconDiv.style.boxShadow = '0 1px 4px rgba(0, 0, 0, 0.3)';
+      }
+
     }
     this.addListeners();
   },
@@ -121,6 +129,7 @@ export default defineComponent({
         },
         isMaterialIcon: this.options.isMaterialIcon ?? true,
         isClickable: this.options.isClickable ?? true,
+        showShadow: this.options.showShadow ?? false,
       }
     },
 
