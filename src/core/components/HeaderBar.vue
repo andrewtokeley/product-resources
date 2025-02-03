@@ -124,7 +124,7 @@ export default {
     }
   },
   
-  async mounted() {
+  mounted() {
     this.searchTerm = this.$route.params.searchTerm;
     this.navLinks = [
       // {id: 'home', path:'/', title:'HOME'},
@@ -139,19 +139,22 @@ export default {
     //   this.numberOfRecommendations = await getUnlinkedRecommendationsCount();
     // }
 
-    const resourceId = this.$route.query.r   
-    if (resourceId) {
-      if (resourceId.toLowerCase() == 'new') {
-        this.showRecommendDialog = true;
-      } else {
-        const resource = await getResource(resourceId);
-        if (resource) {
-          this.resourceFromQueryString = resource;
-          this.showResourceDialog = true;
+    const vm = this;
+    this.$router.isReady().then ( async () => {
+      const resourceId = vm.$route.query.r   
+      if (resourceId) {
+        if (resourceId.toLowerCase() == 'new') {
+          vm.showRecommendDialog = true;
+        } else {
+          const resource = await getResource(resourceId);
+          if (resource) {
+            vm.resourceFromQueryString = resource;
+            vm.showResourceDialog = true;
+          }
         }
       }
-    }
-   
+    });
+    
     this.enableHover();
 
   },
